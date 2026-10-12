@@ -1,0 +1,14 @@
+{
+  "id": "D1_99_settle",
+  "type": "settle",
+  "truth": "none",
+  "label": "첫 정산",
+  "narration": "창밖이 밝아지며 새소리가 들린다. 휴대폰에 점장 문자가 와 있다.",
+  "base_pay": 60000,
+  "manager_texts": [
+    { "flag": "D1_shadow_alarmed", "text": "첫날인데 벨을 눌렀다며요. 잘했어요. 그걸 모르는 사람이 더 많거든요." },
+    { "flag": "", "text": "…CCTV 봤어요. 내일은 수칙 노트 다시 읽고 출근해요." }
+  ],
+  "regular_news": "박 대리가 내일 승진 발표를 앞두고 있다.",
+  "direction": { "bgm": "morning_birds", "idle_10s_fx": "" }
+}

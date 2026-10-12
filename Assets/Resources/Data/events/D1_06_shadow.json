@@ -1,0 +1,33 @@
+{
+  "id": "D1_06_shadow",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "condition": { "day": 1 },
+  "appearance": { "face": "f_07", "outfit": "suit_03", "prop": "umbrella_dry", "fx": ["no_shadow", "no_door_chime"] },
+  "look": ["평범한 정장 차림의 여성.", "비가 오지 않는데 접힌 우산을 들고 있다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "…생수 하나요.",
+    "pay": "(카드를 내민다. 손이 차갑다.)",
+    "ask_id": "…없는데요.",
+    "stare_3s": "왜 그렇게 보세요?",
+    "idle_10s": "빨리요.",
+    "on_sell": "고마워요. 또 올게요.",
+    "on_refuse": "(대답 없이 나가 창밖에 서 있다.)",
+    "on_alarm": "(형광등이 꺼졌다 켜지면 사라진다. 바닥에 젖은 발자국만 남았다.)"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래인데 그림자가 보이지 않는다." },
+    { "kind": "sound", "target": "door_chime", "rule": "R_hidden_01", "visibility": 1, "text": "소리: 문이 열렸는데 차임 소리가 나지 않았다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D1_shadow_served"] },
+    "refuse": { "risk": 1, "flags": ["D1_shadow_refused"], "followup": "D2_shadow_return" },
+    "alarm": { "pay": 10000, "correct": true, "flags": ["D1_shadow_alarmed"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "형광등 아래, 발밑을 보세요. 그림자가 없었습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

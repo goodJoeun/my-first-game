@@ -1,0 +1,33 @@
+{
+  "id": "D1_01_park",
+  "type": "regular",
+  "truth": "human",
+  "label": "박 대리",
+  "placeholder": true,
+  "condition": { "day": 1 },
+  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },
+  "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다."],
+  "items": [ { "id": "kimbap", "name": "삼각김밥", "qty": 2 }, { "id": "energy", "name": "에너지드링크", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요… 오늘도 늦었네요.",
+    "pay": "(카드를 단말기에 댄다) 내일 승진 발표라서 잠이 안 와요.",
+    "ask_id": "사원증이요? 여기요.",
+    "stare_3s": "왜요, 제 얼굴에 뭐 묻었어요?",
+    "idle_10s": "저기… 계산 부탁드려요.",
+    "on_sell": "고마워요. 수고하세요.",
+    "on_refuse": "…네? 제가 뭘 잘못했나요.",
+    "on_alarm": "(놀라서 굳는다) 네?! 저 박 대리인데요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D1_park_served"] },
+    "refuse": { "pay": -3000, "flags": ["D1_park_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D1_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "박 대리는 사람이었습니다. 그림자도 있었고 수칙에 어긋난 점도 없었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

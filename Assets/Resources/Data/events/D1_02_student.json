@@ -1,0 +1,34 @@
+{
+  "id": "D1_02_student",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "condition": { "day": 1 },
+  "tags": ["tutorial"],
+  "appearance": { "face": "f_11", "outfit": "hoodie_02", "prop": "backpack_tag", "fx": [] },
+  "look": ["후드티를 입었고, 후드 아래로 교복 바지가 보인다.", "백팩에 학교 이름표가 달려 있다."],
+  "items": [ { "id": "beer", "name": "캔맥주", "qty": 2 }, { "id": "snack", "name": "과자", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "…안녕하세요.",
+    "pay": "그냥 찍어 주시면 안 돼요? 저 진짜 스무 살이에요.",
+    "ask_id": "아… 지갑 집에 두고 왔는데.",
+    "stare_3s": "왜요? 빨리 좀 해 주세요.",
+    "idle_10s": "저 바쁜데…",
+    "on_sell": "ㅋㅋ 감사합니다~",
+    "on_refuse": "아 진짜… 알겠어요. 과자만 주세요.",
+    "on_alarm": "(당황해서 뛰쳐나간다) 에? 왜요?!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "school_uniform", "rule": "R00", "visibility": 3, "text": "옷차림: 교복 바지와 학교 이름표." },
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 그림자가 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "pay": -10000, "flags": ["D1_manager_warning"] },
+    "refuse": { "correct": true },
+    "alarm": { "pay": -20000, "flags": ["D1_police_called"] }
+  },
+  "replay": { "focus": "school_uniform", "text": "후드 아래로 교복 바지가 보였어요. 사람이어도 팔면 안 되는 손님이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

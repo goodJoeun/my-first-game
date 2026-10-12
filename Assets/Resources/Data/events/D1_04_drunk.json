@@ -1,0 +1,32 @@
+{
+  "id": "D1_04_drunk",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "condition": { "day": 1 },
+  "appearance": { "face": "f_14", "outfit": "suit_tie_head", "prop": "", "fx": ["light_sway"] },
+  "look": ["넥타이를 머리에 맨 정장 차림. 비틀거리고 눈이 풀렸다.", "형광등이 살짝 흔들려 그림자도 같이 흔들린다."],
+  "items": [ { "id": "soju", "name": "소주", "qty": 1 }, { "id": "hangover", "name": "숙취해소제", "qty": 2 } ],
+  "payment": "cash_crumpled",
+  "dialogue": {
+    "enter": "어이~ 알바 새로 왔네? 축하해, 축하해!",
+    "pay": "그림자…? 내 그림자 어디 갔어… 아, 여기 있네. 헤헤.",
+    "ask_id": "내 얼굴이 신분증이야~ 40년째 이 얼굴이라고~",
+    "stare_3s": "왜 쳐다봐~ 잘생겼어?",
+    "idle_10s": "빨리 좀 해 봐~ 술 깨겠다~",
+    "on_sell": "사장님 최고! 내일 또 올게~",
+    "on_refuse": "나 여기 10년 단골이야! 본사에 전화한다!",
+    "on_alarm": "(경찰에게 끌려가며) 나 그냥 숙취해소제 사러 온 거라고오—!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 흔들리지만 그림자는 분명히 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D1_drunk_served"] },
+    "refuse": { "pay": -5000, "flags": ["D1_drunk_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D1_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "말이 아니라 발밑을 보세요. 그림자는 있었습니다." },
+  "direction": { "bgm": "comic", "idle_10s_fx": "" }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "D1_03_yoon",
+  "type": "regular",
+  "truth": "human",
+  "label": "윤 간호사",
+  "placeholder": true,
+  "condition": { "day": 1 },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다."],
+  "items": [ { "id": "soymilk", "name": "따뜻한 두유", "qty": 1 }, { "id": "painkiller", "name": "진통제", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "…안녕하세요. 오늘 응급실이 난리였어요.",
+    "pay": "요즘 이상하게 실종 신고가 많아서… 아니에요, 아무것도.",
+    "ask_id": "출입증이요? 여기 있어요.",
+    "stare_3s": "저 많이 피곤해 보이죠?",
+    "idle_10s": "아, 천천히 하셔도 돼요.",
+    "on_sell": "고마워요. 내일 또 올게요.",
+    "on_refuse": "…제가 뭐 실수라도 했나요?",
+    "on_alarm": "(눈이 동그래진다) 지금… 저한테 그러신 거예요?"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D1_yoon_served"] },
+    "refuse": { "pay": -3000, "flags": ["D1_yoon_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D1_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "윤 간호사는 사람이었습니다. 그림자가 있었고 어긋난 점이 없었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

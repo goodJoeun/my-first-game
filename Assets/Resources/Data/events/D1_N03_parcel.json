@@ -1,0 +1,34 @@
+{
+  "id": "D1_N03_parcel",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "placeholder": true,
+  "tags": ["parcel"],
+  "condition": { "day": 1 },
+  "appearance": { "face": "f_22", "outfit": "padded_vest", "prop": "parcel_box", "fx": [] },
+  "look": ["작은 택배 상자를 든 청년.", "상자에 테이프가 어설프게 붙어 있다."],
+  "items": [ { "id": "parcel", "name": "택배 접수(소형)", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "택배 접수 되죠? 늦게 와서 죄송해요.",
+    "pay": "중고거래 물건이에요. 내일 오전에 보내야 해서.",
+    "ask_id": "송장에 이름 적었는데… 신분증도 필요해요?",
+    "stare_3s": "상자가 좀 허술하죠? 헤헤.",
+    "idle_10s": "저, 접수 부탁드려요.",
+    "on_sell": "감사합니다! 안녕히 계세요.",
+    "on_refuse": "네? 접수 안 돼요…? 아 진짜…",
+    "on_alarm": "(상자를 끌어안고 도망친다) 아니, 택배 하나 보내려는 건데!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 그림자가 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true },
+    "refuse": { "pay": -3000 },
+    "alarm": { "pay": -20000, "flags": ["D1_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "평범한 택배 접수 손님이었습니다. 그림자가 있었고 수칙에 어긋나지 않았습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

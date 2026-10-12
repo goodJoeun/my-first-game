@@ -1,0 +1,21 @@
+{
+  "id": "D1_E1_call",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "placeholder": true,
+  "condition": { "day": 1 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신번호는 표시되지 않는다.",
+  "dialogue": {
+    "enter": "(따르르릉— 따르르릉—)",
+    "on_answer": "(수화기 너머로 숨소리만 들린다. 잠시 뒤 뚝, 끊긴다.)",
+    "on_ignore": "(벨이 열 번 울리고 멈춘다. 매장이 더 조용해진 것 같다.)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "flags": ["D1_call_answered"] },
+    "ignore": { "flags": ["D1_call_ignored"] }
+  },
+  "direction": { "bgm": "low_hum", "idle_10s_fx": "" }
+}

@@ -1,0 +1,18 @@
+{
+  "day": 1,
+  "briefing": "D1_00_briefing",
+  "new_rules": ["R00", "R01"],
+  "difficulty": { "customers": 8, "mimics": 1, "traps": 1, "clue_visibility": 3 },
+  "slots": [
+    { "time": "00:20", "fixed": "D1_01_park" },
+    { "time": "00:50", "fixed": "D1_02_student" },
+    { "time": "01:30", "fixed": "D1_03_yoon" },
+    { "time": "02:00", "pool": "normal", "tags": ["calm"] },
+    { "time": "02:40", "fixed": "D1_E1_call" },
+    { "time": "03:00", "fixed": "D1_04_drunk" },
+    { "time": "03:40", "pool": "normal" },
+    { "time": "04:30", "fixed": "D1_05_choi" },
+    { "time": "05:10", "fixed": "D1_06_shadow" }
+  ],
+  "settle": "D1_99_settle"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "D1_N02_ramyun",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "placeholder": true,
+  "tags": ["calm"],
+  "condition": { "day": 1 },
+  "appearance": { "face": "f_16", "outfit": "college_jacket", "prop": "earphones", "fx": [] },
+  "look": ["대학교 과잠을 입고 이어폰을 낀 청년.", "하품을 하며 컵라면 진열대로 직행한다."],
+  "items": [ { "id": "cupramen", "name": "컵라면", "qty": 2 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(이어폰을 빼며) 아, 안녕하세요.",
+    "pay": "여기 컵라면 물 온도 딱 좋더라고요. 늘 여기서 먹어요.",
+    "ask_id": "학생증이요? 스물셋이에요. 여기요.",
+    "stare_3s": "저 뭐 잘못 샀나요?",
+    "idle_10s": "아, 계산 좀…",
+    "on_sell": "감사합니다! 맛있게 먹을게요.",
+    "on_refuse": "네? 왜요… 컵라면인데…",
+    "on_alarm": "(젓가락을 떨어뜨린다) 아니, 컵라면 샀을 뿐인데요?!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 그림자가 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true },
+    "refuse": { "pay": -3000 },
+    "alarm": { "pay": -20000, "flags": ["D1_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "평범한 손님이었습니다. 술·담배 없이 컵라면만 샀고, 그림자도 있었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}
