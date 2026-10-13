@@ -1,0 +1,47 @@
+{
+  "id": "D4_N71_smoker_babyface",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "smoker",
+  "trap": true,
+  "condition": { "day": 4 },
+  "appearance": {
+    "face": "f_45",
+    "outfit": "navy_jacket",
+    "prop": "backpack",
+    "steps": "boots",
+    "sex": "m",
+    "age": 25,
+    "fx": []
+  },
+  "look": ["남색 재킷에 백팩. 얼굴이 고등학생처럼 앳되다.", "손목에 사원증 목걸이를 감고 있다."],
+  "items": [
+    { "id": "cigarette", "name": "담배", "qty": 1, "restricted": true },
+    { "id": "coffee", "name": "캔커피", "qty": 1 }
+  ],
+  "payment": "card",
+  "card": { "birth": "2001.06.17" },
+  "dialogue": {
+    "enter": "담배 하나랑 캔커피요.",
+    "pay": "(카드를 댄다) 다들 고등학생인 줄 알더라고요. 회사원이에요.",
+    "ask_id": "신분증요? 네, 늘 들고 다녀요. 여기요.",
+    "stare_3s": "…또 그 눈빛이네요.",
+    "idle_10s": "야근 들어가야 해서요.",
+    "on_sell": "감사합니다.",
+    "on_refuse": "…신분증 보여 드렸는데요.",
+    "on_alarm": "(사원증을 흔든다) 회사원이라니까요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_birth", "rule": "R00B", "visibility": 2, "text": "신분증: 2001년생." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_smoker_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_smoker_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "고등학생처럼 보였지만 신분증은 2001년생 회사원이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

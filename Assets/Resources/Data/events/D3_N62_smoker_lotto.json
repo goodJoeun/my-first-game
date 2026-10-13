@@ -16,12 +16,12 @@
   },
   "look": ["택시 회사 점퍼를 입은 남성.", "로또 용지를 만지작거린다."],
   "items": [
-    { "id": "cigarette", "name": "담배 (17번)", "qty": 1, "restricted": true },
+    { "id": "cigarette", "name": "담배", "qty": 1, "restricted": true },
     { "id": "coffee", "name": "캔커피", "qty": 1 }
   ],
   "payment": "현금 (만 원권 한 장)",
   "dialogue": {
-    "enter": "17번 하나랑 캔커피요.",
+    "enter": "담배 하나랑 캔커피요.",
     "pay": "(만 원을 낸다) 이번 주엔 될 것 같아요. 꿈에 돼지가 나왔거든요.",
     "ask_id": "신분증요? 여기.",
     "stare_3s": "로또 번호 하나 불러 볼래요?",

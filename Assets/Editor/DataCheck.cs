@@ -77,6 +77,13 @@ public static class DataCheck
                 bad += Fail(e.id + ": 윤 간호사 변형에 친절 행동이 없음");
         }
 
+        // 담배 진열장: 손님이 '상표 중에 ○○ 갑'이라고 찾으므로 같은 상표 안에서 갑 색이 겹치면 안 된다.
+        if (repo.Cigarettes.Count < 10) bad += Fail("담배 상표가 " + repo.Cigarettes.Count + "개뿐 (진열장이 너무 비었다)");
+        var famColors = new HashSet<string>();
+        foreach (var c in repo.Cigarettes)
+            if (!famColors.Add(c.family + "/" + c.color)) bad += Fail("담배 " + c.family + " 에 " + c.color + " 갑이 둘 이상");
+        Debug.Log("DATACHECK cigarettes=" + repo.Cigarettes.Count);
+
         // 순찰 이상현상: 연출이 있는 종류여야 하고, 순찰 날마다 필요한 수만큼 서로 다른 종류가 있어야 한다.
         foreach (var a in repo.Anomalies.Values)
             if (System.Array.IndexOf(RunRules.AnomalyKinds, a.kind) < 0) bad += Fail(a.id + ": 연출이 없는 이상현상 종류 '" + a.kind + "'");
@@ -103,6 +110,10 @@ public static class DataCheck
             if (card == null)
             {
                 if (idClue) bad += Fail(e.id + ": 신분증 단서가 있는데 신분증을 보여 주지 않음");
+                // R00B(2일차~): 신분증을 안 보이면 술·담배를 팔지 않는다 → 그런 성인 손님이 '계산'이 정답이면 안 된다
+                int from = e.condition != null && e.condition.day > 0 ? e.condition.day : 1;
+                if (from >= 2 && e.truth == "human" && !e.minor && RunRules.HasRestricted(e))
+                    bad += Fail(e.id + ": 신분증 없이 술·담배를 사는 성인 (R00B 와 어긋남)");
                 continue;
             }
             int born = IdCards.BirthYear(card.birth);
@@ -119,6 +130,7 @@ public static class DataCheck
             else
             {
                 if (!valid) bad += Fail(e.id + ": 사람인데 신분증 생년월일이 없는 날짜 (" + card.birth + ")");
+                if (born == 0) bad += Fail(e.id + ": 신분증 생년을 읽을 수 없음");
                 if (born > IdCards.AdultBornBy) bad += Fail(e.id + ": 미성년자가 아닌데 신분증 생년이 미성년 (" + card.birth + ")");
                 if (!samePhoto) bad += Fail(e.id + ": 사람인데 신분증 사진의 점·흉터가 얼굴과 다름");
             }

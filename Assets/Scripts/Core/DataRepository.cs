@@ -12,6 +12,7 @@ public class DataRepository
     public readonly Dictionary<string, NpcData> Npcs = new Dictionary<string, NpcData>();
     public readonly Dictionary<string, EndingData> Endings = new Dictionary<string, EndingData>();
     public readonly Dictionary<string, AnomalyData> Anomalies = new Dictionary<string, AnomalyData>();
+    public readonly List<CigaretteBrand> Cigarettes = new List<CigaretteBrand>();
 
     public void Load()
     {
@@ -39,6 +40,11 @@ public class DataRepository
         {
             var en = Parse<EndingData>(t);
             if (en != null && !string.IsNullOrEmpty(en.id)) Endings[en.id] = en;
+        }
+        foreach (var t in Resources.LoadAll<TextAsset>("Data/cigarettes"))
+        {
+            var list = Parse<CigaretteList>(t);
+            if (list != null && list.brands != null) Cigarettes.AddRange(list.brands);
         }
         foreach (var t in Resources.LoadAll<TextAsset>("Data/anomalies"))
         {

@@ -9,12 +9,12 @@
   "appearance": { "face": "f_25", "outfit": "guard_uniform", "prop": "", "steps": "boots", "sex": "m", "age": 51, "fx": [] },
   "look": ["야간 경비원 제복을 입은 남성.", "들어오자마자 벽시계를 올려다보며 혀를 찬다."],
   "items": [
-    { "id": "cigarette", "name": "담배 (5번)", "qty": 1, "restricted": true },
+    { "id": "cigarette", "name": "담배", "qty": 1, "restricted": true },
     { "id": "hotbar", "name": "핫바", "qty": 1 }
   ],
   "payment": "card",
   "dialogue": {
-    "enter": "5번 하나. 저 시계 또 5분 느리네.",
+    "enter": "담배 하나. 저 시계 또 5분 느리네.",
     "pay": "(카드를 댄다) 초침은 잘 가는데 말이야. 배터리 바꿔. 내가 경비라 시계는 잘 봐.",
     "ask_id": "신분증? 경비원 신분증 줄까, 주민등록증 줄까. 여기.",
     "stare_3s": "왜, 제복 처음 봐?",

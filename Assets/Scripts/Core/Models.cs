@@ -253,6 +253,22 @@ public class EndingData
     public string hint;
 }
 
+// 담배 진열장의 담배 (가상의 상표). 같은 상표(family) 안에서는 갑 색(color)이 서로 다르다.
+[Serializable]
+public class CigaretteBrand
+{
+    public string family;     // 한강
+    public string variant;    // 블루
+    public string color;      // 파란 (손님이 '한강 중에 파란 갑'처럼 말한다)
+    public float r, g, b;     // 갑 색
+}
+
+[Serializable]
+public class CigaretteList
+{
+    public CigaretteBrand[] brands;
+}
+
 [Serializable]
 public class DayPlan
 {
@@ -299,6 +315,7 @@ public class GameState
     public int regulars_wrong;
     public int yoon_affection;     // 화면에 표시하지 않는다
     public string ending;
+    public int rackSeed;           // 담배 진열장 배치 (날마다 이 값과 날짜로 섞는다)
 
     public bool all_correct { get { return customers_met > 0 && customers_wrong == 0; } }
     public bool regulars_all_correct { get { return regulars_met > 0 && regulars_wrong == 0; } }

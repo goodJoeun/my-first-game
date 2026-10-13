@@ -15,7 +15,7 @@
     "age": 17,
     "fx": []
   },
-  "look": ["교복 위에 롱패딩. 친구 하나가 유리문 밖에서 휴대폰을 보며 기다린다.", "가방에 고등학교 배지가 달려 있다."],
+  "look": ["롱패딩을 목까지 잠갔다. 친구 하나가 유리문 밖에서 휴대폰을 보며 기다린다.", "가방에 작은 배지가 달려 있다."],
   "items": [ { "id": "beer", "name": "캔맥주", "qty": 4, "restricted": true } ],
   "payment": "card",
   "no_id": true,
@@ -30,7 +30,7 @@
     "on_alarm": "(둘이 같이 달아난다) 뭐야, 왜 벨을 눌러!"
   },
   "clues": [
-    { "kind": "appearance", "target": "school_badge", "rule": "R00", "visibility": 3, "text": "옷차림: 롱패딩 아래 교복, 가방에 고등학교 배지." },
+    { "kind": "id", "target": "id_none", "rule": "R00B", "visibility": 2, "text": "신분증: 보여 주지 않는다." },
     { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
   ],
   "choices": ["sell", "refuse", "alarm"],
@@ -39,6 +39,6 @@
     "refuse": { "correct": true },
     "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
   },
-  "replay": { "focus": "school_badge", "text": "롱패딩 아래 교복과 고등학교 배지가 보였습니다. 형 심부름이라도 미성년자에게 술은 팔 수 없습니다." },
+  "replay": { "focus": "id_none", "text": "신분증이 없었습니다(\"형한테 있다\"). 롱패딩 아래는 교복, 가방 배지는 고등학교 배지였습니다." },
   "direction": { "bgm": "normal", "idle_10s_fx": "" }
 }

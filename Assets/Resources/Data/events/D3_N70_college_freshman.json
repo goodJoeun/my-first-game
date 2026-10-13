@@ -1,0 +1,47 @@
+{
+  "id": "D3_N70_college_freshman",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "collegian",
+  "trap": true,
+  "condition": { "day": 3 },
+  "appearance": {
+    "face": "f_16",
+    "outfit": "freshman_hoodie",
+    "prop": "phone",
+    "steps": "plain",
+    "sex": "m",
+    "age": 19,
+    "fx": []
+  },
+  "look": ["앳된 얼굴에 대학 새내기 후드티.", "단체 대화방 알림이 계속 울린다."],
+  "items": [
+    { "id": "beer", "name": "캔맥주", "qty": 4, "restricted": true },
+    { "id": "snack", "name": "과자", "qty": 2 }
+  ],
+  "payment": "card",
+  "card": { "birth": "2007.11.02" },
+  "dialogue": {
+    "enter": "맥주 네 캔이랑 과자요. 신입생 환영회라서요.",
+    "pay": "(카드를 댄다) 다들 저보고 고등학생 같대요. 진짜 성인인데.",
+    "ask_id": "신분증이요? 네, 여기요. 사진은 고3 때 거예요.",
+    "stare_3s": "…어려 보이죠? 자주 들어요.",
+    "idle_10s": "선배들 기다려요. 빨리 부탁드려요.",
+    "on_sell": "감사합니다! 무사히 사 간다.",
+    "on_refuse": "아니, 신분증 보여 드렸잖아요…",
+    "on_alarm": "(휴대폰을 떨어뜨린다) 저 대학생이에요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_birth", "rule": "R00B", "visibility": 2, "text": "신분증: 2007년생. 판매 기준 안이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_collegian_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_collegian_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "어려 보였지만 신분증은 2007년생, 판매 기준 안이었습니다. 신분증을 확인했으면 팔아도 되는 손님이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

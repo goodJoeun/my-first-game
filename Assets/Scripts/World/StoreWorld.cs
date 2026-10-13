@@ -101,7 +101,7 @@ public partial class StoreWorld : MonoBehaviour
 
         if (cctvCamera != null && cctvMonitor != null)
         {
-            var rt = new RenderTexture(320, 240, 16);
+            var rt = new RenderTexture(512, 384, 16);   // 들어오는 손님 발자국까지 보이게
             cctvCamera.targetTexture = rt;
             cctvCamera.cullingMask = ~(1 << HiddenFromCctvLayer);
             cctvMonitor.material.mainTexture = rt;

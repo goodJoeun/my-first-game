@@ -98,36 +98,117 @@ public static class SceneBuilder
         foreach (var n in new[] { "Monitor_Body", "Monitor_Screen" })
             counter.Find(n).RotateAround(new Vector3(-1.15f, 1.17f, -0.05f), Vector3.up, -20f);
 
-        // --- 진열대: 벽 진열대는 통로 쪽 한 면, 가운데 진열대는 양면 (상품 이름 Product_P 는 +x 면, Product_N 은 -x 면)
+        // --- 진열대: 왼쪽 벽 진열대(한 면) + 가운데 곤돌라 두 줄(양면). 층마다 상품 모양이 다르다
+        //     (상품 이름 Product_P 는 +x 면, Product_N 은 -x 면 — 순찰 이상현상이 면 단위로 쓴다)
         var shelfMat = Mat("Shelf", new Color(0.58f, 0.6f, 0.64f), 0.3f);
+        var priceMat = Mat("Price_Strip", new Color(0.95f, 0.85f, 0.25f), 0.3f);
         var rng = new System.Random(7);
-        int perFace = (int)(StoreLayout.ShelfLength / 0.24f);
         for (int i = 0; i < StoreLayout.ShelfNames.Length; i++)
         {
             var c0 = StoreLayout.ShelfCenters[i];
+            float len = StoreLayout.ShelfLengths[i], hgt = StoreLayout.ShelfHeights[i], dep = StoreLayout.ShelfDepths[i];
             var shelf = new GameObject(StoreLayout.ShelfNames[i]).transform;
             shelf.SetParent(store);
-            Box(shelf, "Base", new Vector3(c0.x, StoreLayout.ShelfHeight / 2f, c0.z), new Vector3(StoreLayout.ShelfDepth, StoreLayout.ShelfHeight, StoreLayout.ShelfLength), shelfMat);
+            Box(shelf, "Base", new Vector3(c0.x, hgt / 2f, c0.z), new Vector3(dep, hgt, len), shelfMat);
             var faces = StoreLayout.ShelfDoubleSided[i] ? new[] { 1, -1 } : new[] { c0.x < 0 ? 1 : -1 };
+            int levels = hgt > 1.5f ? 4 : 3;
             foreach (int f in faces)
-                for (int level = 0; level < 4; level++)
-                    for (int k = 0; k < perFace; k++)
+            {
+                string pname = f > 0 ? "Product_P" : "Product_N";
+                float faceX = c0.x + f * (dep / 2f + 0.06f);
+                for (int level = 0; level < levels; level++)
+                {
+                    float y = 0.22f + level * 0.4f;
+                    Box(shelf, "Shelf_Price", new Vector3(c0.x + f * (dep / 2f + 0.005f), y - 0.1f, c0.z), new Vector3(0.01f, 0.04f, len - 0.05f), priceMat)
+                        .GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+                    int kind = level % 4;   // 0 큰 상자, 1 컵라면, 2 과자 봉지, 3 병
+                    float step = kind == 0 ? 0.3f : kind == 1 ? 0.16f : kind == 2 ? 0.22f : 0.14f;
+                    for (float z = c0.z - len / 2f + step / 2f + 0.04f; z < c0.z + len / 2f - step / 2f; z += step)
                     {
-                        var c = Color.HSVToRGB((float)rng.NextDouble(), 0.55f, 0.85f);
-                        Box(shelf, f > 0 ? "Product_P" : "Product_N",
-                            new Vector3(c0.x + f * 0.32f, 0.4f + level * 0.38f, c0.z - StoreLayout.ShelfLength / 2f + 0.14f + k * 0.24f),
-                            new Vector3(0.12f, 0.24f, 0.17f), Mat("Product_" + (int)(c.r * 9) + (int)(c.g * 9) + (int)(c.b * 9), c));
+                        var c = Color.HSVToRGB((float)rng.NextDouble(), 0.5f + (float)rng.NextDouble() * 0.3f, 0.8f);
+                        var m = Mat("Product_" + (int)(c.r * 9) + (int)(c.g * 9) + (int)(c.b * 9), c);
+                        if (rng.NextDouble() < 0.08) continue;   // 군데군데 빈자리 (팔린 칸)
+                        switch (kind)
+                        {
+                            case 0: Box(shelf, pname, new Vector3(faceX - f * 0.08f, y + 0.14f, z), new Vector3(0.18f, 0.28f, 0.24f), m); break;
+                            case 1: Prim(shelf, pname, PrimitiveType.Cylinder, new Vector3(faceX - f * 0.05f, y + 0.06f, z), new Vector3(0.12f, 0.06f, 0.12f), m); break;
+                            case 2: Box(shelf, pname, new Vector3(faceX - f * 0.02f, y + 0.12f, z), new Vector3(0.05f, 0.24f, 0.17f), m); break;
+                            default: Prim(shelf, pname, PrimitiveType.Cylinder, new Vector3(faceX - f * 0.06f, y + 0.12f, z), new Vector3(0.08f, 0.12f, 0.08f), m); break;
+                        }
                     }
+                }
+            }
         }
 
-        // --- 냉장고 (오른쪽 벽 전체, 문 칸막이)
-        var fridgeGlow = Mat("Fridge_Glow", new Color(0.75f, 0.88f, 1f), 0.8f, new Color(0.45f, 0.6f, 0.75f));
+        // --- 계산대 앞 껌·사탕 진열대 (손님 쪽)
+        var rack = new GameObject("Counter_Rack").transform;
+        rack.SetParent(store);
+        var cr = StoreLayout.CounterRack;
+        Box(rack, "Counter_Rack_Base", new Vector3(cr.x, 0.5f, cr.z), new Vector3(0.9f, 1.0f, 0.25f), Mat("Rack", new Color(0.3f, 0.25f, 0.2f)));
+        for (int tier = 0; tier < 3; tier++)
+            for (int k = 0; k < 7; k++)
+            {
+                var c = Color.HSVToRGB((float)rng.NextDouble(), 0.7f, 0.95f);
+                Box(rack, "Counter_Rack_Item", new Vector3(cr.x - 0.36f + k * 0.12f, 0.62f + tier * 0.17f, cr.z + 0.14f), new Vector3(0.09f, 0.12f, 0.04f),
+                    Mat("Product_" + (int)(c.r * 9) + (int)(c.g * 9) + (int)(c.b * 9), c));
+            }
+
+        // --- 계산대 오른쪽 온수기·전자레인지 (컵라면)
+        var hw = StoreLayout.HotwaterStation;
+        var station = new GameObject("Hotwater").transform;
+        station.SetParent(store);
+        Box(station, "Hotwater_Table", new Vector3(hw.x, 0.45f, hw.z), new Vector3(1.6f, 0.9f, 0.6f), Mat("Counter", Color.white));
+        Box(station, "Hotwater_Microwave", new Vector3(hw.x - 0.35f, 1.07f, hw.z), new Vector3(0.5f, 0.3f, 0.38f), Mat("Microwave", new Color(0.85f, 0.85f, 0.86f), 0.4f));
+        Box(station, "Hotwater_Dispenser", new Vector3(hw.x + 0.45f, 1.15f, hw.z), new Vector3(0.3f, 0.5f, 0.3f), Mat("Dispenser", new Color(0.92f, 0.92f, 0.9f), 0.4f));
+        Box(station, "Hotwater_Sign", new Vector3(hw.x, 1.6f, hw.z - 0.28f), new Vector3(1.0f, 0.22f, 0.02f), Mat("Storage_Sign", new Color(0.9f, 0.9f, 0.85f)));
+
+        // --- 아이스크림 냉동고 (출입문 쪽)
+        var fz0 = StoreLayout.Freezer;
+        var freezer = new GameObject("Freezer").transform;
+        freezer.SetParent(store);
+        Box(freezer, "Freezer_Body", new Vector3(fz0.x, 0.42f, fz0.z), new Vector3(1.2f, 0.84f, 0.8f), Mat("Fridge", Color.white));
+        Box(freezer, "Freezer_Lid", new Vector3(fz0.x, 0.86f, fz0.z), new Vector3(1.16f, 0.03f, 0.76f), Mat("Fridge_Glow", Color.white));
+
+        // --- 신문·잡지 진열대 (왼쪽 유리창 앞)
+        var mg = StoreLayout.MagazineRack;
+        var mag = new GameObject("Magazine").transform;
+        mag.SetParent(store);
+        Box(mag, "Magazine_Rack", new Vector3(mg.x, 0.55f, mg.z), new Vector3(0.9f, 1.1f, 0.3f), Mat("Rack", Color.white));
+        for (int k = 0; k < 4; k++)
+        {
+            var c = Color.HSVToRGB((float)rng.NextDouble(), 0.3f, 0.9f);
+            Box(mag, "Magazine_Item", new Vector3(mg.x - 0.32f + k * 0.21f, 0.85f, mg.z - 0.17f), new Vector3(0.18f, 0.26f, 0.02f),
+                Mat("Product_" + (int)(c.r * 9) + (int)(c.g * 9) + (int)(c.b * 9), c));
+        }
+
+        // --- 냉장고 (오른쪽 벽 전체): 투명한 유리문 안에 음료가 보인다
         var fc = StoreLayout.FridgeCenter;
-        Box(store, "Fridge_Body", fc, new Vector3(0.7f, 2.1f, StoreLayout.FridgeLength), Mat("Fridge", new Color(0.85f, 0.86f, 0.88f)));
-        Box(store, "Fridge_Front", new Vector3(StoreLayout.FridgeFrontX, 1.1f, fc.z), new Vector3(0.02f, 1.8f, StoreLayout.FridgeLength - 0.2f), fridgeGlow);
-        for (float z = fc.z - StoreLayout.FridgeLength / 2f + 1.1f; z < fc.z + StoreLayout.FridgeLength / 2f - 0.1f; z += 1.1f)
-            Box(store, "Fridge_Mullion", new Vector3(StoreLayout.FridgeFrontX - 0.02f, 1.1f, z), new Vector3(0.03f, 1.8f, 0.05f), Mat("Fridge", Color.white));
-        NewLight(store, "FridgeLight", LightType.Point, new Vector3(StoreLayout.FridgeFrontX - 0.5f, 1.3f, fc.z), new Color(0.7f, 0.85f, 1f), 0.6f, 4f, LightShadows.None);
+        float fl = StoreLayout.FridgeLength, ff = StoreLayout.FridgeFrontX;
+        var fridge = new GameObject("Fridge").transform;
+        fridge.SetParent(store);
+        var fridgeMat = Mat("Fridge", new Color(0.85f, 0.86f, 0.88f));
+        var fridgeGlow = Mat("Fridge_Glow", new Color(0.75f, 0.88f, 1f), 0.8f, new Color(0.45f, 0.6f, 0.75f));
+        Box(fridge, "Fridge_Back", new Vector3(fc.x + 0.33f, 1.05f, fc.z), new Vector3(0.04f, 2.1f, fl), fridgeGlow);
+        Box(fridge, "Fridge_Top", new Vector3(fc.x, 2.08f, fc.z), new Vector3(0.7f, 0.06f, fl), fridgeMat);
+        Box(fridge, "Fridge_Bottom", new Vector3(fc.x, 0.1f, fc.z), new Vector3(0.7f, 0.2f, fl), fridgeMat);
+        Box(fridge, "Fridge_End_A", new Vector3(fc.x, 1.05f, fc.z - fl / 2f), new Vector3(0.7f, 2.1f, 0.05f), fridgeMat);
+        Box(fridge, "Fridge_End_B", new Vector3(fc.x, 1.05f, fc.z + fl / 2f), new Vector3(0.7f, 2.1f, 0.05f), fridgeMat);
+        for (int level = 0; level < 4; level++)
+        {
+            float y = 0.3f + level * 0.43f;
+            Box(fridge, "Fridge_Shelf", new Vector3(fc.x, y - 0.02f, fc.z), new Vector3(0.6f, 0.02f, fl - 0.1f), fridgeMat);
+            for (float z = fc.z - fl / 2f + 0.12f; z < fc.z + fl / 2f - 0.08f; z += 0.13f)
+            {
+                var c = Color.HSVToRGB((float)rng.NextDouble(), 0.6f, 0.85f);
+                Prim(fridge, "Fridge_Bottle", PrimitiveType.Cylinder, new Vector3(ff + 0.18f, y + 0.13f, z), new Vector3(0.08f, 0.13f, 0.08f),
+                    Mat("Product_" + (int)(c.r * 9) + (int)(c.g * 9) + (int)(c.b * 9), c));
+            }
+        }
+        var glass = Box(fridge, "Fridge_Front", new Vector3(ff, 1.1f, fc.z), new Vector3(0.02f, 1.8f, fl - 0.2f), GlassMat("Fridge_Glass", new Color(0.8f, 0.9f, 1f, 0.18f)));
+        glass.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        for (float z = fc.z - fl / 2f + 1.1f; z < fc.z + fl / 2f - 0.1f; z += 1.1f)
+            Box(fridge, "Fridge_Mullion", new Vector3(ff - 0.02f, 1.1f, z), new Vector3(0.03f, 1.8f, 0.05f), fridgeMat);
+        NewLight(store, "FridgeLight", LightType.Point, new Vector3(ff - 0.5f, 1.3f, fc.z), new Color(0.7f, 0.85f, 1f), 0.6f, 4f, LightShadows.None);
 
         // --- 형광등: 계산대 앞 등은 그림자를 드리운다 (판별 단서). 매장 등 0 번이 '꺼진 형광등' 이상현상에 쓰인다.
         var tubeMat = Mat("Tube", Color.white, 0.2f, Color.white * 1.4f);
@@ -170,7 +251,7 @@ public static class SceneBuilder
         var cctvGo = new GameObject("CCTV Camera");
         cctvGo.transform.SetParent(store);
         cctvGo.transform.position = StoreLayout.CctvCamera;
-        cctvGo.transform.rotation = Quaternion.LookRotation(new Vector3(0, 0.8f, 1.6f) - cctvGo.transform.position);
+        cctvGo.transform.rotation = Quaternion.LookRotation(StoreLayout.CctvLookAt - cctvGo.transform.position);
         var cctv = cctvGo.AddComponent<Camera>();
         cctv.fieldOfView = 75f;
         cctv.clearFlags = CameraClearFlags.SolidColor;
@@ -221,6 +302,42 @@ public static class SceneBuilder
         go.transform.localScale = scale;
         go.GetComponent<Renderer>().sharedMaterial = mat;
         return go;
+    }
+
+    static GameObject Prim(Transform parent, string name, PrimitiveType type, Vector3 pos, Vector3 scale, Material mat)
+    {
+        var go = GameObject.CreatePrimitive(type);
+        go.name = name;
+        Object.DestroyImmediate(go.GetComponent<Collider>());
+        go.transform.SetParent(parent, false);
+        go.transform.position = pos;
+        go.transform.localScale = scale;
+        go.GetComponent<Renderer>().sharedMaterial = mat;
+        return go;
+    }
+
+    // 반투명 유리 (URP Lit 투명). 알파는 color.a
+    static Material GlassMat(string name, Color color)
+    {
+        Material m;
+        if (mats.TryGetValue(name, out m)) return m;
+        var lit = Shader.Find("Universal Render Pipeline/Lit");
+        m = new Material(lit != null ? lit : Shader.Find("Standard")) { color = color };
+        if (lit != null)
+        {
+            m.SetFloat("_Surface", 1f);
+            m.SetFloat("_Blend", 0f);
+            m.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            m.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            m.SetFloat("_ZWrite", 0f);
+            m.SetFloat("_Smoothness", 0.95f);
+            m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            m.SetOverrideTag("RenderType", "Transparent");
+            m.renderQueue = (int)RenderQueue.Transparent;
+        }
+        m = SaveMat(name, m);
+        mats[name] = m;
+        return m;
     }
 
     static Transform Point(Transform parent, string name, Vector3 pos)

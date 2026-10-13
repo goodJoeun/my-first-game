@@ -16,7 +16,22 @@ public class GameController : MonoBehaviour
         public EventData ev;
         public string choice;
         public Outcome outcome;
+        public string time;   // 그 손님이 온 시각 (정산에 이벤트 ID 대신 보여 준다)
     }
+
+    // 결제 수단 코드를 화면 문구로 (데이터에 이미 문장으로 쓴 것은 그대로)
+    static string PaymentText(string code)
+    {
+        switch (code)
+        {
+            case "card": return "카드";
+            case "cash": return "현금";
+            case "cash_crumpled": return "구겨진 현금";
+            default: return code;
+        }
+    }
+
+    static string Who(Record r) { return r.time + " " + r.ev.label; }
 
     static readonly Dictionary<string, string> ChoiceLabels = new Dictionary<string, string>
     {
@@ -55,6 +70,14 @@ public class GameController : MonoBehaviour
     float eventStart;
     bool arrived, stareShown, idleShown, flicker, paid, askedId, askedLast, kindDone, notesRead, notesOpen;
     float payAt, stareAt, idleAt;   // 손님마다 대사가 나오는 때를 조금씩 다르게
+    // 담배 찾기: 담배를 사는 손님은 원하는 담배를 말하고, 진열장에서 그걸 찾아 건네야 계산할 수 있다.
+    const int CigaretteWrongPay = -500;   // 잘못 꺼낼 때마다
+    int[] rackOrder;                      // 오늘 진열장 칸(0~) → 상표 번호. 날마다 다시 진열한다
+    int cigWant = -1, cigQty;             // 원하는 상표 번호와 갑 수 (-1 이면 담배 손님 아님)
+    string cigRequest;
+    bool cigFetched, rackOpen;
+    int dayCigWrong;
+
     IdCard card;            // 지금 손님이 보여 줄 신분증 (없으면 null)
     Texture2D cardPhoto;
     bool cardOpen;
@@ -80,6 +103,7 @@ public class GameController : MonoBehaviour
     void NewGame()
     {
         state = new GameState();
+        state.rackSeed = Random.Range(1, int.MaxValue);
         EnsurePlan();
         StartDay();
     }
@@ -116,6 +140,9 @@ public class GameController : MonoBehaviour
         patrolMissedWhere.Clear();
         patrolFalse = 0;
         patrolDone = false;
+        dayCigWrong = 0;
+        if (state.rackSeed == 0) state.rackSeed = Random.Range(1, int.MaxValue);   // 예전 저장 파일
+        rackOrder = BuildRack(state.rackSeed, state.day, repo.Cigarettes.Count);
         usedIds.Clear();
         slotIndex = -1;
         customerIndex = 0;
@@ -220,6 +247,18 @@ public class GameController : MonoBehaviour
         stareAt = Random.Range(2.5f, 4.5f);
         idleAt = Random.Range(8f, 13f);
         cardOpen = false;
+        rackOpen = false;
+        cigFetched = false;
+        cigRequest = null;
+        cigWant = -1;
+        if (RunRules.IsCustomer(ev) && ev.items != null && repo.Cigarettes.Count > 0)
+            foreach (var it in ev.items)
+                if (it.id == "cigarette")
+                {
+                    cigWant = Random.Range(0, repo.Cigarettes.Count);
+                    cigQty = Mathf.Max(1, it.qty);
+                    cigRequest = CigaretteRequest(repo.Cigarettes[cigWant], cigQty);
+                }
         card = IdCards.For(ev);
         if (cardPhoto != null) Destroy(cardPhoto);
         cardPhoto = null;
@@ -235,14 +274,16 @@ public class GameController : MonoBehaviour
     {
         var o = current.outcomes != null ? current.outcomes.Get(choice) : null;
         if (o == null) return;
+        if (choice == "sell" && cigWant >= 0 && !cigFetched) return;   // 담배를 건네야 계산할 수 있다
         cardOpen = false;
+        rackOpen = false;
 
         dayPay += o.pay;
         state.risk = Mathf.Clamp(state.risk + o.risk, 0, RiskLimit);
         // 여러 날에 나올 수 있는 이벤트는 플래그에 {day} 를 써서 그 날의 플래그로 남긴다.
         if (o.flags != null) foreach (var f in o.flags) state.Add(f.Replace("{day}", state.day.ToString()));
         if (!string.IsNullOrEmpty(o.followup) && !state.followups.Contains(o.followup)) state.followups.Add(o.followup);
-        records.Add(new Record { ev = current, choice = choice, outcome = o });
+        records.Add(new Record { ev = current, choice = choice, outcome = o, time = currentTime });
         RunTracker.Apply(state, current, choice, o);
 
         var d = current.dialogue;
@@ -361,7 +402,8 @@ public class GameController : MonoBehaviour
         sb.AppendLine("기본 급여  " + Won(basePay));
         foreach (var r in records)
             if (r.outcome.pay != 0)
-                sb.AppendLine(r.ev.id + "  " + Won(r.outcome.pay, true));
+                sb.AppendLine(Who(r) + "  " + Won(r.outcome.pay, true));
+        if (dayCigWrong > 0) sb.AppendLine("담배 잘못 꺼냄 " + dayCigWrong + "번  " + Won(CigaretteWrongPay * dayCigWrong, true));
         sb.AppendLine("합계  <b>" + Won(total) + "</b>").AppendLine();
 
         var wrong = new List<Record>();
@@ -372,9 +414,9 @@ public class GameController : MonoBehaviour
         if (wrong.Count == 0) sb.AppendLine("놓친 판단이 없습니다.");
         foreach (var r in wrong)
         {
-            sb.AppendLine("[" + r.ev.id + "]  선택: " + Label(r.choice));
-            if (r.ev.replay != null)
-                sb.AppendLine("  (" + r.ev.replay.focus + ")  \"" + r.ev.replay.text + "\"");
+            sb.AppendLine("[" + Who(r) + "]  선택: " + Label(r.choice));
+            if (r.ev.replay != null && !string.IsNullOrEmpty(r.ev.replay.text))
+                sb.AppendLine("  \"" + r.ev.replay.text + "\"");
         }
         sb.AppendLine();
 
@@ -451,6 +493,7 @@ public class GameController : MonoBehaviour
             arrived = true;
             eventStart = Time.time;
             if (current.dialogue != null && !string.IsNullOrEmpty(current.dialogue.enter)) log.Add(current.dialogue.enter);
+            if (cigRequest != null) log.Add(cigRequest);
         }
 
         if (current.dialogue == null) return;
@@ -622,7 +665,8 @@ public class GameController : MonoBehaviour
             GUI.Label(new Rect(60, 82, W - 120, 60), current.narration, label);
         }
 
-        if (cardOpen && card != null) DrawIdCard();
+        if (rackOpen) DrawRack();
+        else if (cardOpen && card != null) DrawIdCard();
         else if (world != null)
             GUI.Label(new Rect(44, 386, 600, 28), "마우스 오른쪽 드래그: 둘러보기   Space: 정면", small);
 
@@ -657,8 +701,18 @@ public class GameController : MonoBehaviour
                     string line = current.dialogue != null ? current.dialogue.ask_id : null;
                     log.Add(string.IsNullOrEmpty(line) ? "(신분증을 보여준다.)" : line);
                     cardOpen = card != null;
+                    rackOpen = false;
                 }
-                else cardOpen = !cardOpen;
+                else { cardOpen = !cardOpen; if (cardOpen) rackOpen = false; }
+            }
+            if (cigWant >= 0)
+            {
+                GUI.enabled = arrived && !cigFetched;
+                if (GUI.Button(new Rect(x + 210, y, 200, 50), cigFetched ? "담배 건넴" : rackOpen ? "진열장 닫기" : "담배 꺼내기", button))
+                {
+                    rackOpen = !rackOpen;
+                    if (rackOpen) cardOpen = false;
+                }
             }
             GUI.enabled = arrived;
 
@@ -689,9 +743,89 @@ public class GameController : MonoBehaviour
             float bw = 230, gap = 10;
             float cx = W - 40 - (bw + gap) * choices.Length + gap;
             for (int i = 0; i < choices.Length; i++)
-                if (GUI.Button(new Rect(cx + (bw + gap) * i, y, bw, 50), Label(choices[i]), button)) { GUI.enabled = true; Choose(choices[i]); return; }
+            {
+                bool needCig = choices[i] == "sell" && cigWant >= 0 && !cigFetched;   // 담배를 먼저 건네야 한다
+                GUI.enabled = arrived && !needCig;
+                string caption = needCig ? "계산 (담배 먼저)" : Label(choices[i]);
+                if (GUI.Button(new Rect(cx + (bw + gap) * i, y, bw, 50), caption, button)) { GUI.enabled = true; Choose(choices[i]); return; }
+            }
         }
         GUI.enabled = true;
+    }
+
+    // ---------------------------------------------------------------- 담배 진열장
+
+    // 날마다 진열을 다시 한다: 같은 회차·같은 날이면 같은 배치 (다시 하기에도 같다)
+    static int[] BuildRack(int seed, int day, int count)
+    {
+        var order = new int[count];
+        for (int i = 0; i < count; i++) order[i] = i;
+        var rng = new System.Random(seed * 31 + day);
+        for (int i = count - 1; i > 0; i--) { int j = rng.Next(i + 1); var t = order[i]; order[i] = order[j]; order[j] = t; }
+        return order;
+    }
+
+    int SlotOf(int brand)
+    {
+        for (int i = 0; i < rackOrder.Length; i++) if (rackOrder[i] == brand) return i;
+        return -1;
+    }
+
+    static string BrandName(CigaretteBrand b) { return b.family + " " + b.variant; }
+
+    // 손님이 담배를 찾는 말. 뒤로 갈수록 번호 → 이름 → 생김새로 어려워진다.
+    string CigaretteRequest(CigaretteBrand b, int qty)
+    {
+        float roll = Random.value;
+        string count = qty + "갑";
+        if (state.day <= 2 && roll < 0.5f) return (SlotOf(cigWant) + 1) + "번 " + count + "이요.";
+        if (state.day >= 5 ? roll < 0.6f : (state.day >= 3 && roll < 0.5f))
+            return b.family + " 중에 " + b.color + " 갑으로 " + count + "이요. 이름이 기억이 안 나네.";
+        return BrandName(b) + " " + count + "이요.";
+    }
+
+    void PickCigarette(int slot)
+    {
+        if (rackOrder[slot] == cigWant)
+        {
+            cigFetched = true;
+            rackOpen = false;
+            log.Add("(" + BrandName(repo.Cigarettes[cigWant]) + " " + cigQty + "갑을 꺼내 건넸다.)");
+            return;
+        }
+        dayCigWrong++;
+        dayPay += CigaretteWrongPay;
+        log.Add("아뇨, 그거 말고요. " + cigRequest);
+    }
+
+    void DrawRack()
+    {
+        const int Cols = 8;
+        var r = new Rect(40, 70, 740, 340);
+        Fill(new Rect(r.x - 2, r.y - 2, r.width + 4, r.height + 4), new Color(0.12f, 0.1f, 0.08f));
+        Fill(r, new Color(0.3f, 0.24f, 0.18f));
+        var head = new GUIStyle(label) { fontSize = 18 };
+        FixedColor(head);
+        GUI.Label(new Rect(r.x + 16, r.y + 8, 520, 28), "<b>담배 진열장</b>   손님이 찾는 담배를 눌러 꺼내세요", head);
+        if (GUI.Button(new Rect(r.xMax - 84, r.y + 6, 70, 30), "닫기", button)) rackOpen = false;
+
+        var numStyle = new GUIStyle(label) { fontSize = 15, fontStyle = FontStyle.Bold, alignment = TextAnchor.UpperLeft };
+        var nameStyle = new GUIStyle(label) { fontSize = 12, alignment = TextAnchor.LowerLeft, wordWrap = true };
+        float cw = 88, ch = 56, ox = r.x + 16, oy = r.y + 44;
+        for (int slot = 0; slot < rackOrder.Length; slot++)
+        {
+            var b = repo.Cigarettes[rackOrder[slot]];
+            var cell = new Rect(ox + (slot % Cols) * (cw + 2), oy + (slot / Cols) * (ch + 2), cw, ch);
+            var c = new Color(b.r, b.g, b.b);
+            Fill(cell, c);
+            // 밝은 갑에는 검은 글씨, 어두운 갑에는 흰 글씨
+            var ink = c.grayscale > 0.55f ? new Color(0.08f, 0.08f, 0.1f) : Color.white;
+            numStyle.normal.textColor = ink; FixedColor(numStyle);
+            nameStyle.normal.textColor = ink; FixedColor(nameStyle);
+            GUI.Label(new Rect(cell.x + 4, cell.y + 2, cw - 8, 20), (slot + 1).ToString(), numStyle);
+            GUI.Label(new Rect(cell.x + 4, cell.y + 18, cw - 8, ch - 20), BrandName(b), nameStyle);
+            if (GUI.Button(cell, GUIContent.none, GUIStyle.none)) PickCigarette(slot);
+        }
     }
 
     // 신분증 카드. 정답을 글로 알려 주지 않는다: 생년월일·사진은 플레이어가 직접 읽고 손님과 비교한다.
@@ -775,7 +909,7 @@ public class GameController : MonoBehaviour
                 sb.Append(i > 0 ? ", " : "").Append(current.items[i].name).Append(" x").Append(current.items[i].qty);
             sb.AppendLine();
         }
-        if (!string.IsNullOrEmpty(current.payment)) sb.AppendLine("결제: " + current.payment);
+        if (!string.IsNullOrEmpty(current.payment)) sb.AppendLine("결제: " + PaymentText(current.payment));
         if (!string.IsNullOrEmpty(current.cctv)) sb.AppendLine("CCTV: " + current.cctv);
         sb.AppendLine();
         // 그 날의 clue_visibility 가 단서가 드러나는 정도의 상한이다. 1 이면 3초 응시해야 보인다.

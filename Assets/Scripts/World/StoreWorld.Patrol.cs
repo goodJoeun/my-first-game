@@ -180,6 +180,10 @@ public partial class StoreWorld
             string n = t.name;
             if (n.StartsWith("Tube")) return "형광등";
             if (n.StartsWith("Fridge")) return "냉장고";
+            if (n.StartsWith("Counter_Rack")) return "껌·사탕 진열대";
+            if (n.StartsWith("Hotwater")) return "온수기·전자레인지";
+            if (n.StartsWith("Freezer")) return "아이스크림 냉동고";
+            if (n.StartsWith("Magazine")) return "신문 진열대";
             if (n.StartsWith("Shelf") || n.StartsWith("Product")) return "진열대";
             if (n.StartsWith("Counter") || n == "Register") return "계산대";
             if (n == "Phone") return "전화기";
@@ -498,7 +502,8 @@ public partial class StoreWorld
         if (i < 0) return;
         var c = StoreLayout.ShelfCenters[i];
         float f = parts[1] == "N" ? -1f : 1f;
-        Target(kind, a, root, new Vector3(c.x + f * 0.42f, 0.95f, c.z), new Vector3(0.3f, 1.9f, StoreLayout.ShelfLength), "진열대");
+        float dep = StoreLayout.ShelfDepths[i], hgt = StoreLayout.ShelfHeights[i];
+        Target(kind, a, root, new Vector3(c.x + f * (dep / 2f + 0.12f), hgt / 2f, c.z), new Vector3(0.3f, hgt + 0.1f, StoreLayout.ShelfLengths[i]), "진열대");
     }
 
     // 예: "왼쪽 통로 쪽 왼쪽 가운데 진열대 (출입문 쪽)"
@@ -511,7 +516,7 @@ public partial class StoreWorld
         float f = parts[1] == "N" ? -1f : 1f;
         float faceX = c.x + f * 1.2f;   // 이 면이 바라보는 통로
         string aisle = faceX < -1.9f ? "왼쪽 통로" : faceX > 1.9f ? "오른쪽 통로" : "가운데 통로";
-        string shelf = parts[0].StartsWith("Shelf_L") ? "왼쪽 벽" : (c.x < 0 ? "왼쪽 가운데" : "오른쪽 가운데");
+        string shelf = parts[0].StartsWith("Shelf_L") ? "왼쪽 벽" : (c.x < 0 ? "왼쪽 곤돌라" : "오른쪽 곤돌라");
         string row = c.z < StoreLayout.MidZ + 1f ? "계산대 쪽" : "출입문 쪽";
         return aisle + "에 면한 " + shelf + " 진열대 (" + row + ")";
     }
