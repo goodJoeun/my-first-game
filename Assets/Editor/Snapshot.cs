@@ -22,7 +22,8 @@ public static class Snapshot
         var cam = Camera.main;
         var rt = new RenderTexture(1280, 720, 24);
         cam.targetTexture = rt;
-        cam.Render();
+        // URP 후처리(색 보정)는 첫 프레임에 준비되지 않아 색이 틀어진다. 몇 번 그린 뒤 찍는다.
+        for (int i = 0; i < 4; i++) cam.Render();
         RenderTexture.active = rt;
         var tex = new Texture2D(1280, 720, TextureFormat.RGB24, false);
         tex.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);

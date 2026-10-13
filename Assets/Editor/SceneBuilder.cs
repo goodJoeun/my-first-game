@@ -16,6 +16,10 @@ public static class SceneBuilder
 
     static readonly Dictionary<string, Material> mats = new Dictionary<string, Material>();
 
+    // URP 조명 세기 보정 (계산대 시점 캡처를 보며 맞춘 값)
+    const float UrpSpotScale = 2f;
+    const float UrpPointScale = 4f;
+
     [MenuItem("Tools/Build Main Scene")]
     public static void Build()
     {
@@ -73,7 +77,8 @@ public static class SceneBuilder
         screen.transform.SetParent(counter);
         screen.transform.localPosition = new Vector3(-1.15f, 1.17f, -0.105f);
         screen.transform.localScale = new Vector3(0.44f, 0.32f, 1);
-        var screenMat = SaveMat("Monitor_Screen", new Material(Shader.Find("Unlit/Texture")));
+        var unlit = Shader.Find("Universal Render Pipeline/Unlit");
+        var screenMat = SaveMat("Monitor_Screen", new Material(unlit != null ? unlit : Shader.Find("Unlit/Texture")));
         screen.GetComponent<Renderer>().sharedMaterial = screenMat;
         screen.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
         // 모니터가 플레이어 쪽을 향하도록 계산대 위에서 살짝 돌린다
@@ -137,6 +142,7 @@ public static class SceneBuilder
         camGo.transform.rotation = Quaternion.LookRotation(new Vector3(0, 1.05f, 2.4f) - camGo.transform.position);
         camGo.AddComponent<CounterCamera>();
         camGo.AddComponent<AudioListener>();
+        if (RenderSetup.Active) RenderSetup.AddPostProcessing(cam, store);
 
         var cctvGo = new GameObject("CCTV Camera");
         cctvGo.transform.SetParent(store);
@@ -210,7 +216,8 @@ public static class SceneBuilder
         var l = go.AddComponent<Light>();
         l.type = type;
         l.color = color;
-        l.intensity = intensity;
+        // URP 는 빛이 거리 제곱으로 줄어서 기본 렌더러보다 어둡다. 같은 밝기가 되게 보정한다.
+        l.intensity = intensity * (RenderSetup.Active ? (type == LightType.Spot ? UrpSpotScale : UrpPointScale) : 1f);
         l.range = range;
         l.shadows = shadows;
         l.shadowBias = 0.02f;
@@ -222,8 +229,11 @@ public static class SceneBuilder
     {
         Material m;
         if (mats.TryGetValue(name, out m)) return m;
-        m = new Material(Shader.Find("Standard")) { color = color };
-        m.SetFloat("_Glossiness", smoothness);
+        // URP 가 켜져 있으면 URP Lit, 아니면 기본 Standard
+        var lit = Shader.Find("Universal Render Pipeline/Lit");
+        m = new Material(lit != null ? lit : Shader.Find("Standard")) { color = color };
+        if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", smoothness);
+        if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", smoothness);
         if (emission.HasValue)
         {
             m.EnableKeyword("_EMISSION");

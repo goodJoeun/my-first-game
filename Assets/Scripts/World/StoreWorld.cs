@@ -348,7 +348,8 @@ public class StoreWorld : MonoBehaviour
         var r = go.GetComponent<Renderer>();
         r.sharedMaterial = mat;
         var block = new MaterialPropertyBlock();
-        block.SetColor("_Color", mat.color * color);
+        block.SetColor("_Color", mat.color * color);       // 기본 렌더러
+        block.SetColor("_BaseColor", mat.color * color);   // URP
         r.SetPropertyBlock(block);
         return go;
     }

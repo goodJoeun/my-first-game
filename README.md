@@ -13,6 +13,7 @@
 | 엔진 | Unity 6 (`6000.6.5f1`) |
 | 언어 | C# |
 | 데이터 | JSON (`JsonUtility`) |
+| 렌더링 | URP 17.6 (선형 색 공간, Forward+, 후처리) |
 | 메인 씬 | `Assets/Scenes/Main.unity` |
 
 ## 실행 방법
@@ -119,6 +120,16 @@ Docs/RULES.md            7일 회차 규칙 (합의한 규칙 전체)
 
 데이터를 추가한 뒤에는 **Tools > Check Data**로 스키마와 손님 수를 확인하세요. 회차 배치 2,000개를 만들어 규칙 위반과 엔딩 도달 가능성도 같이 검사합니다.
 
+## 렌더링 (URP)
+
+URP(Universal Render Pipeline)로 그립니다. 설정 파일은 `Assets/Art/Rendering/`에 있습니다.
+
+- `URP_Asset`: 그림자 거리 25m, 추가 조명(계산대 형광등) 그림자와 부드러운 그림자 켬, HDR, MSAA 4x
+- `URP_Renderer`: Forward+ (조명 개수 제한 없음)
+- `NightShift_Volume`: 후처리. ACES 톤매핑, 형광등 번짐(Bloom), 차갑고 약간 초록빛인 화이트밸런스, 비네트, 필름 노이즈. 분위기를 바꾸려면 이 파일의 값을 고치면 됩니다.
+
+색 공간은 선형(Linear)입니다. URP는 빛이 거리 제곱으로 줄어서, `SceneBuilder`의 조명 세기에 URP 보정값(`UrpSpotScale`, `UrpPointScale`)을 곱합니다. 매장을 다시 만들려면 **Tools > Setup URP (Rebuild Scene)**를 실행합니다.
+
 ## 실제 사람 모델로 바꾸기
 
 손님은 기본 도형으로 만들어지지만, 모델 프리팹을 넣으면 코드 수정 없이 그 모델로 바뀝니다.
@@ -146,6 +157,7 @@ Docs/RULES.md            7일 회차 규칙 (합의한 규칙 전체)
 | Tools > Build Main Scene | `-executeMethod SceneBuilder.Build` | 3D 매장 씬 생성 |
 | Tools > Check Data | `-executeMethod DataCheck.Run` | JSON 데이터 검증 + 회차 시뮬레이션 |
 | Tools > Check Runs | `-executeMethod DataCheck.Runs` | 회차 시뮬레이션만 |
+| Tools > Setup URP (Rebuild Scene) | `-executeMethod RenderSetup.Run` | URP 설정 적용, 매장 씬 다시 만들기, 계산대 시점 캡처 |
 | Tools > Snapshot Counter View | `-executeMethod Snapshot.Run` | 계산대 시점 캡처 (그래픽 장치 필요) |
 
 ## 저장
