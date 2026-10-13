@@ -10,6 +10,8 @@
     "outfit": "sportswear",
     "prop": "earphones",
     "steps": "plain",
+    "sex": "m",
+    "age": 24,
     "fx": ["no_footprints", "no_footsteps"]
   },
   "look": ["운동복 차림의 청년. 이어폰을 꼈다.", "평범하다."],

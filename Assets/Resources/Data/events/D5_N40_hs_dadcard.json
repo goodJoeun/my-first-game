@@ -6,10 +6,11 @@
   "npc": "highschooler",
   "minor": true,
   "condition": { "day": 5 },
-  "appearance": { "face": "f_12", "outfit": "tracksuit", "prop": "", "steps": "plain", "fx": [] },
+  "appearance": { "face": "f_12", "outfit": "tracksuit", "prop": "", "steps": "plain", "sex": "m", "age": 17, "fx": [] },
   "look": ["트레이닝복 차림. 목 뒤로 교복 셔츠 깃이 삐져나와 있다.", "아빠 심부름이라며 카드를 내민다."],
   "items": [ { "id": "cigarette", "name": "담배 (33번)", "qty": 2, "restricted": true } ],
   "payment": "카드 (명의: 김정호, 남성)",
+  "no_id": true,
   "dialogue": {
     "enter": "33번 두 갑이요. 아빠 심부름이에요.",
     "pay": "(카드를 댄다) 아빠가 이 카드로 사 오랬어요.",

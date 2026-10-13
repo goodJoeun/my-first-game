@@ -5,14 +5,14 @@
   "label": "손님",
   "npc": "smoker",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_25", "outfit": "work_clothes", "prop": "", "steps": "boots", "fx": [] },
+  "appearance": { "face": "f_25", "outfit": "work_clothes", "prop": "", "steps": "boots", "sex": "m", "age": 51, "fx": [] },
   "look": ["작업복 차림의 중년 남성. 손톱 밑이 까맣다.", "들어오자마자 담배 진열장 번호를 부른다."],
   "items": [
     { "id": "cigarette", "name": "담배 (33번)", "qty": 1, "restricted": true },
     { "id": "lighter", "name": "라이터", "qty": 1 }
   ],
   "payment": "cash",
-  "id_card": "주민등록증: 1975년 2월 11일생",
+  "card": { "birth": "1975.02.11" },
   "dialogue": {
     "enter": "33번 하나, 라이터도.",
     "pay": "(현금을 낸다) 야간 작업 끝났어요. 이거 한 대 피우고 자야지.",

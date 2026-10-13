@@ -5,7 +5,16 @@
   "label": "박 대리",
   "npc": "park",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "steps": "shoes", "fx": [] },
+  "appearance": {
+    "face": "f_02",
+    "outfit": "shirt_01",
+    "prop": "id_badge",
+    "steps": "shoes",
+    "sex": "m",
+    "age": 33,
+    "marks": ["mole_left_brow"],
+    "fx": []
+  },
   "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다."],
   "items": [
     { "id": "lunchbox", "name": "도시락", "qty": 1 },

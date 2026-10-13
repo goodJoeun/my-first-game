@@ -6,13 +6,22 @@
   "npc": "student",
   "minor": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_11", "outfit": "hoodie_03", "prop": "backpack_tag", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_11",
+    "outfit": "hoodie_03",
+    "prop": "backpack_tag",
+    "steps": "plain",
+    "sex": "m",
+    "age": 17,
+    "fx": []
+  },
   "look": ["후드티에 슬리퍼. 앳된 얼굴에 일부러 목소리를 깔았다.", "백팩 지퍼 사이로 학생증 끈이 삐져나와 있다."],
   "items": [
     { "id": "cigarette", "name": "담배 (21번)", "qty": 1, "restricted": true },
     { "id": "gum", "name": "껌", "qty": 1 }
   ],
   "payment": "cash",
+  "no_id": true,
   "dialogue": {
     "enter": "(목소리를 낮추며) 21번 하나요.",
     "pay": "(구겨진 오천 원을 낸다) 아, 아빠 심부름이에요. 진짜로.",

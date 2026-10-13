@@ -5,7 +5,15 @@
   "label": "손님",
   "npc": "grandma",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_24", "outfit": "work_vest", "prop": "cotton_gloves", "steps": "slippers", "fx": [] },
+  "appearance": {
+    "face": "f_24",
+    "outfit": "work_vest",
+    "prop": "cotton_gloves",
+    "steps": "slippers",
+    "sex": "f",
+    "age": 76,
+    "fx": []
+  },
   "look": ["허리가 굽은 할머니. 바깥에 폐지 실은 손수레를 세워 뒀다.", "목장갑을 끼고 있다."],
   "items": [ { "id": "yogurt", "name": "요구르트", "qty": 5 }, { "id": "candy", "name": "사탕", "qty": 1 } ],
   "payment": "현금 (천 원짜리 세 장)",

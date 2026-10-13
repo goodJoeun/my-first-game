@@ -10,6 +10,9 @@
     "outfit": "work_clothes_mud",
     "prop": "work_boots",
     "steps": "boots",
+    "sex": "m",
+    "age": 45,
+    "marks": ["scar_right_brow"],
     "fx": ["no_footprints"]
   },
   "look": ["흙투성이 작업화를 신은 남성.", "공사장에서 막 온 듯 바지에도 진흙이 묻었다."],

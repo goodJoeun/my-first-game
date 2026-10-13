@@ -5,11 +5,20 @@
   "label": "손님",
   "npc": "idcard",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_27", "outfit": "trench_coat", "prop": "mole_right", "steps": "heels", "fx": [] },
-  "look": ["베이지색 트렌치코트의 여성.", "오른쪽 뺨에 작은 점이 있다."],
+  "appearance": {
+    "face": "f_27",
+    "outfit": "trench_coat",
+    "prop": "mole_right",
+    "steps": "heels",
+    "sex": "f",
+    "age": 40,
+    "marks": ["mole_right_cheek"],
+    "fx": []
+  },
+  "look": ["베이지색 트렌치코트의 여성.", "진한 향수 냄새가 난다."],
   "items": [ { "id": "beer", "name": "캔맥주", "qty": 2, "restricted": true } ],
   "payment": "card",
-  "id_card": "주민등록증: 1993년 3월 8일생 (사진: 왼쪽 뺨에 점)",
+  "card": { "birth": "1993.03.08", "marks": ["mole_left_cheek"] },
   "dialogue": {
     "enter": "맥주 두 캔이요.",
     "pay": "(카드를 댄다) 오늘 좀 마시고 싶어서요.",

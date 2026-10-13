@@ -5,11 +5,20 @@
   "label": "손님",
   "npc": "hiker",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "flashlight", "steps": "boots", "fx": [] },
+  "appearance": {
+    "face": "f_20",
+    "outfit": "hiking_jacket",
+    "prop": "flashlight",
+    "steps": "boots",
+    "sex": "m",
+    "age": 58,
+    "glasses": true,
+    "fx": []
+  },
   "look": ["등산 점퍼에 안경을 쓴 중년 남성.", "새벽 산행 준비인지 손전등을 들고 있다."],
   "items": [ { "id": "water", "name": "생수", "qty": 2 }, { "id": "chocobar", "name": "초코바", "qty": 2 } ],
   "payment": "card",
-  "id_card": "주민등록증: 1968년 6월 3일생",
+  "card": { "birth": "1968.06.03" },
   "dialogue": {
     "enter": "안녕하세요. 또 왔습니다.",
     "pay": "(카드를 댄다) 해 뜨는 거 보러 가요. 뒷산이지만.",

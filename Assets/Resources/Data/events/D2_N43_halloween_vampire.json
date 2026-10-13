@@ -6,14 +6,23 @@
   "npc": "halloween",
   "trap": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_17", "outfit": "cape", "prop": "fake_fangs", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_17",
+    "outfit": "cape",
+    "prop": "fake_fangs",
+    "steps": "plain",
+    "sex": "m",
+    "age": 22,
+    "marks": ["mole_right_brow"],
+    "fx": []
+  },
   "look": ["창백한 얼굴 분장에 가짜 송곳니. 검은 망토.", "망토 아래로 대학교 과잠이 보인다."],
   "items": [
     { "id": "tomatojuice", "name": "토마토주스", "qty": 2 },
     { "id": "beer", "name": "캔맥주", "qty": 2, "restricted": true }
   ],
   "payment": "card",
-  "id_card": "주민등록증: 2004년 10월 31일생",
+  "card": { "birth": "2004.10.31" },
   "dialogue": {
     "enter": "(송곳니 때문에 발음이 샌다) 안녕하세여… 파티 끝나고 왔어여.",
     "pay": "(카드를 댄다) 토마토주스는 컨셉이에여. 피 같잖아여.",

@@ -6,7 +6,15 @@
   "npc": "parcel",
   "trap": true,
   "condition": { "day": 3 },
-  "appearance": { "face": "f_22", "outfit": "padded_vest", "prop": "holed_box", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_22",
+    "outfit": "padded_vest",
+    "prop": "holed_box",
+    "steps": "plain",
+    "sex": "m",
+    "age": 26,
+    "fx": []
+  },
   "look": ["구멍이 숭숭 뚫린 상자를 든 청년.", "상자 안에서 사각사각 긁는 소리가 난다."],
   "items": [ { "id": "seeds", "name": "해바라기씨", "qty": 1 }, { "id": "water", "name": "생수", "qty": 1 } ],
   "payment": "card",

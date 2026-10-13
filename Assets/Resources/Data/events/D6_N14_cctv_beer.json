@@ -5,7 +5,15 @@
   "label": "손님",
   "npc": "cctv",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_37", "outfit": "office_loose_tie", "prop": "", "steps": "shoes", "fx": ["no_cctv"] },
+  "appearance": {
+    "face": "f_37",
+    "outfit": "office_loose_tie",
+    "prop": "",
+    "steps": "shoes",
+    "sex": "m",
+    "age": 42,
+    "fx": ["no_cctv"]
+  },
   "look": ["평범한 회사원 차림의 남성.", "넥타이를 느슨하게 풀었다."],
   "items": [ { "id": "beer", "name": "캔맥주", "qty": 2, "restricted": true } ],
   "payment": "card",

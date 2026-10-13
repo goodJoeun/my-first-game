@@ -5,7 +5,16 @@
   "label": "최 기사님",
   "npc": "choi",
   "condition": { "day": 3 },
-  "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_09",
+    "outfit": "driver_vest",
+    "prop": "folding_helmet",
+    "steps": "plain",
+    "sex": "m",
+    "age": 52,
+    "marks": ["scar_left_brow"],
+    "fx": []
+  },
   "look": ["형광 조끼에 접이식 헬멧을 든 대리기사.", "피곤한 얼굴로 연신 하품을 한다."],
   "items": [
     { "id": "water", "name": "생수", "qty": 1 },

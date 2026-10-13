@@ -6,7 +6,17 @@
   "npc": "hiker",
   "trap": true,
   "condition": { "day": 3 },
-  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "shopping_bag", "steps": "boots", "fx": [] },
+  "appearance": {
+    "face": "f_20",
+    "outfit": "hiking_jacket",
+    "prop": "shopping_bag",
+    "steps": "boots",
+    "sex": "m",
+    "age": 58,
+    "marks": ["mole_left_brow"],
+    "glasses": true,
+    "fx": []
+  },
   "look": ["등산 점퍼에 안경. 장바구니를 두 개나 들었다.", "'김장'이라고 쓴 메모를 쥐고 있다."],
   "items": [
     { "id": "salt", "name": "굵은소금", "qty": 5 },

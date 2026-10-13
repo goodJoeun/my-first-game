@@ -6,14 +6,14 @@
   "npc": "student",
   "minor": true,
   "condition": { "day": 4 },
-  "appearance": { "face": "f_11", "outfit": "suit_big", "prop": "", "steps": "plain", "fx": [] },
+  "appearance": { "face": "f_11", "outfit": "suit_big", "prop": "", "steps": "plain", "sex": "m", "age": 17, "fx": [] },
   "look": ["소매가 손등을 덮는 큰 정장. 아버지 옷 같다.", "구두 대신 흰 운동화를 신었다."],
   "items": [
     { "id": "soju", "name": "소주", "qty": 2, "restricted": true },
     { "id": "snack", "name": "오징어땅콩", "qty": 1 }
   ],
   "payment": "card",
-  "id_card": "주민등록증: 2009년 5월 2일생",
+  "card": { "birth": "2009.05.02" },
   "dialogue": {
     "enter": "(어깨를 펴며) 소주 두 병이요.",
     "pay": "(카드를 내민다) 회식 끝나고 2차예요. 회사원이라서요.",

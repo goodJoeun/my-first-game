@@ -5,11 +5,19 @@
   "label": "손님",
   "npc": "shadow",
   "condition": { "day": 4 },
-  "appearance": { "face": "f_07", "outfit": "blouse", "prop": "", "steps": "heels", "fx": ["no_shadow"] },
+  "appearance": {
+    "face": "f_07",
+    "outfit": "blouse",
+    "prop": "",
+    "steps": "heels",
+    "sex": "f",
+    "age": 36,
+    "fx": ["no_shadow"]
+  },
   "look": ["단정한 블라우스의 여성. 계속 미소 짓고 있다.", "계산대에 바짝 붙어 선다."],
   "items": [ { "id": "candy", "name": "사탕", "qty": 1 } ],
   "payment": "card",
-  "id_card": "주민등록증: 1990년 7월 12일생",
+  "card": { "birth": "1990.07.12" },
   "dialogue": {
     "enter": "안녕하세요. 사탕 하나만 주세요.",
     "pay": "(카드를 댄다) 밤이 참 밝네요. 여기 형광등이 좋아요.",
@@ -21,8 +29,7 @@
     "on_alarm": "(형광등이 터질 듯 밝아졌다가, 그 자리에 아무도 없다.)"
   },
   "clues": [
-    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 2, "text": "발밑: 바짝 붙어 섰지만, 형광등 아래 바닥에 그림자가 없다." },
-    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진도 날짜도 멀쩡하다." }
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 2, "text": "발밑: 바짝 붙어 섰지만, 형광등 아래 바닥에 그림자가 없다." }
   ],
   "choices": ["sell", "refuse", "alarm"],
   "outcomes": {

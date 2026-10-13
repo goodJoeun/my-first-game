@@ -5,7 +5,17 @@
   "label": "손님",
   "npc": "echo",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_34", "outfit": "shirt_glasses", "prop": "", "steps": "shoes", "fx": [] },
+  "appearance": {
+    "face": "f_34",
+    "outfit": "shirt_glasses",
+    "prop": "",
+    "steps": "shoes",
+    "sex": "m",
+    "age": 38,
+    "marks": ["mole_left_brow"],
+    "glasses": true,
+    "fx": []
+  },
   "look": ["깔끔한 셔츠에 안경을 쓴 남성.", "말이 차분하다."],
   "items": [ { "id": "milk", "name": "우유", "qty": 1 }, { "id": "bread", "name": "식빵", "qty": 1 } ],
   "payment": "card",

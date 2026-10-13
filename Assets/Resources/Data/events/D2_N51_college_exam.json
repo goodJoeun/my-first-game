@@ -5,11 +5,20 @@
   "label": "손님",
   "npc": "collegian",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_16", "outfit": "college_jacket", "prop": "textbook", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_16",
+    "outfit": "college_jacket",
+    "prop": "textbook",
+    "steps": "plain",
+    "sex": "m",
+    "age": 23,
+    "marks": ["mole_left_cheek"],
+    "fx": []
+  },
   "look": ["대학교 과잠, 손가락에 형광펜 자국.", "전공 책을 옆구리에 끼고 있다."],
   "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "coffee", "name": "캔커피", "qty": 2 } ],
   "payment": "card",
-  "id_card": "주민등록증: 2003년 4월 9일생",
+  "card": { "birth": "2003.04.09" },
   "dialogue": {
     "enter": "(하품하며) 안녕하세요…",
     "pay": "(카드를 댄다) 내일 전공 시험이에요. 밤새야 돼요.",

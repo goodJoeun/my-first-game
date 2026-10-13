@@ -5,14 +5,14 @@
   "label": "손님",
   "npc": "idcard",
   "condition": { "day": 5 },
-  "appearance": { "face": "f_28", "outfit": "knit", "prop": "", "steps": "plain", "fx": [] },
+  "appearance": { "face": "f_28", "outfit": "knit", "prop": "", "steps": "plain", "sex": "m", "age": 40, "fx": [] },
   "look": ["말끔한 니트를 입은 청년.", "말투가 공손하다."],
   "items": [
     { "id": "beer", "name": "캔맥주", "qty": 1, "restricted": true },
     { "id": "snack", "name": "과자", "qty": 1 }
   ],
   "payment": "card",
-  "id_card": "주민등록증: 1999년 4월 31일생",
+  "card": { "birth": "1999.04.31" },
   "dialogue": {
     "enter": "안녕하세요. 이것 좀 계산해 주시겠어요?",
     "pay": "(카드를 댄다) 봄에 태어났어요. 4월 말이요.",

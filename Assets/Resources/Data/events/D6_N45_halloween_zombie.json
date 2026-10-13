@@ -6,7 +6,15 @@
   "npc": "halloween",
   "trap": true,
   "condition": { "day": 6 },
-  "appearance": { "face": "f_17", "outfit": "torn_shirt", "prop": "club_stamp", "steps": "slippers", "fx": [] },
+  "appearance": {
+    "face": "f_17",
+    "outfit": "torn_shirt",
+    "prop": "club_stamp",
+    "steps": "slippers",
+    "sex": "m",
+    "age": 22,
+    "fx": []
+  },
   "look": ["찢어진 셔츠, 회색 분장의 좀비. 한쪽 발을 질질 끈다.", "손목에 클럽 입장 도장이 찍혀 있다."],
   "items": [ { "id": "hangover", "name": "숙취해소제", "qty": 1 }, { "id": "water", "name": "생수", "qty": 1 } ],
   "payment": "card",

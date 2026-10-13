@@ -5,14 +5,14 @@
   "label": "손님",
   "npc": "idcard",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_26", "outfit": "grey_suit", "prop": "wallet", "steps": "shoes", "fx": [] },
+  "appearance": { "face": "f_26", "outfit": "grey_suit", "prop": "wallet", "steps": "shoes", "sex": "m", "age": 40, "fx": [] },
   "look": ["회색 정장의 남성. 넥타이가 지나치게 반듯하다.", "지갑에서 신분증을 미리 꺼내 들고 있다."],
   "items": [
     { "id": "cigarette", "name": "담배 (21번)", "qty": 1, "restricted": true },
     { "id": "lighter", "name": "라이터", "qty": 1 }
   ],
   "payment": "card",
-  "id_card": "주민등록증: 1985년 2월 30일생",
+  "card": { "birth": "1985.02.30" },
   "dialogue": {
     "enter": "신분증 먼저 드릴게요. 다들 보시더라고요.",
     "pay": "(카드를 댄다) 21번. 라이터도.",

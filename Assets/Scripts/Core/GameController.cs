@@ -45,6 +45,9 @@ public class GameController : MonoBehaviour
     string currentTime = "00:00";
     float eventStart;
     bool arrived, stareShown, idleShown, flicker, paid, askedId, askedLast, kindDone, notesRead, notesOpen;
+    IdCard card;            // 지금 손님이 보여 줄 신분증 (없으면 null)
+    Texture2D cardPhoto;
+    bool cardOpen;
     readonly List<string> log = new List<string>();
     string reaction;
     Vector2 scroll, notesScroll, dialogScroll;
@@ -181,6 +184,10 @@ public class GameController : MonoBehaviour
         currentTime = time;
         eventStart = Time.time;
         arrived = stareShown = idleShown = flicker = paid = askedId = askedLast = kindDone = false;
+        cardOpen = false;
+        card = IdCards.For(ev);
+        if (cardPhoto != null) Destroy(cardPhoto);
+        cardPhoto = null;
         log.Clear();
         dialogLines = -1;
         dialogScroll = Vector2.zero;
@@ -193,6 +200,7 @@ public class GameController : MonoBehaviour
     {
         var o = current.outcomes != null ? current.outcomes.Get(choice) : null;
         if (o == null) return;
+        cardOpen = false;
 
         dayPay += o.pay;
         state.risk = Mathf.Clamp(state.risk + o.risk, 0, RiskLimit);
@@ -408,19 +416,27 @@ public class GameController : MonoBehaviour
         else if (phase == Phase.Title || phase == Phase.DayEnd || phase == Phase.BadEnding || phase == Phase.Ending)
             Fill(new Rect(0, 0, W, H), new Color(0, 0, 0, 0.78f));
 
-        switch (phase)
+        // 수칙 노트가 열려 있으면 그 밑의 화면은 그리기만 하고 클릭·스크롤은 받지 않는다.
+        // (IMGUI 는 먼저 그린 버튼이 입력을 먼저 가져가서, 노트 위를 눌러도 밑의 버튼이 눌린다.)
+        bool notesPhase = phase != Phase.Title && phase != Phase.DayEnd && phase != Phase.BadEnding && phase != Phase.Ending;
+        var evType = Event.current.type;
+        bool inputEvent = evType != EventType.Repaint && evType != EventType.Layout;
+        if (!(notesPhase && notesOpen && inputEvent))
         {
-            case Phase.Title: DrawTitle(W, H); break;
-            case Phase.Briefing: DrawHud(W); DrawBriefing(W, H); break;
-            case Phase.Event: DrawHud(W); DrawEvent(W, H); break;
-            case Phase.Reaction: DrawHud(W); DrawReaction(W, H); break;
-            case Phase.Settlement: DrawHud(W); DrawSettlement(W, H); break;
-            case Phase.DayEnd: DrawDayEnd(W, H); break;
-            case Phase.BadEnding: DrawBadEnding(W, H); break;
-            case Phase.Ending: DrawEnding(W, H); break;
+            switch (phase)
+            {
+                case Phase.Title: DrawTitle(W, H); break;
+                case Phase.Briefing: DrawHud(W); DrawBriefing(W, H); break;
+                case Phase.Event: DrawHud(W); DrawEvent(W, H); break;
+                case Phase.Reaction: DrawHud(W); DrawReaction(W, H); break;
+                case Phase.Settlement: DrawHud(W); DrawSettlement(W, H); break;
+                case Phase.DayEnd: DrawDayEnd(W, H); break;
+                case Phase.BadEnding: DrawBadEnding(W, H); break;
+                case Phase.Ending: DrawEnding(W, H); break;
+            }
         }
 
-        if (phase != Phase.Title && phase != Phase.DayEnd && phase != Phase.BadEnding && phase != Phase.Ending)
+        if (notesPhase)
         {
             if (GUI.Button(new Rect(W - 180, 12, 160, 40), "수칙 노트", button))
             {
@@ -481,7 +497,8 @@ public class GameController : MonoBehaviour
             GUI.Label(new Rect(60, 82, W - 120, 60), current.narration, label);
         }
 
-        if (world != null)
+        if (cardOpen && card != null) DrawIdCard();
+        else if (world != null)
             GUI.Label(new Rect(44, 386, 600, 28), "마우스 오른쪽 드래그: 둘러보기   Space: 정면", small);
 
         // 대화창: 이 손님이 한 말을 모두 남기고 스크롤한다. 새 줄이 오면 맨 아래로 내린다.
@@ -504,12 +521,19 @@ public class GameController : MonoBehaviour
         GUI.enabled = arrived;
         if (customer)
         {
-            GUI.enabled = arrived && !askedId;
-            if (GUI.Button(new Rect(x, y, 200, 50), "신분증 요청", button))
+            // 신분증은 카드 화면으로 직접 확인한다. 처음 누르면 손님이 건네고, 그 뒤로는 열고 닫는다.
+            GUI.enabled = arrived && (!askedId || card != null);
+            string idLabel = !askedId ? "신분증 요청" : (cardOpen ? "신분증 닫기" : "신분증 보기");
+            if (GUI.Button(new Rect(x, y, 200, 50), idLabel, button))
             {
-                askedId = true;
-                string line = current.dialogue != null ? current.dialogue.ask_id : null;
-                log.Add(string.IsNullOrEmpty(line) ? "(신분증을 보여준다.)" : line);
+                if (!askedId)
+                {
+                    askedId = true;
+                    string line = current.dialogue != null ? current.dialogue.ask_id : null;
+                    log.Add(string.IsNullOrEmpty(line) ? "(신분증을 보여준다.)" : line);
+                    cardOpen = card != null;
+                }
+                else cardOpen = !cardOpen;
             }
             GUI.enabled = arrived;
 
@@ -545,6 +569,53 @@ public class GameController : MonoBehaviour
         GUI.enabled = true;
     }
 
+    // 신분증 카드. 정답을 글로 알려 주지 않는다: 생년월일·사진은 플레이어가 직접 읽고 손님과 비교한다.
+    void DrawIdCard()
+    {
+        if (cardPhoto == null) cardPhoto = IdPhoto.Draw(card, IdCards.Glasses(current), current.appearance != null ? current.appearance.sex : null);
+        var r = new Rect(40, 75, 500, 288);
+        Fill(new Rect(r.x - 2, r.y - 2, r.width + 4, r.height + 4), new Color(0.3f, 0.32f, 0.36f));
+        Fill(r, new Color(0.92f, 0.94f, 0.96f));
+        Fill(new Rect(r.x, r.y, r.width, 8), new Color(0.55f, 0.68f, 0.85f));
+
+        var ink = new GUIStyle(label) { fontSize = 18 };
+        ink.normal.textColor = new Color(0.12f, 0.13f, 0.16f);
+        FixedColor(ink);
+        var big = new GUIStyle(ink) { fontSize = 24, fontStyle = FontStyle.Bold };
+        var smallInk = new GUIStyle(ink) { fontSize = 15 };
+
+        bool student = card.type == "학생증";
+        string sex = current.appearance != null ? current.appearance.sex : null;
+        GUI.Label(new Rect(r.x + 22, r.y + 16, 300, 34), card.type, big);
+        GUI.Label(new Rect(r.x + 22, r.y + 60, 320, 34), card.name, new GUIStyle(big) { fontSize = 26, fontStyle = FontStyle.Normal });
+        if (student)
+        {
+            GUI.Label(new Rect(r.x + 22, r.y + 102, 320, 28), "생년월일  " + card.birth, ink);
+            GUI.Label(new Rect(r.x + 22, r.y + 136, 320, 50), card.school, ink);
+            GUI.Label(new Rect(r.x + 22, r.y + 244, 320, 26), (card.school ?? "").Split(' ')[0] + "장", smallInk);
+        }
+        else
+        {
+            GUI.Label(new Rect(r.x + 22, r.y + 102, 320, 28), IdCards.Number(card, sex), new GUIStyle(ink) { fontSize = 22 });
+            GUI.Label(new Rect(r.x + 22, r.y + 140, 320, 56), card.address, ink);
+            GUI.Label(new Rect(r.x + 22, r.y + 210, 320, 26), card.issued.Replace(".", ". ") + ".", smallInk);
+            GUI.Label(new Rect(r.x + 22, r.y + 240, 260, 26), "서울특별시 중랑구청장", smallInk);
+            Fill(new Rect(r.x + 200, r.y + 236, 28, 28), new Color(0.8f, 0.15f, 0.12f, 0.75f));
+        }
+
+        var photo = new Rect(r.x + 360, r.y + 40, 112, 140);
+        Fill(new Rect(photo.x - 2, photo.y - 2, photo.width + 4, photo.height + 4), new Color(0.6f, 0.62f, 0.66f));
+        GUI.DrawTexture(photo, cardPhoto);
+
+        // 계산대에 붙은 판매 기준 스티커
+        var sticker = new Rect(r.x, r.yMax + 6, r.width, 30);
+        Fill(sticker, new Color(0.98f, 0.84f, 0.22f));
+        GUI.Label(new Rect(sticker.x + 12, sticker.y + 4, sticker.width - 24, 24),
+            "술·담배 판매: " + IdCards.AdultBornBy + "년 12월 31일 이전 출생자만 (" + IdCards.Year + "년 기준)", smallInk);
+
+        if (GUI.Button(new Rect(r.xMax - 84, r.y + 14, 70, 32), "닫기", button)) cardOpen = false;
+    }
+
     // 전에 온 적 있는 단골에게만 물을 수 있다. 위장한 것도 같은 얼굴이라 똑같이 물을 수 있다.
     bool CanAskLast()
     {
@@ -569,6 +640,8 @@ public class GameController : MonoBehaviour
 
         var sb = new StringBuilder("<b>관찰</b>\n");
         if (current.look != null) foreach (var l in current.look) sb.AppendLine(l);
+        var face = current.appearance != null ? IdCards.MarksText(current.appearance.marks) : null;
+        if (face != null) sb.AppendLine("얼굴: " + face + ".");
         sb.AppendLine();
         if (current.items != null)
         {
@@ -578,7 +651,6 @@ public class GameController : MonoBehaviour
             sb.AppendLine();
         }
         if (!string.IsNullOrEmpty(current.payment)) sb.AppendLine("결제: " + current.payment);
-        if (askedId && !string.IsNullOrEmpty(current.id_card)) sb.AppendLine(current.id_card); // 예: "주민등록증: 1985년 2월 30일생"
         if (!string.IsNullOrEmpty(current.cctv)) sb.AppendLine("CCTV: " + current.cctv);
         sb.AppendLine();
         // 그 날의 clue_visibility 가 단서가 드러나는 정도의 상한이다. 1 이면 3초 응시해야 보인다.
@@ -587,6 +659,7 @@ public class GameController : MonoBehaviour
             foreach (var c in current.clues)
             {
                 if (string.IsNullOrEmpty(c.text)) continue;
+                if (c.kind == "id") continue;                            // 신분증은 카드 화면에서 직접 확인
                 if (world != null && world.Renders(c.target)) continue; // 3D 로 직접 확인
                 if (Mathf.Min(c.visibility, cap) >= 2 || stareShown) sb.AppendLine(c.text);
             }

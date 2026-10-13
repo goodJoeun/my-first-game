@@ -29,7 +29,7 @@
 
 1. **브리핑**: 점장 메모, 라디오, 나레이션이 나옵니다. 오른쪽 위의 **[수칙 노트]** 를 읽어야 근무를 시작할 수 있습니다.
 2. **근무**: 손님이 계산대 앞에 도착하면 관찰 패널에 외형, 구매 품목, 결제 수단, CCTV 정보가 표시됩니다.
-   - 손님이 계산 중에 하는 말은 자동으로 나오고, 대화창을 스크롤해 그 손님이 한 말을 모두 다시 볼 수 있습니다. `신분증 요청`으로 정보를 더 얻을 수 있습니다.
+   - 손님이 계산 중에 하는 말은 자동으로 나오고, 대화창을 스크롤해 그 손님이 한 말을 모두 다시 볼 수 있습니다. `신분증 요청`을 누르면 신분증 카드가 떠서 생년월일과 사진을 직접 확인합니다.
    - 신분증을 요청하면 관찰 패널에 신분증 내용이 나옵니다.
    - 전에 온 적 있는 단골에게는 `지난번에 뭐 사셨죠?`로 진짜인지 확인할 수 있고, 윤 간호사에게는 친절 행동(예: `따뜻한 캔커피 건네기`)을 할 수 있습니다. 둘 다 최종 선택이 아닙니다.
    - 오래 바라보면(3초) 숨은 단서가 보이고, 10초가 지나면 추가 대사나 연출(형광등 깜빡임 등)이 나옵니다.
@@ -112,6 +112,8 @@ Docs/RULES.md            7일 회차 규칙 (합의한 규칙 전체)
   - `outcomes.{sell,refuse,alarm,answer,ignore}`: 급여·위험도 증감, 플래그, 다음 날 후속 이벤트
   - `appearance.fx`: 3D 연출 플래그 (`no_shadow`, `no_door_chime`, `no_cctv`, `no_footprints`, `no_footsteps`, `clock_stop`, `light_sway`, `phone_ring`)
   - `appearance.steps`: 발소리 (`plain` 운동화, `shoes` 구두, `heels` 하이힐, `boots` 작업화·장화, `slippers` 슬리퍼)
+  - `appearance.sex` / `age` / `marks` / `glasses`: 신분증 사진과 3D 얼굴. `marks`는 점·흉터(`mole_left_cheek`, `scar_right_brow` 등, 좌우는 손님 기준)
+  - `card`: 신분증. 비우면 외형으로 정상 신분증을 만들고, 단서는 여기에 넣습니다(`birth`에 없는 날짜, `marks`에 다른 점 위치, `type: 학생증`). `no_id: true`면 신분증을 보여 주지 않습니다.
 - **날짜** (`Resources/Data/days/dayN.json`): 시간대별 슬롯을 정합니다. `fixed`는 특정 이벤트를 고정하고, `pool: "customer"` / `pool: "phone"`은 회차 배치에서 손님·전화를 꺼냅니다. 그 밖의 `pool`과 `tags`는 조건에 맞는 이벤트 중 하나를 무작위로 고릅니다. `difficulty`의 `mimics`/`mimics_max`, `traps`/`traps_max`는 범위, `clue_visibility`는 그 날 단서 표시의 상한입니다.
 - **수칙** (`Resources/Data/rules/*.json`): `day` 이후부터 수칙 노트에 표시되고, `hidden: true`인 수칙은 노트에 나오지 않습니다.
 

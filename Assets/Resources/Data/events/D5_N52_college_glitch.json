@@ -6,7 +6,15 @@
   "npc": "collegian",
   "trap": true,
   "condition": { "day": 5 },
-  "appearance": { "face": "f_16", "outfit": "hoodie_01", "prop": "laptop_bag", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_16",
+    "outfit": "hoodie_01",
+    "prop": "laptop_bag",
+    "steps": "plain",
+    "sex": "m",
+    "age": 23,
+    "fx": []
+  },
   "look": ["후드티에 노트북 가방을 멘 청년.", "들어올 때 CCTV 모니터가 잠깐 지직거렸다."],
   "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "hotbar", "name": "핫바", "qty": 1 } ],
   "payment": "card",

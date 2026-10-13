@@ -6,7 +6,16 @@
   "npc": "halloween",
   "trap": true,
   "condition": { "day": 5 },
-  "appearance": { "face": "f_17", "outfit": "white_sheet", "prop": "", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_17",
+    "outfit": "white_sheet",
+    "prop": "",
+    "steps": "plain",
+    "sex": "m",
+    "age": 22,
+    "marks": ["mole_right_brow"],
+    "fx": []
+  },
   "look": ["머리부터 흰 천을 뒤집어쓴 유령 분장. 눈구멍 두 개가 뚫려 있다.", "천 아래로 운동화가 보인다."],
   "items": [ { "id": "snack", "name": "과자", "qty": 3 }, { "id": "cola", "name": "콜라", "qty": 2 } ],
   "payment": "card",

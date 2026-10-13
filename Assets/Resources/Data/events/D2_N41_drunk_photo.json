@@ -6,14 +6,23 @@
   "npc": "drunk",
   "trap": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_14", "outfit": "suit_loose", "prop": "", "steps": "shoes", "fx": [] },
+  "appearance": {
+    "face": "f_14",
+    "outfit": "suit_loose",
+    "prop": "",
+    "steps": "shoes",
+    "sex": "m",
+    "age": 50,
+    "marks": ["mole_left_brow"],
+    "fx": []
+  },
   "look": ["넥타이를 손목에 감은 정장 차림. 얼굴이 벌겋다.", "트로트를 흥얼거리며 비틀거린다."],
   "items": [
     { "id": "soju", "name": "소주", "qty": 1, "restricted": true },
     { "id": "cupramen", "name": "컵라면", "qty": 1 }
   ],
   "payment": "cash_crumpled",
-  "id_card": "주민등록증: 1979년 9월 14일생 (사진은 20년 전)",
+  "card": { "birth": "1979.09.14", "old_photo": true, "hair": "long" },
   "dialogue": {
     "enter": "(흥얼거리며) 알바야~ 소주 어딨어, 소주~",
     "pay": "(구겨진 돈을 편다) 이거 다 줄게, 다 가져~",

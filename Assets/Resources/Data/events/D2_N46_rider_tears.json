@@ -6,11 +6,19 @@
   "npc": "rider",
   "trap": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_18", "outfit": "rain_coat", "prop": "delivery_helmet", "steps": "boots", "fx": [] },
+  "appearance": {
+    "face": "f_18",
+    "outfit": "rain_coat",
+    "prop": "delivery_helmet",
+    "steps": "boots",
+    "sex": "m",
+    "age": 28,
+    "fx": []
+  },
   "look": ["배달 헬멧을 쓴 채 눈이 퉁퉁 부었다.", "우비가 젖어 있고 소매에 진흙이 묻었다."],
   "items": [ { "id": "bananamilk", "name": "바나나우유", "qty": 1 }, { "id": "tissue", "name": "휴지", "qty": 1 } ],
   "payment": "card",
-  "id_card": "주민등록증: 1998년 1월 23일생",
+  "card": { "birth": "1998.01.23" },
   "dialogue": {
     "enter": "(코를 훌쩍이며) …죄송해요. 안녕하세요.",
     "pay": "(카드를 댄다) 배달하다 넘어져서 음식을 다 쏟았어요. 물어 줘야 한대요.",

@@ -5,10 +5,20 @@
   "label": "손님",
   "npc": "silent",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_38", "outfit": "grey_coat", "prop": "", "steps": "shoes", "fx": ["clock_stop"] },
+  "appearance": {
+    "face": "f_38",
+    "outfit": "grey_coat",
+    "prop": "",
+    "steps": "shoes",
+    "sex": "m",
+    "age": 72,
+    "marks": ["mole_left_cheek"],
+    "fx": ["clock_stop"]
+  },
   "look": ["회색 코트의 노인.", "들어오는 순간 매장이 조금 더 조용해졌다."],
   "items": [ { "id": "candle", "name": "양초", "qty": 2 }, { "id": "match", "name": "성냥", "qty": 1 } ],
   "payment": "현금 (천 원짜리 두 장)",
+  "no_id": true,
   "dialogue": {
     "enter": "양초 두 개.",
     "pay": "(천 원짜리를 내민다) 오늘 밤은 길 거야.",

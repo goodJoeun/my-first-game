@@ -235,6 +235,7 @@ public class StoreWorld : MonoBehaviour
             var head = Part(PrimitiveType.Sphere, root.transform, new Vector3(0, 1.6f, 0), new Vector3(0.26f, 0.3f, 0.26f), skinMaterial, Color.white);
             Part(PrimitiveType.Cube, head.transform, new Vector3(-0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
             Part(PrimitiveType.Cube, head.transform, new Vector3(0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
+            AddFace(head.transform, e);
         }
 
         bool noShadow = HasFx(e, "no_shadow");
@@ -245,6 +246,40 @@ public class StoreWorld : MonoBehaviour
             if (noCctv) r.gameObject.layer = HiddenFromCctvLayer;
         }
         return root;
+    }
+
+    // 얼굴의 점·흉터·안경 (신분증 사진과 대조하는 단서). 머리는 +z 를 보고, 손님의 오른쪽이 +x 다.
+    void AddFace(Transform head, EventData e)
+    {
+        var ap = e.appearance;
+        if (ap == null) return;
+        var mole = new Color(0.12f, 0.08f, 0.06f);
+        var scar = new Color(0.7f, 0.35f, 0.33f);
+        if (ap.marks != null)
+            foreach (var m in ap.marks)
+            {
+                switch (m)
+                {
+                    case "mole_left_cheek": Part(PrimitiveType.Sphere, head, new Vector3(-0.3f, -0.12f, 0.4f), Vector3.one * 0.09f, customerMaterial, mole); break;
+                    case "mole_right_cheek": Part(PrimitiveType.Sphere, head, new Vector3(0.3f, -0.12f, 0.4f), Vector3.one * 0.09f, customerMaterial, mole); break;
+                    case "mole_left_brow": Part(PrimitiveType.Sphere, head, new Vector3(-0.2f, 0.24f, 0.43f), Vector3.one * 0.09f, customerMaterial, mole); break;
+                    case "mole_right_brow": Part(PrimitiveType.Sphere, head, new Vector3(0.2f, 0.24f, 0.43f), Vector3.one * 0.09f, customerMaterial, mole); break;
+                    case "mole_chin": Part(PrimitiveType.Sphere, head, new Vector3(0f, -0.42f, 0.27f), Vector3.one * 0.09f, customerMaterial, mole); break;
+                    case "scar_left_brow":
+                        Part(PrimitiveType.Cube, head, new Vector3(-0.22f, 0.18f, 0.46f), new Vector3(0.05f, 0.22f, 0.03f), customerMaterial, scar).transform.localRotation = Quaternion.Euler(0, 0, -30f);
+                        break;
+                    case "scar_right_brow":
+                        Part(PrimitiveType.Cube, head, new Vector3(0.22f, 0.18f, 0.46f), new Vector3(0.05f, 0.22f, 0.03f), customerMaterial, scar).transform.localRotation = Quaternion.Euler(0, 0, 30f);
+                        break;
+                }
+            }
+        if (ap.glasses || ap.prop == "glasses")
+        {
+            var frame = new Color(0.08f, 0.08f, 0.09f);
+            Part(PrimitiveType.Cube, head, new Vector3(-0.22f, 0.08f, 0.49f), new Vector3(0.26f, 0.17f, 0.02f), customerMaterial, frame * 1.5f);
+            Part(PrimitiveType.Cube, head, new Vector3(0.22f, 0.08f, 0.49f), new Vector3(0.26f, 0.17f, 0.02f), customerMaterial, frame * 1.5f);
+            Part(PrimitiveType.Cube, head, new Vector3(0f, 0.1f, 0.5f), new Vector3(0.2f, 0.03f, 0.02f), customerMaterial, frame);
+        }
     }
 
     // ------------------------------------------------------------ 실제 사람 모델

@@ -10,6 +10,8 @@
     "outfit": "yellow_raincoat",
     "prop": "umbrella_wet",
     "steps": "boots",
+    "sex": "f",
+    "age": 33,
     "fx": ["no_footprints"]
   },
   "look": ["노란 우비를 입은 여성. 우비에서 빗물이 뚝뚝 떨어진다.", "장화를 신었다."],

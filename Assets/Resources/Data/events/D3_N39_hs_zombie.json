@@ -7,13 +7,22 @@
   "trap": true,
   "minor": true,
   "condition": { "day": 3 },
-  "appearance": { "face": "f_12", "outfit": "torn_uniform", "prop": "festival_band", "steps": "plain", "fx": [] },
+  "appearance": {
+    "face": "f_12",
+    "outfit": "torn_uniform",
+    "prop": "festival_band",
+    "steps": "plain",
+    "sex": "m",
+    "age": 17,
+    "fx": []
+  },
   "look": ["얼굴이 온통 회색 분장. 입가에 가짜 피가 흘러내린다.", "손목에 형광 팔찌를 찼다."],
   "items": [
     { "id": "cigarette", "name": "담배 (7번)", "qty": 1, "restricted": true },
     { "id": "cola", "name": "콜라", "qty": 1 }
   ],
   "payment": "card",
+  "card": { "type": "학생증", "birth": "2009.08.21", "school": "○○고등학교 2학년 3반" },
   "dialogue": {
     "enter": "(그르렁거리다가 웃는다) 아, 놀라셨어요? 분장이에요.",
     "pay": "(카드를 댄다) 축제 끝나고 뒤풀이 가는 길이에요. 담배는 선배 거요.",

@@ -20,7 +20,27 @@ public class Appearance
     public string outfit;
     public string prop;
     public string steps;      // 발소리: plain(운동화) / shoes(구두) / heels(하이힐) / boots(작업화·장화) / slippers(슬리퍼). 비우면 plain
+    public string sex;        // m / f (신분증 사진·주민번호)
+    public int age;           // 대략 나이. 신분증을 따로 정하지 않으면 이 나이로 만든다
+    public string[] marks;    // 얼굴의 점·흉터 (손님 기준 좌우): mole_left_cheek, mole_right_brow, scar_left_brow, mole_chin …
+    public bool glasses;
     public string[] fx;
+}
+
+// 신분증. 비워 두면 손님 외형(나이·성별·점)으로 정상 신분증을 만든다 (IdCards.For).
+// 판별 단서는 여기에 직접 넣는다: 존재하지 않는 생년월일, 사진 속 점 위치가 다름, 미성년자 생년.
+[Serializable]
+public class IdCard
+{
+    public string type;       // 주민등록증(기본) / 학생증
+    public string name;
+    public string birth;      // "1985.02.30" — 존재하지 않는 날짜도 그대로 적는다
+    public string address;
+    public string issued;     // "2019.05.14"
+    public string school;     // 학생증
+    public string[] marks;    // 사진 속 점·흉터. 비우면 손님 얼굴과 같다
+    public string hair;       // short / long (비우면 성별 기본)
+    public bool old_photo;    // 오래된 사진 (빛바램)
 }
 
 [Serializable]
@@ -138,7 +158,8 @@ public class EventData
     public string[] look;           // 외형 설명 (관찰 패널)
     public Item[] items;
     public string payment;
-    public string id_card;
+    public IdCard card;             // 신분증 (비우면 외형으로 만든다)
+    public bool no_id;              // 신분증을 보여 주지 않는다 (집에 두고 옴 등)
     public Dialogue dialogue;
     public Clue[] clues;
     public string[] choices;

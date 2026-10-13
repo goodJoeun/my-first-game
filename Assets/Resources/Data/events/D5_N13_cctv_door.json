@@ -5,7 +5,15 @@
   "label": "손님",
   "npc": "cctv",
   "condition": { "day": 5 },
-  "appearance": { "face": "f_36", "outfit": "slippers", "prop": "", "steps": "slippers", "fx": ["no_door_chime"] },
+  "appearance": {
+    "face": "f_36",
+    "outfit": "slippers",
+    "prop": "",
+    "steps": "slippers",
+    "sex": "f",
+    "age": 27,
+    "fx": ["no_door_chime"]
+  },
   "look": ["슬리퍼 차림의 여성. 진열대 사이에서 언제 나타났는지 모르게 계산대로 왔다.", "밖은 쌀쌀한데 반팔이다."],
   "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 } ],
   "payment": "card",

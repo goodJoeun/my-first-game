@@ -7,7 +7,7 @@
   "placeholder": true,
   "tags": ["calm"],
   "condition": { "day": 1 },
-  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "glasses", "steps": "boots", "fx": [] },
+  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "glasses", "steps": "boots", "sex": "m", "age": 58, "fx": [] },
   "look": ["등산 점퍼에 안경을 쓴 중년 남성.", "느긋한 걸음으로 들어온다."],
   "items": [ { "id": "coffee", "name": "캔커피", "qty": 3 }, { "id": "gum", "name": "껌", "qty": 1 } ],
   "payment": "card",

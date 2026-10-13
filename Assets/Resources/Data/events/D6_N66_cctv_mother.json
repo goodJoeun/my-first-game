@@ -5,7 +5,15 @@
   "label": "손님",
   "npc": "cctv",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_43", "outfit": "cardigan", "prop": "", "steps": "plain", "fx": ["no_cctv"] },
+  "appearance": {
+    "face": "f_43",
+    "outfit": "cardigan",
+    "prop": "",
+    "steps": "plain",
+    "sex": "f",
+    "age": 34,
+    "fx": ["no_cctv"]
+  },
   "look": ["카디건을 걸친 여성. 왼손을 아래로 내밀고 있다. 누군가의 손을 잡은 것처럼.", "옆에는 아무도 없다."],
   "items": [ { "id": "milk", "name": "우유", "qty": 1 }, { "id": "babysnack", "name": "아기 과자", "qty": 1 } ],
   "payment": "card",

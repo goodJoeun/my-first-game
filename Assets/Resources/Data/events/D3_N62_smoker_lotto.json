@@ -5,7 +5,15 @@
   "label": "손님",
   "npc": "smoker",
   "condition": { "day": 3 },
-  "appearance": { "face": "f_25", "outfit": "taxi_jumper", "prop": "lotto_slip", "steps": "shoes", "fx": [] },
+  "appearance": {
+    "face": "f_25",
+    "outfit": "taxi_jumper",
+    "prop": "lotto_slip",
+    "steps": "shoes",
+    "sex": "m",
+    "age": 51,
+    "fx": []
+  },
   "look": ["택시 회사 점퍼를 입은 남성.", "로또 용지를 만지작거린다."],
   "items": [
     { "id": "cigarette", "name": "담배 (17번)", "qty": 1, "restricted": true },

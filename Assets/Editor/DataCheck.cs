@@ -77,6 +77,45 @@ public static class DataCheck
                 bad += Fail(e.id + ": 윤 간호사 변형에 친절 행동이 없음");
         }
 
+        // 신분증: 카드 화면으로 직접 확인하므로, 카드 내용이 판별 규칙과 맞아야 한다.
+        var regularCards = new Dictionary<string, string>();
+        foreach (var e in repo.Events.Values)
+        {
+            if (!RunRules.IsCustomer(e) || string.IsNullOrEmpty(e.npc)) continue;
+            var card = IdCards.For(e);
+            bool idClue = false;
+            if (e.clues != null) foreach (var c in e.clues) if (c.kind == "id" && c.rule == "R02") idClue = true;
+            if (card == null)
+            {
+                if (idClue) bad += Fail(e.id + ": 신분증 단서가 있는데 신분증을 보여 주지 않음");
+                continue;
+            }
+            int born = IdCards.BirthYear(card.birth);
+            bool valid = IdCards.ValidDate(card.birth);
+            bool samePhoto = SameMarks(card.marks, e.appearance != null ? e.appearance.marks : null);
+            if (RunRules.IsMonster(e))
+            {
+                if (idClue && valid && samePhoto) bad += Fail(e.id + ": 신분증 단서가 있는데 카드에 이상한 점이 없음");
+            }
+            else if (e.minor)
+            {
+                if (born <= IdCards.AdultBornBy) bad += Fail(e.id + ": 미성년자인데 신분증 생년이 성인 (" + card.birth + ")");
+            }
+            else
+            {
+                if (!valid) bad += Fail(e.id + ": 사람인데 신분증 생년월일이 없는 날짜 (" + card.birth + ")");
+                if (born > IdCards.AdultBornBy) bad += Fail(e.id + ": 미성년자가 아닌데 신분증 생년이 미성년 (" + card.birth + ")");
+                if (!samePhoto) bad += Fail(e.id + ": 사람인데 신분증 사진의 점·흉터가 얼굴과 다름");
+            }
+            if (RunRules.IsRegular(e.npc))
+            {
+                string sig = card.name + "|" + card.birth + "|" + card.address + "|" + string.Join(",", card.marks ?? new string[0]);
+                string first;
+                if (!regularCards.TryGetValue(e.npc, out first)) regularCards[e.npc] = sig;
+                else if (first != sig) bad += Fail(e.id + ": 단골 " + e.npc + " 의 신분증이 다른 변형과 다름 (위장도 같아야 함)");
+            }
+        }
+
         foreach (var n in repo.Npcs.Values)
         {
             List<EventData> l;
@@ -238,6 +277,15 @@ public static class DataCheck
         }
         foreach (var c in e.choices) if (c == "ignore") return c;
         return e.choices[0];
+    }
+
+    static bool SameMarks(string[] a, string[] b)
+    {
+        var x = new List<string>(a ?? new string[0]);
+        var y = new List<string>(b ?? new string[0]);
+        x.Sort(System.StringComparer.Ordinal);
+        y.Sort(System.StringComparer.Ordinal);
+        return string.Join(",", x.ToArray()) == string.Join(",", y.ToArray());
     }
 
     static int Fail(string msg)
