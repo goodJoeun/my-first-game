@@ -1,0 +1,33 @@
+{
+  "id": "D6_N67_silent_raincoat",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "silent",
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_44", "outfit": "yellow_raincoat", "prop": "umbrella_wet", "fx": ["no_footprints"] },
+  "look": ["노란 우비를 입은 여성. 우비에서 빗물이 뚝뚝 떨어진다.", "장화를 신었다."],
+  "items": [ { "id": "umbrella", "name": "비닐우산", "qty": 1 }, { "id": "tissue", "name": "휴지", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "우산 하나 주세요. 비가 너무 와서요.",
+    "pay": "(카드를 댄다) 장화 안까지 다 젖었어요.",
+    "ask_id": "신분증이요? 여기 있어요.",
+    "stare_3s": "바닥 더럽혀서 죄송해요. 젖었죠?",
+    "idle_10s": "빨리 가야 돼요. 비 더 오기 전에.",
+    "on_sell": "고마워요.",
+    "on_refuse": "(장화 소리를 내며 나간다. 바닥은 여전히 말라 있다.)",
+    "on_alarm": "(벨이 울리자 형광등이 깜빡이고, 빗물 한 방울 남지 않는다.)"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "footprints", "rule": "R08", "visibility": 2, "text": "바닥: 젖은 장화로 걸어 들어왔는데 발자국이 하나도 없다. 바닥이 말라 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "footprints", "text": "빗물이 떨어지는 장화를 신고 걸어 들어왔는데 바닥에 발자국이 하나도 없었습니다. 수칙 제8조입니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

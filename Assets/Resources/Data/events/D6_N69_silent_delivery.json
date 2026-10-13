@@ -1,0 +1,33 @@
+{
+  "id": "D6_N69_silent_delivery",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "silent",
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_46", "outfit": "padded_jacket", "prop": "food_bag", "fx": ["no_footprints"] },
+  "look": ["음식 봉투를 든 패딩 차림의 남성.", "평범하다."],
+  "items": [ { "id": "cola", "name": "콜라", "qty": 2 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "콜라 두 개요.",
+    "pay": "(카드를 댄다) 야식 먹으려고요. 콜라가 빠지면 안 되죠.",
+    "ask_id": "신분증이요? 여기요.",
+    "stare_3s": "음식 식기 전에 가야 돼요.",
+    "idle_10s": "빨리 부탁드려요.",
+    "on_sell": "감사합니다.",
+    "on_refuse": "(봉투를 들고 나간다.)",
+    "on_alarm": "(벨이 울리자 음식 봉투만 바닥에 떨어진다.)"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "footprints", "rule": "R08", "visibility": 1, "text": "바닥: 걸어 들어왔는데 발자국이 하나도 찍히지 않았다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "footprints", "text": "평범해 보였지만, 걸어 들어온 자리에 발자국이 하나도 없었습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

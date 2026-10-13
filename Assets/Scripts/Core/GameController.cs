@@ -47,7 +47,8 @@ public class GameController : MonoBehaviour
     bool arrived, stareShown, idleShown, flicker, paid, askedId, askedLast, kindDone, notesRead, notesOpen;
     readonly List<string> log = new List<string>();
     string reaction;
-    Vector2 scroll, notesScroll;
+    Vector2 scroll, notesScroll, dialogScroll;
+    int dialogLines;     // 대화창이 마지막으로 그린 줄 수 (새 줄이 오면 맨 아래로 내린다)
     string settlementText;
 
     Font font;
@@ -104,7 +105,7 @@ public class GameController : MonoBehaviour
         currentTime = "00:00";
         notesRead = false;
         notesOpen = false;
-        if (world != null) world.ResetDay();
+        if (world != null) { world.ResetDay(); world.SetClock(currentTime); }
         phase = Phase.Briefing;
     }
 
@@ -181,8 +182,10 @@ public class GameController : MonoBehaviour
         eventStart = Time.time;
         arrived = stareShown = idleShown = flicker = paid = askedId = askedLast = kindDone = false;
         log.Clear();
+        dialogLines = -1;
+        dialogScroll = Vector2.zero;
         reaction = null;
-        if (world != null) world.BeginEvent(ev);
+        if (world != null) { world.SetClock(time); world.BeginEvent(ev); }
         phase = Phase.Event;
     }
 
@@ -227,7 +230,7 @@ public class GameController : MonoBehaviour
     void EnterSettlement()
     {
         currentTime = "06:00";
-        if (world != null) world.Morning();
+        if (world != null) { world.Morning(); world.SetClock(currentTime); }
         settlementText = BuildSettlement();
         scroll = Vector2.zero;
         phase = Phase.Settlement;
@@ -320,6 +323,13 @@ public class GameController : MonoBehaviour
 
         if (current.dialogue == null) return;
         float t = Time.time - eventStart;
+        // 계산 중 대사는 버튼 없이 자동으로 나온다. 단골의 고정 사실과 위장의 거짓말이 여기 들어 있어서
+        // 플레이어가 반드시 보게 한다.
+        if (!paid && t >= 1.5f)
+        {
+            paid = true;
+            if (!string.IsNullOrEmpty(current.dialogue.pay)) log.Add(current.dialogue.pay);
+        }
         if (!stareShown && t >= 3f)
         {
             stareShown = true;
@@ -472,26 +482,30 @@ public class GameController : MonoBehaviour
         }
 
         if (world != null)
-            GUI.Label(new Rect(44, 438, 600, 28), "마우스 오른쪽 드래그: 둘러보기   Space: 정면", small);
+            GUI.Label(new Rect(44, 386, 600, 28), "마우스 오른쪽 드래그: 둘러보기   Space: 정면", small);
 
-        // 대화창
-        Fill(new Rect(40, 468, W - 80, 118), Panel);
+        // 대화창: 이 손님이 한 말을 모두 남기고 스크롤한다. 새 줄이 오면 맨 아래로 내린다.
+        var box = new Rect(40, 420, W - 80, 166);
+        Fill(box, Panel);
         var sb = new StringBuilder();
         if (customer || current.type == "event") sb.AppendLine("<b>" + current.label + "</b>");
         if (!arrived) sb.AppendLine("…");
-        int from = Mathf.Max(0, log.Count - 3);
-        for (int i = from; i < log.Count; i++) sb.AppendLine(log[i]);
-        GUI.Label(new Rect(56, 474, W - 112, 108), sb.ToString(), label);
+        foreach (var line in log) sb.AppendLine(line);
+        string text = sb.ToString().TrimEnd();
+        float textW = box.width - 48;
+        var content = new Rect(0, 0, textW, label.CalcHeight(new GUIContent(text), textW));
+        if (log.Count != dialogLines) { dialogLines = log.Count; dialogScroll.y = content.height; }
+        dialogScroll = GUI.BeginScrollView(new Rect(box.x + 16, box.y + 6, box.width - 24, box.height - 12), dialogScroll, content);
+        GUI.Label(content, text, label);
+        GUI.EndScrollView();
 
         // 행동
         float x = 40, y = 600;
         GUI.enabled = arrived;
         if (customer)
         {
-            GUI.enabled = arrived && !paid;
-            if (GUI.Button(new Rect(x, y, 200, 50), "바코드 찍기", button)) { paid = true; if (current.dialogue != null && !string.IsNullOrEmpty(current.dialogue.pay)) log.Add(current.dialogue.pay); }
             GUI.enabled = arrived && !askedId;
-            if (GUI.Button(new Rect(x + 210, y, 200, 50), "신분증 요청", button))
+            if (GUI.Button(new Rect(x, y, 200, 50), "신분증 요청", button))
             {
                 askedId = true;
                 string line = current.dialogue != null ? current.dialogue.ask_id : null;

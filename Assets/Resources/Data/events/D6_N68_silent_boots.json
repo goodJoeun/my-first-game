@@ -1,0 +1,33 @@
+{
+  "id": "D6_N68_silent_boots",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "silent",
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_45", "outfit": "work_clothes_mud", "prop": "work_boots", "fx": ["no_footprints"] },
+  "look": ["흙투성이 작업화를 신은 남성.", "공사장에서 막 온 듯 바지에도 진흙이 묻었다."],
+  "items": [ { "id": "coffee", "name": "캔커피", "qty": 2 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요. 캔커피 두 개요.",
+    "pay": "(카드를 댄다) 야간 공사예요. 진흙 밭이라 죽겠네요.",
+    "ask_id": "신분증이요? 네, 여기요.",
+    "stare_3s": "바닥 괜찮아요? 흙 많이 묻었죠.",
+    "idle_10s": "계산 부탁드려요.",
+    "on_sell": "감사합니다. 수고하세요.",
+    "on_refuse": "(쿵쿵 걸어 나간다. 진흙 한 점 떨어지지 않는다.)",
+    "on_alarm": "(벨이 울리자 작업화 소리만 남고, 사람은 없다.)"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "footprints", "rule": "R08", "visibility": 2, "text": "바닥: 진흙투성이 작업화로 들어왔는데 바닥에 흙 자국 하나 없다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "footprints", "text": "진흙 묻은 작업화로 걸어 들어왔는데 발자국이 하나도 남지 않았습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

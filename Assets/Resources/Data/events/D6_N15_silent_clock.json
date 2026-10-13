@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "silent",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_38", "outfit": "grey_coat", "prop": "", "fx": [] },
+  "appearance": { "face": "f_38", "outfit": "grey_coat", "prop": "", "fx": ["clock_stop"] },
   "look": ["회색 코트의 노인.", "들어오는 순간 매장이 조금 더 조용해졌다."],
   "items": [ { "id": "candle", "name": "양초", "qty": 2 }, { "id": "match", "name": "성냥", "qty": 1 } ],
   "payment": "현금 (천 원짜리 두 장)",

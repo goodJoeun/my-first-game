@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "silent",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_40", "outfit": "sportswear", "prop": "earphones", "fx": [] },
+  "appearance": { "face": "f_40", "outfit": "sportswear", "prop": "earphones", "fx": ["no_footprints", "no_footsteps"] },
   "look": ["운동복 차림의 청년. 이어폰을 꼈다.", "평범하다."],
   "items": [ { "id": "isotonic", "name": "이온음료", "qty": 1 } ],
   "payment": "card",
@@ -20,7 +20,8 @@
     "on_alarm": "(벨이 울리자 이온음료가 계산대 위에서 넘어진다.)"
   },
   "clues": [
-    { "kind": "sound", "target": "footsteps", "rule": "R08", "visibility": 1, "text": "소리: 걸어 들어왔는데 발소리가 한 번도 나지 않았다." }
+    { "kind": "sound", "target": "footsteps", "rule": "R08", "visibility": 1, "text": "소리: 걸어 들어왔는데 발소리가 한 번도 나지 않았다." },
+    { "kind": "appearance", "target": "footprints", "rule": "R08", "visibility": 1, "text": "바닥: 걸어 들어왔는데 발자국이 하나도 찍히지 않았다." }
   ],
   "choices": ["sell", "refuse", "alarm"],
   "outcomes": {
@@ -28,6 +29,6 @@
     "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
     "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
   },
-  "replay": { "focus": "footsteps", "text": "운동화를 신고 걸어 들어왔는데 발소리가 전혀 없었습니다." },
+  "replay": { "focus": "footsteps", "text": "운동화를 신고 걸어 들어왔는데 발소리도, 발자국도 없었습니다." },
   "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
 }
