@@ -195,7 +195,7 @@ public partial class StoreWorld : MonoBehaviour
         }
         else
         {
-            StartCoroutine(Walk(customer.transform, doorOutside.position, 1.3f, true));
+            StartCoroutine(Walk(customer.transform, doorOutside.position, Random.Range(1.4f, 2.0f), true));
         }
     }
 
@@ -356,12 +356,27 @@ public partial class StoreWorld : MonoBehaviour
         return go;
     }
 
+    // 들어오는 길: 사람마다 머뭇거림, 걷는 속도, 둘러보는 곳이 다르다.
+    // 사람과 괴물이 똑같이 고르므로 들어오는 모습은 판별 단서가 아니다.
     IEnumerator Enter(EventData e)
     {
-        if (!HasFx(e, "no_door_chime")) PlayOnce(chime);
         var c = customer;
+        yield return new WaitForSeconds(Random.Range(0.2f, 2.0f));   // 문 앞에서 잠깐
+        if (c == null || c != customer) yield break;
+        if (!HasFx(e, "no_door_chime")) PlayOnce(chime);
+        float speed = Random.Range(1.4f, 2.1f);
         var prints = HasFx(e, "no_footprints") ? null : StartCoroutine(LeaveFootprints(c.transform));
-        yield return Walk(c.transform, counterSpot.position, 1.4f, false);
+        foreach (var step in EntryRoute())
+        {
+            yield return Walk(c.transform, step.point, speed, false);
+            if (c == null || c != customer) break;
+            if (step.pause > 0)
+            {
+                Face(c.transform, step.look);
+                yield return new WaitForSeconds(step.pause);
+            }
+        }
+        if (c != null && c == customer) yield return Walk(c.transform, counterSpot.position, speed, false);
         if (prints != null) StopCoroutine(prints);
         if (c == null || c != customer) yield break;
         Face(customer.transform, counterSpot.position + counterSpot.forward);
@@ -401,9 +416,62 @@ public partial class StoreWorld : MonoBehaviour
         if (destroyAtEnd && t.gameObject == customer) ClearCustomer();
     }
 
+    struct RouteStep
+    {
+        public Vector3 point;
+        public float pause;
+        public Vector3 look;
+    }
+
+    // 곧장 계산대로(50%), 가운데 통로에서 진열대를 잠깐 보고(25%), 옆 통로를 한 바퀴 돌고(25%).
+    // 경로점은 통로 위에만 둬서 진열대를 뚫고 지나가지 않는다.
+    List<RouteStep> EntryRoute()
+    {
+        var route = new List<RouteStep>();
+        float front = StoreLayout.FrontZ, roll = Random.value;
+        if (roll < 0.5f) return route;
+        if (roll < 0.75f)
+        {
+            float side = Random.value < 0.5f ? -1f : 1f;
+            var p = new Vector3(side * 1.35f, 0, Random.Range(3.0f, 8.0f));
+            route.Add(new RouteStep { point = p, pause = Random.Range(0.8f, 2.2f), look = p + new Vector3(side, 0, 0) });
+            return route;
+        }
+        float ax = roll < 0.875f ? StoreLayout.LeftAisleX : StoreLayout.RightAisleX;
+        route.Add(new RouteStep { point = new Vector3(0, 0, front - 0.6f) });
+        route.Add(new RouteStep { point = new Vector3(ax, 0, front - 0.8f) });
+        var b = new Vector3(ax, 0, Random.Range(3.0f, 8.0f));
+        float toShelf = (ax < 0 ? -1f : 1f) * (Random.value < 0.5f ? 1f : -1f);   // 벽 쪽 또는 가운데 진열대 쪽
+        route.Add(new RouteStep { point = b, pause = Random.Range(1.0f, 2.5f), look = b + new Vector3(toShelf, 0, 0) });
+        route.Add(new RouteStep { point = new Vector3(ax, 0, 1.4f) });
+        return route;
+    }
+
+    // 비상벨에 괴물이 사라지는 모습: 암전 / 여러 번 깜빡이다 암전 / 눈을 떼지 않고 뒷걸음질 치다 암전
     IEnumerator Vanish()
     {
         var c = customer;
+        int style = Random.Range(0, 3);
+        if (style == 1)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                SetLights(0.1f);
+                yield return new WaitForSeconds(0.08f);
+                SetLights(1f);
+                yield return new WaitForSeconds(Random.Range(0.08f, 0.2f));
+            }
+        }
+        else if (style == 2 && c != null)
+        {
+            var start = c.transform.position;
+            var back = start + new Vector3(0, 0, 1.6f);
+            for (float t = 0; t < 0.9f && c != null; t += Time.deltaTime)
+            {
+                c.transform.position = Vector3.Lerp(start, back, t / 0.9f);
+                yield return null;
+            }
+        }
         SetLights(0f);
         yield return new WaitForSeconds(0.5f);
         if (customer == c) ClearCustomer();
@@ -456,9 +524,12 @@ public partial class StoreWorld : MonoBehaviour
         var c = customer;
         customer = null; // 더 이상 계산대 손님이 아님
         dayObjects.Add(c);
-        yield return Walk(c.transform, doorOutside.position, 1.1f, false);
+        yield return Walk(c.transform, doorOutside.position, Random.Range(1.2f, 1.7f), false);
         if (c == null) yield break;
-        yield return Walk(c.transform, windowSpot.position, 1.1f, false);
+        // 창밖에 서는 자리도 매번 다르다 (왼쪽·오른쪽 유리창 앞)
+        float side = Random.value < 0.5f ? -1f : 1f;
+        var spot = new Vector3(side * Random.Range(1.6f, StoreLayout.HalfWidth - 0.8f), 0, windowSpot.position.z);
+        yield return Walk(c.transform, spot, Random.Range(1.2f, 1.7f), false);
         if (c == null) yield break;
         Face(c.transform, counterSpot.position);
     }
@@ -509,11 +580,11 @@ public partial class StoreWorld : MonoBehaviour
         for (int i = 0; i < lights.Length; i++) lights[i].intensity = baseIntensity[i] * k;
         foreach (var r in lightTubes)
             if (r != null) r.material.SetColor("_EmissionColor", Color.white * (k > 0.5f ? 1.4f : 0.05f));
-        // 이상현상: 매장 안쪽 형광등이 꺼져 있다 (lights[1] = StoreLight, lightTubes[1] = Tube_Store)
-        if (storeLightOff && lights.Length > 1 && lightTubes.Length > 1)
+        // 이상현상: 매장 형광등 하나가 꺼져 있다 (offLight 번 조명과 형광등 막대)
+        if (offLight > 0 && offLight < lights.Length && offLight < lightTubes.Length)
         {
-            lights[1].intensity = 0f;
-            if (lightTubes[1] != null) lightTubes[1].material.SetColor("_EmissionColor", Color.white * 0.02f);
+            lights[offLight].intensity = 0f;
+            if (lightTubes[offLight] != null) lightTubes[offLight].material.SetColor("_EmissionColor", Color.white * 0.02f);
         }
     }
 
@@ -594,7 +665,8 @@ public partial class StoreWorld : MonoBehaviour
         if (itemMaterial == null) return;
         var root = new GameObject("Wall_Clock").transform;
         root.SetParent(transform, false);
-        root.position = new Vector3(0, 2.62f, 5.93f);   // 출입문 위, 앞면이 계산대(-z)를 향한다
+        root.position = StoreLayout.Clock;   // 출입문 위, 앞면이 계산대(-z)를 향한다
+        root.gameObject.AddComponent<BoxCollider>().size = new Vector3(0.62f, 0.62f, 0.08f);   // 순찰 때 겨눌 수 있게
 
         var rim = Part(PrimitiveType.Cylinder, root, new Vector3(0, 0, 0.02f), new Vector3(0.62f, 0.02f, 0.62f), itemMaterial, new Color(0.12f, 0.12f, 0.13f));
         rim.transform.localRotation = Quaternion.Euler(90, 0, 0);

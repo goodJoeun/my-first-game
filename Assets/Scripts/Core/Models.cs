@@ -260,6 +260,9 @@ public class DayPlan
     public List<string> customers = new List<string>();
     public string phone;
     public List<string> anomalies = new List<string>();   // 순찰 때 나올 이상현상 ID
+    // 그 날 슬롯을 채울 순서 (이벤트 ID, 순찰은 "@patrol"). 시간대는 날짜 JSON 의 슬롯 시간을 순서대로 쓴다.
+    // 비어 있으면 날짜 JSON 의 슬롯 순서를 그대로 쓴다 (예전 저장 파일).
+    public List<string> sequence = new List<string>();
 }
 
 [Serializable]

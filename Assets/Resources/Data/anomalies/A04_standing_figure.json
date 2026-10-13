@@ -1,7 +1,1 @@
-{
-  "id": "A04",
-  "kind": "standing_figure",
-  "day": 3,
-  "label": "선반 사이에 선 사람",
-  "text": "손님이 없는데 선반 사이에 누군가 벽을 보고 서 있었습니다."
-}
+{ "id": "A04", "kind": "standing_figure", "day": 3, "label": "통로에 선 사람", "text": "손님이 없는데 통로에 누군가 서 있었습니다." }

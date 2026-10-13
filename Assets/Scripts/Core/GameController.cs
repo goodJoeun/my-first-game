@@ -44,6 +44,7 @@ public class GameController : MonoBehaviour
     readonly Dictionary<string, AnomalyData> patrolActive = new Dictionary<string, AnomalyData>();   // kind → 데이터
     readonly List<AnomalyData> patrolFound = new List<AnomalyData>();
     readonly List<AnomalyData> patrolMissed = new List<AnomalyData>();
+    readonly List<string> patrolMissedWhere = new List<string>();   // 놓친 이상현상의 실제 위치 (매번 다르다)
     int patrolFalse;
     bool patrolDone;
     string patrolMessage;
@@ -53,6 +54,7 @@ public class GameController : MonoBehaviour
     string currentTime = "00:00";
     float eventStart;
     bool arrived, stareShown, idleShown, flicker, paid, askedId, askedLast, kindDone, notesRead, notesOpen;
+    float payAt, stareAt, idleAt;   // 손님마다 대사가 나오는 때를 조금씩 다르게
     IdCard card;            // 지금 손님이 보여 줄 신분증 (없으면 null)
     Texture2D cardPhoto;
     bool cardOpen;
@@ -111,6 +113,7 @@ public class GameController : MonoBehaviour
         patrolActive.Clear();
         patrolFound.Clear();
         patrolMissed.Clear();
+        patrolMissedWhere.Clear();
         patrolFalse = 0;
         patrolDone = false;
         usedIds.Clear();
@@ -134,14 +137,16 @@ public class GameController : MonoBehaviour
             slotIndex++;
             if (day.slots == null || slotIndex >= day.slots.Length) { EnterSettlement(); return; }
             var slot = day.slots[slotIndex];
-            if (slot.pool == "patrol")
+            // 회차 배치에 하루 순서가 있으면 그 순서로 채운다 (시간대는 슬롯 시간 그대로).
+            string seq = SequenceAt(slotIndex);
+            if (seq == RunRules.PatrolToken || (seq == null && slot.pool == "patrol"))
             {
                 // 3D 매장이 없으면 걸어 다닐 수 없으니 건너뛴다.
                 if (world == null) continue;
                 BeginPatrol(slot.time);
                 return;
             }
-            var ev = ResolveSlot(slot);
+            var ev = seq != null ? repo.Get(seq) : ResolveSlot(slot);
             if (ev == null)
             {
                 Debug.LogWarning("슬롯 " + slot.time + " 에 넣을 이벤트가 없어 건너뜁니다.");
@@ -151,6 +156,13 @@ public class GameController : MonoBehaviour
             BeginEvent(ev, slot.time);
             return;
         }
+    }
+
+    string SequenceAt(int index)
+    {
+        var p = state.PlanFor(state.day);
+        if (p == null || p.sequence == null || day.slots == null || p.sequence.Count != day.slots.Length) return null;
+        return p.sequence[index];
     }
 
     EventData ResolveSlot(Slot slot)
@@ -204,6 +216,9 @@ public class GameController : MonoBehaviour
         currentTime = time;
         eventStart = Time.time;
         arrived = stareShown = idleShown = flicker = paid = askedId = askedLast = kindDone = false;
+        payAt = Random.Range(1.0f, 2.5f);
+        stareAt = Random.Range(2.5f, 4.5f);
+        idleAt = Random.Range(8f, 13f);
         cardOpen = false;
         card = IdCards.For(ev);
         if (cardPhoto != null) Destroy(cardPhoto);
@@ -275,14 +290,15 @@ public class GameController : MonoBehaviour
 
     void ReportAnomaly()
     {
-        string kind = world.Report();
+        string what;
+        string kind = world.Report(out what);
         AnomalyData a;
         if (kind == null) patrolMessage = "너무 멀다. 가까이 가서 확인하자.";
         else if (kind == "" || !patrolActive.TryGetValue(kind, out a))
         {
             patrolFalse++;
             dayPay += RunRules.FalseReportPay;
-            patrolMessage = "…아무 이상도 없다. 괜히 신고했다. (" + Won(RunRules.FalseReportPay, true) + ")";
+            patrolMessage = what + ": …아무 이상도 없다. 괜히 신고했다. (" + Won(RunRules.FalseReportPay, true) + ")";
         }
         else
         {
@@ -298,7 +314,7 @@ public class GameController : MonoBehaviour
         foreach (var kind in missed)
         {
             AnomalyData a;
-            if (patrolActive.TryGetValue(kind, out a)) patrolMissed.Add(a);
+            if (patrolActive.TryGetValue(kind, out a)) { patrolMissed.Add(a); patrolMissedWhere.Add(world.WhereOf(kind)); }
         }
         patrolActive.Clear();
         patrolDone = true;
@@ -380,7 +396,11 @@ public class GameController : MonoBehaviour
         {
             sb.AppendLine("<b>순찰</b>");
             sb.AppendLine("찾은 이상현상 " + patrolFound.Count + "개, 놓친 이상현상 " + patrolMissed.Count + "개, 오인 신고 " + patrolFalse + "번");
-            foreach (var a in patrolMissed) sb.AppendLine("  놓침: \"" + a.text + "\"  (위험도 +" + RunRules.MissedAnomalyRisk + ")");
+            for (int i = 0; i < patrolMissed.Count; i++)
+            {
+                string at = patrolMissedWhere[i];
+                sb.AppendLine("  놓침: \"" + patrolMissed[i].text + "\"" + (string.IsNullOrEmpty(at) ? "" : "  — " + at) + "  (위험도 +" + RunRules.MissedAnomalyRisk + ")");
+            }
             if (patrolFalse > 0) sb.AppendLine("  오인 신고  " + Won(RunRules.FalseReportPay * patrolFalse, true));
             sb.AppendLine();
         }
@@ -437,17 +457,17 @@ public class GameController : MonoBehaviour
         float t = Time.time - eventStart;
         // 계산 중 대사는 버튼 없이 자동으로 나온다. 단골의 고정 사실과 위장의 거짓말이 여기 들어 있어서
         // 플레이어가 반드시 보게 한다.
-        if (!paid && t >= 1.5f)
+        if (!paid && t >= payAt)
         {
             paid = true;
             if (!string.IsNullOrEmpty(current.dialogue.pay)) log.Add(current.dialogue.pay);
         }
-        if (!stareShown && t >= 3f)
+        if (!stareShown && t >= stareAt)
         {
             stareShown = true;
             if (!string.IsNullOrEmpty(current.dialogue.stare_3s)) log.Add(current.dialogue.stare_3s);
         }
-        if (!idleShown && t >= 10f)
+        if (!idleShown && t >= idleAt)
         {
             idleShown = true;
             if (!string.IsNullOrEmpty(current.dialogue.idle_10s)) log.Add(current.dialogue.idle_10s);
@@ -773,9 +793,19 @@ public class GameController : MonoBehaviour
 
     void DrawPatrol(float W, float H)
     {
-        // 조준점: 이 자리를 신고한다
-        Fill(new Rect(W / 2 - 1, H / 2 - 9, 2, 18), new Color(1, 1, 1, 0.8f));
-        Fill(new Rect(W / 2 - 9, H / 2 - 1, 18, 2), new Color(1, 1, 1, 0.8f));
+        // 조준점 + 조준 보조: 겨눈 물체 이름을 보여 준다 (이상한지 아닌지는 알려 주지 않는다)
+        string aimed = world != null ? world.AimLabel : null;
+        var cross = aimed != null ? new Color(1f, 0.85f, 0.3f, 0.95f) : new Color(1, 1, 1, 0.6f);
+        Fill(new Rect(W / 2 - 1, H / 2 - 9, 2, 18), cross);
+        Fill(new Rect(W / 2 - 9, H / 2 - 1, 18, 2), cross);
+        if (aimed != null)
+        {
+            var tag = new GUIStyle(small) { alignment = TextAnchor.MiddleCenter, fontSize = 17 };
+            tag.normal.textColor = cross;
+            FixedColor(tag);
+            Fill(new Rect(W / 2 - 80, H / 2 + 16, 160, 26), new Color(0, 0, 0, 0.45f));
+            GUI.Label(new Rect(W / 2 - 80, H / 2 + 16, 160, 26), aimed, tag);
+        }
 
         Fill(new Rect(40, 486, W - 80, 100), Panel);
         GUI.Label(new Rect(56, 492, W - 112, 30), "<b>새벽 순찰</b>   W/A/S/D: 걷기   마우스 오른쪽 드래그: 둘러보기   E: 바라보는 곳 신고", small);

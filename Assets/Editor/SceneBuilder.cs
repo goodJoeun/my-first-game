@@ -7,8 +7,7 @@ using UnityEngine.Rendering;
 // 기본 도형으로 3D 편의점 매장을 만든다. 실제 에셋이 생기면 도형을 교체하면 된다.
 // 배치 모드: Unity -batchmode -executeMethod SceneBuilder.Build
 //
-// 좌표 (미터): 플레이어는 계산대 뒤 z=-0.9 에서 +z(출입문) 쪽을 본다.
-//   계산대  z -0.2 ~ 0.5     손님 위치  z 1.7     출입문/유리벽  z 6
+// 좌표 (미터)는 StoreLayout 에 모여 있다. 플레이어는 계산대 뒤 z=-0.9 에서 +z(출입문) 쪽을 본다.
 public static class SceneBuilder
 {
     const string ScenePath = "Assets/Scenes/Main.unity";
@@ -32,29 +31,43 @@ public static class SceneBuilder
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Linear;
         RenderSettings.fogColor = new Color(0.01f, 0.01f, 0.02f);
-        RenderSettings.fogStartDistance = 8f;
-        RenderSettings.fogEndDistance = 22f;
+        RenderSettings.fogStartDistance = 10f;
+        RenderSettings.fogEndDistance = 26f;
 
         var store = new GameObject("Store").transform;
 
-        // --- 바닥 / 벽 / 천장
-        Box(store, "Floor", new Vector3(0, -0.05f, 2f), new Vector3(8, 0.1f, 8), Mat("Floor", new Color(0.78f, 0.79f, 0.76f), 0.35f));
-        Box(store, "Ceiling", new Vector3(0, 3.05f, 2f), new Vector3(8, 0.1f, 8), Mat("Ceiling", new Color(0.85f, 0.85f, 0.83f)));
+        // --- 바닥 / 벽 / 천장 (StoreLayout: 가로 12m, 깊이 12m)
+        float W = StoreLayout.HalfWidth * 2f, mid = StoreLayout.MidZ, depth = StoreLayout.Depth, front = StoreLayout.FrontZ;
+        Box(store, "Floor", new Vector3(0, -0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Floor", new Color(0.78f, 0.79f, 0.76f), 0.35f));
+        Box(store, "Ceiling", new Vector3(0, StoreLayout.Height + 0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Ceiling", new Color(0.85f, 0.85f, 0.83f)));
         var wall = Mat("Wall", new Color(0.86f, 0.87f, 0.83f));
-        Box(store, "Wall_Back", new Vector3(0, 1.5f, -2.05f), new Vector3(8, 3, 0.1f), wall);
-        Box(store, "Wall_Left", new Vector3(-4.05f, 1.5f, 2f), new Vector3(0.1f, 3, 8), wall);
-        Box(store, "Wall_Right", new Vector3(4.05f, 1.5f, 2f), new Vector3(0.1f, 3, 8), wall);
+        Box(store, "Wall_Back", new Vector3(0, 1.5f, StoreLayout.BackZ - 0.05f), new Vector3(W, 3, 0.1f), wall);
+        Box(store, "Wall_Left", new Vector3(-StoreLayout.HalfWidth - 0.05f, 1.5f, mid), new Vector3(0.1f, 3, depth), wall);
+        Box(store, "Wall_Right", new Vector3(StoreLayout.HalfWidth + 0.05f, 1.5f, mid), new Vector3(0.1f, 3, depth), wall);
         var frame = Mat("Frame", new Color(0.2f, 0.22f, 0.25f), 0.6f);
-        Box(store, "Front_Top", new Vector3(0, 2.75f, 6.05f), new Vector3(8, 0.5f, 0.12f), frame);
-        Box(store, "Front_Bottom", new Vector3(0, 0.15f, 6.05f), new Vector3(8, 0.3f, 0.12f), frame);
-        Box(store, "Door_Frame_L", new Vector3(-0.75f, 1.4f, 6.05f), new Vector3(0.08f, 2.3f, 0.14f), frame);
-        Box(store, "Door_Frame_R", new Vector3(0.75f, 1.4f, 6.05f), new Vector3(0.08f, 2.3f, 0.14f), frame);
+        Box(store, "Front_Top", new Vector3(0, 2.75f, front + 0.05f), new Vector3(W, 0.5f, 0.12f), frame);
+        Box(store, "Front_Bottom", new Vector3(0, 0.15f, front + 0.05f), new Vector3(W, 0.3f, 0.12f), frame);
+        Box(store, "Door_Frame_L", new Vector3(-0.75f, 1.4f, front + 0.05f), new Vector3(0.08f, 2.3f, 0.14f), frame);
+        Box(store, "Door_Frame_R", new Vector3(0.75f, 1.4f, front + 0.05f), new Vector3(0.08f, 2.3f, 0.14f), frame);
         var glassMat = Mat("Glass_Night", new Color(0.02f, 0.03f, 0.06f), 0.95f);
-        var glassL = Box(store, "Glass_Left", new Vector3(-2.4f, 1.45f, 6.05f), new Vector3(3.2f, 2.3f, 0.04f), glassMat);
-        Box(store, "Glass_Right", new Vector3(2.4f, 1.45f, 6.05f), new Vector3(3.2f, 2.3f, 0.04f), glassMat);
+        float glassW = StoreLayout.HalfWidth - 0.75f, glassX = 0.75f + glassW / 2f;
+        var glassL = Box(store, "Glass_Left", new Vector3(-glassX, 1.45f, front + 0.05f), new Vector3(glassW, 2.3f, 0.04f), glassMat);
+        Box(store, "Glass_Right", new Vector3(glassX, 1.45f, front + 0.05f), new Vector3(glassW, 2.3f, 0.04f), glassMat);
         // 바깥 길바닥 (창밖에 선 손님이 보이도록)
-        Box(store, "Street", new Vector3(0, -0.06f, 9f), new Vector3(14, 0.1f, 6), Mat("Street", new Color(0.12f, 0.12f, 0.13f)));
-        NewLight(store, "StreetLight", LightType.Point, new Vector3(3f, 3.5f, 8.5f), new Color(1f, 0.75f, 0.45f), 1.2f, 7f, LightShadows.None);
+        Box(store, "Street", new Vector3(0, -0.06f, front + 3f), new Vector3(20, 0.1f, 6), Mat("Street", new Color(0.12f, 0.12f, 0.13f)));
+        NewLight(store, "StreetLight", LightType.Point, new Vector3(3f, 3.5f, front + 2.5f), new Color(1f, 0.75f, 0.45f), 1.2f, 7f, LightShadows.None);
+
+        // --- 창고 문 (왼쪽 벽 안쪽 구석)
+        var storage = new GameObject("Storage").transform;
+        storage.SetParent(store);
+        Box(storage, "Storage_Door", StoreLayout.StorageDoor, new Vector3(0.06f, 2.1f, 1.0f), Mat("Storage_Door", new Color(0.35f, 0.3f, 0.26f), 0.3f));
+        Box(storage, "Storage_Handle", StoreLayout.StorageDoor + new Vector3(0.05f, -0.05f, -0.38f), new Vector3(0.05f, 0.04f, 0.14f), Mat("Frame", Color.black));
+        Box(storage, "Storage_Sign", StoreLayout.StorageDoor + new Vector3(0.04f, 0.75f, 0), new Vector3(0.02f, 0.18f, 0.5f), Mat("Storage_Sign", new Color(0.9f, 0.9f, 0.85f)));
+        // 문 위 초록 비상구 표시등: 어두운 구석이 보일 만큼만 밝힌다
+        var exitSign = Box(storage, "Storage_ExitSign", StoreLayout.StorageDoor + new Vector3(0.06f, 1.3f, 0), new Vector3(0.04f, 0.16f, 0.36f),
+            Mat("Exit_Sign", new Color(0.2f, 0.8f, 0.4f), 0.2f, new Color(0.2f, 1.2f, 0.45f)));
+        exitSign.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        NewLight(storage, "ExitLight", LightType.Point, StoreLayout.StorageDoor + new Vector3(0.6f, 1.2f, 0), new Color(0.55f, 1f, 0.7f), 0.35f, 3.5f, LightShadows.None);
 
         // --- 계산대
         var counter = new GameObject("Counter").transform;
@@ -85,51 +98,61 @@ public static class SceneBuilder
         foreach (var n in new[] { "Monitor_Body", "Monitor_Screen" })
             counter.Find(n).RotateAround(new Vector3(-1.15f, 1.17f, -0.05f), Vector3.up, -20f);
 
-        // --- 진열대 / 냉장고
+        // --- 진열대: 벽 진열대는 통로 쪽 한 면, 가운데 진열대는 양면 (상품 이름 Product_P 는 +x 면, Product_N 은 -x 면)
         var shelfMat = Mat("Shelf", new Color(0.58f, 0.6f, 0.64f), 0.3f);
         var rng = new System.Random(7);
-        foreach (float sx in new[] { -2.6f, 2.6f })
+        int perFace = (int)(StoreLayout.ShelfLength / 0.24f);
+        for (int i = 0; i < StoreLayout.ShelfNames.Length; i++)
         {
-            for (int row = 0; row < 2; row++)
-            {
-                float sz = 2.3f + row * 1.9f;
-                var shelf = new GameObject("Shelf").transform;
-                shelf.SetParent(store);
-                Box(shelf, "Base", new Vector3(sx, 0.75f, sz), new Vector3(0.6f, 1.5f, 1.4f), shelfMat);
-                for (int level = 0; level < 3; level++)
-                    for (int k = 0; k < 6; k++)
+            var c0 = StoreLayout.ShelfCenters[i];
+            var shelf = new GameObject(StoreLayout.ShelfNames[i]).transform;
+            shelf.SetParent(store);
+            Box(shelf, "Base", new Vector3(c0.x, StoreLayout.ShelfHeight / 2f, c0.z), new Vector3(StoreLayout.ShelfDepth, StoreLayout.ShelfHeight, StoreLayout.ShelfLength), shelfMat);
+            var faces = StoreLayout.ShelfDoubleSided[i] ? new[] { 1, -1 } : new[] { c0.x < 0 ? 1 : -1 };
+            foreach (int f in faces)
+                for (int level = 0; level < 4; level++)
+                    for (int k = 0; k < perFace; k++)
                     {
                         var c = Color.HSVToRGB((float)rng.NextDouble(), 0.55f, 0.85f);
-                        float face = sx < 0 ? 0.32f : -0.32f;
-                        Box(shelf, "Product", new Vector3(sx + face, 0.45f + level * 0.42f, sz - 0.55f + k * 0.22f),
+                        Box(shelf, f > 0 ? "Product_P" : "Product_N",
+                            new Vector3(c0.x + f * 0.32f, 0.4f + level * 0.38f, c0.z - StoreLayout.ShelfLength / 2f + 0.14f + k * 0.24f),
                             new Vector3(0.12f, 0.24f, 0.17f), Mat("Product_" + (int)(c.r * 9) + (int)(c.g * 9) + (int)(c.b * 9), c));
                     }
-            }
         }
-        var fridgeGlow = Mat("Fridge_Glow", new Color(0.75f, 0.88f, 1f), 0.8f, new Color(0.45f, 0.6f, 0.75f));
-        Box(store, "Fridge_Body", new Vector3(3.65f, 1.05f, 3.2f), new Vector3(0.7f, 2.1f, 3.2f), Mat("Fridge", new Color(0.85f, 0.86f, 0.88f)));
-        Box(store, "Fridge_Front", new Vector3(3.29f, 1.1f, 3.2f), new Vector3(0.02f, 1.8f, 3.0f), fridgeGlow);
-        NewLight(store, "FridgeLight", LightType.Point, new Vector3(3.0f, 1.3f, 3.2f), new Color(0.7f, 0.85f, 1f), 0.6f, 3f, LightShadows.None);
 
-        // --- 형광등: 계산대 앞 등은 그림자를 드리운다 (판별 단서)
+        // --- 냉장고 (오른쪽 벽 전체, 문 칸막이)
+        var fridgeGlow = Mat("Fridge_Glow", new Color(0.75f, 0.88f, 1f), 0.8f, new Color(0.45f, 0.6f, 0.75f));
+        var fc = StoreLayout.FridgeCenter;
+        Box(store, "Fridge_Body", fc, new Vector3(0.7f, 2.1f, StoreLayout.FridgeLength), Mat("Fridge", new Color(0.85f, 0.86f, 0.88f)));
+        Box(store, "Fridge_Front", new Vector3(StoreLayout.FridgeFrontX, 1.1f, fc.z), new Vector3(0.02f, 1.8f, StoreLayout.FridgeLength - 0.2f), fridgeGlow);
+        for (float z = fc.z - StoreLayout.FridgeLength / 2f + 1.1f; z < fc.z + StoreLayout.FridgeLength / 2f - 0.1f; z += 1.1f)
+            Box(store, "Fridge_Mullion", new Vector3(StoreLayout.FridgeFrontX - 0.02f, 1.1f, z), new Vector3(0.03f, 1.8f, 0.05f), Mat("Fridge", Color.white));
+        NewLight(store, "FridgeLight", LightType.Point, new Vector3(StoreLayout.FridgeFrontX - 0.5f, 1.3f, fc.z), new Color(0.7f, 0.85f, 1f), 0.6f, 4f, LightShadows.None);
+
+        // --- 형광등: 계산대 앞 등은 그림자를 드리운다 (판별 단서). 매장 등 0 번이 '꺼진 형광등' 이상현상에 쓰인다.
         var tubeMat = Mat("Tube", Color.white, 0.2f, Color.white * 1.4f);
         var counterLight = NewLight(store, "CounterLight", LightType.Spot, new Vector3(1.0f, 2.9f, 0.5f), new Color(0.93f, 0.97f, 1f), 2.6f, 7f, LightShadows.Soft);
         counterLight.transform.rotation = Quaternion.Euler(90, 0, 0);
         counterLight.spotAngle = 140f;
         counterLight.shadowStrength = 0.95f;
-        var tube1 = Box(store, "Tube_Counter", new Vector3(1.0f, 2.97f, 0.5f), new Vector3(1.2f, 0.05f, 0.12f), tubeMat);
-        var storeLight = NewLight(store, "StoreLight", LightType.Point, new Vector3(0, 2.8f, 3.8f), new Color(0.93f, 0.97f, 1f), 0.45f, 6f, LightShadows.None);
-        var tube2 = Box(store, "Tube_Store", new Vector3(0, 2.97f, 3.8f), new Vector3(1.2f, 0.05f, 0.12f), tubeMat);
-        var backLight = NewLight(store, "BackLight", LightType.Point, new Vector3(0, 2.6f, -1.3f), new Color(1f, 0.95f, 0.85f), 0.5f, 3.5f, LightShadows.None);
-        foreach (var t in new[] { tube1, tube2 }) t.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        var lightList = new List<Light> { counterLight };
+        var tubeList = new List<Renderer> { Box(store, "Tube_Counter", new Vector3(1.0f, 2.97f, 0.5f), new Vector3(1.2f, 0.05f, 0.12f), tubeMat).GetComponent<Renderer>() };
+        for (int i = 0; i < StoreLayout.StoreLights.Length; i++)
+        {
+            var lp = StoreLayout.StoreLights[i];
+            lightList.Add(NewLight(store, "StoreLight_" + i, LightType.Point, lp, new Color(0.93f, 0.97f, 1f), 0.45f, 6f, LightShadows.None));
+            tubeList.Add(Box(store, "Tube_Store_" + i, new Vector3(lp.x, 2.97f, lp.z), new Vector3(1.2f, 0.05f, 0.12f), tubeMat).GetComponent<Renderer>());
+        }
+        lightList.Add(NewLight(store, "BackLight", LightType.Point, new Vector3(0, 2.6f, -1.3f), new Color(1f, 0.95f, 0.85f), 0.5f, 3.5f, LightShadows.None));
+        foreach (var t in tubeList) t.shadowCastingMode = ShadowCastingMode.Off;
 
         // --- 위치 표식
         var points = new GameObject("Points").transform;
         points.SetParent(store);
-        var doorOutside = Point(points, "DoorOutside", new Vector3(0, 0, 7.3f));
-        var counterSpot = Point(points, "CounterSpot", new Vector3(0, 0, 1.9f));
+        var doorOutside = Point(points, "DoorOutside", StoreLayout.DoorOutside);
+        var counterSpot = Point(points, "CounterSpot", StoreLayout.CounterSpot);
         counterSpot.rotation = Quaternion.LookRotation(Vector3.back);
-        var windowSpot = Point(points, "WindowSpot", new Vector3(-2.3f, 0, 6.7f));
+        var windowSpot = Point(points, "WindowSpot", StoreLayout.WindowSpot);
 
         // --- 카메라
         var camGo = new GameObject("Main Camera") { tag = "MainCamera" };
@@ -146,7 +169,7 @@ public static class SceneBuilder
 
         var cctvGo = new GameObject("CCTV Camera");
         cctvGo.transform.SetParent(store);
-        cctvGo.transform.position = new Vector3(3.6f, 2.85f, 5.6f);
+        cctvGo.transform.position = StoreLayout.CctvCamera;
         cctvGo.transform.rotation = Quaternion.LookRotation(new Vector3(0, 0.8f, 1.6f) - cctvGo.transform.position);
         var cctv = cctvGo.AddComponent<Camera>();
         cctv.fieldOfView = 75f;
@@ -162,8 +185,8 @@ public static class SceneBuilder
         world.windowSpot = windowSpot;
         world.itemsAnchor = itemsAnchor;
         world.counterLight = counterLight;
-        world.lights = new[] { counterLight, storeLight, backLight };
-        world.lightTubes = new[] { tube1.GetComponent<Renderer>(), tube2.GetComponent<Renderer>() };
+        world.lights = lightList.ToArray();        // [0] 계산대 등, [1..5] 매장 등, 마지막 뒤쪽 등
+        world.lightTubes = tubeList.ToArray();     // [0] 계산대 등, [1..5] 매장 등
         world.windowGlass = glassL.GetComponent<Renderer>();
         world.phone = phone.transform;
         world.cctvCamera = cctv;

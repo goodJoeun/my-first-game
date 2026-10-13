@@ -27,6 +27,7 @@ public class RunPlanner
         public List<EventData> ordered = new List<EventData>();   // 슬롯 순서 (Expand 만 채운다)
         public bool patrol;                                       // 순찰 슬롯이 있는 날
         public List<string> anomalies = new List<string>();      // 순찰 때 나올 이상현상 ID
+        public List<string> sequence = new List<string>();       // 슬롯을 채울 순서 (이벤트 ID, 순찰은 PatrolToken)
     }
 
     const int Attempts = 400;
@@ -113,11 +114,12 @@ public class RunPlanner
         var plan = new List<DayPlan>();
         foreach (var ds in best)
         {
-            if (ds.picked.Count == 0 && ds.pickedPhones.Count == 0 && ds.anomalies.Count == 0) continue;
+            if (ds.picked.Count == 0 && ds.pickedPhones.Count == 0 && ds.anomalies.Count == 0 && ds.sequence.Count == 0) continue;
             var p = new DayPlan { day = ds.day };
             foreach (var e in ds.picked) p.customers.Add(e.id);
             if (ds.pickedPhones.Count > 0) p.phone = ds.pickedPhones[0].id;
             p.anomalies.AddRange(ds.anomalies);
+            p.sequence.AddRange(ds.sequence);
             plan.Add(p);
         }
         return plan;
@@ -363,6 +365,37 @@ public class RunPlanner
                 if (kinds.Add(src.anomalies[id].kind)) ds.anomalies.Add(id);
             }
         }
+
+        // 8) 하루 순서: 손님·전화·순찰이 매번 다른 순서로 온다 (시간대는 날짜 JSON 그대로).
+        //    풀 슬롯이 있는 날은 전부 섞되 첫 슬롯은 손님. 고정된 날(1일차)은 첫 손님과 마지막 손님을 두고 가운데만 섞는다.
+        foreach (var ds in sched)
+        {
+            if (ds.data.slots == null) continue;
+            var items = new List<string>();
+            int ci = 0, pi = 0;
+            bool pooled = false;
+            foreach (var s in ds.data.slots)
+            {
+                if (!string.IsNullOrEmpty(s.@fixed)) items.Add(s.@fixed);
+                else if (s.pool == "customer") { pooled = true; if (ci < ds.picked.Count) items.Add(ds.picked[ci++].id); }
+                else if (s.pool == "phone") { pooled = true; if (pi < ds.pickedPhones.Count) items.Add(ds.pickedPhones[pi++].id); }
+                else if (s.pool == "patrol") { pooled = true; items.Add(RunRules.PatrolToken); }
+            }
+            if (items.Count != ds.data.slots.Length) continue;   // 못 채운 슬롯이 있으면 날짜 JSON 순서로
+            if (pooled)
+            {
+                Shuffle(items);
+                int first = items.FindIndex(id => src.events.ContainsKey(id) && RunRules.IsCustomer(src.events[id]));
+                if (first > 0) { var t = items[0]; items[0] = items[first]; items[first] = t; }
+            }
+            else if (items.Count > 3)
+            {
+                var middle = items.GetRange(1, items.Count - 2);
+                Shuffle(middle);
+                for (int i = 0; i < middle.Count; i++) items[i + 1] = middle[i];
+            }
+            ds.sequence = items;
+        }
         return sched;
     }
 
@@ -502,6 +535,20 @@ public class RunPlanner
             foreach (var x in plan) if (x.day == d) p = x;
             if (p != null && p.anomalies != null) ds.anomalies.AddRange(p.anomalies);
             if (ds.data.slots != null) foreach (var s in ds.data.slots) if (s.pool == "patrol") ds.patrol = true;
+            if (p != null && p.sequence != null && ds.data.slots != null && p.sequence.Count == ds.data.slots.Length)
+            {
+                // 배치에 하루 순서가 있으면 그 순서대로
+                ds.sequence.AddRange(p.sequence);
+                foreach (var id in p.sequence)
+                {
+                    EventData e;
+                    if (id == RunRules.PatrolToken || !src.events.TryGetValue(id, out e)) continue;
+                    ds.ordered.Add(e);
+                    if (RunRules.IsCustomer(e)) ds.customers.Add(e); else ds.phones.Add(e);
+                }
+                result.Add(ds);
+                continue;
+            }
             int ci = 0;
             if (ds.data.slots != null)
                 foreach (var s in ds.data.slots)
@@ -567,6 +614,17 @@ public class RunPlanner
                 if (e.suspicious) susp++;
             }
 
+            if (ds.sequence.Count > 0)
+            {
+                var first = ds.sequence[0];
+                EventData fe;
+                if (!src.events.TryGetValue(first, out fe) || !RunRules.IsCustomer(fe)) hard.Add(d + "일차 첫 슬롯이 손님이 아님 (" + first + ")");
+                bool pooled = false;
+                foreach (var s in ds.data.slots) if (string.IsNullOrEmpty(s.@fixed)) pooled = true;
+                if (!pooled && (ds.sequence[0] != ds.data.slots[0].@fixed || ds.sequence[ds.sequence.Count - 1] != ds.data.slots[ds.data.slots.Length - 1].@fixed))
+                    hard.Add(d + "일차(고정) 첫 손님이나 마지막 손님이 바뀜");
+                if (ds.patrol && !ds.sequence.Contains(RunRules.PatrolToken)) hard.Add(d + "일차 순서에 순찰이 없음");
+            }
             var df = ds.data.difficulty;
             if (ds.patrol && src.anomalies != null)
             {

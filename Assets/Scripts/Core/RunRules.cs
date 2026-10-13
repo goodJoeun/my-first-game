@@ -40,7 +40,9 @@ public static class RunRules
     {
         "light_off", "fridge_open", "counter_object", "standing_figure", "products_reversed", "wet_footprints",
         "phone_off_hook", "clock_backward", "cctv_figure", "handprints", "empty_shelf", "ceiling_stain",
+        "storage_door_open",
     };
+    public const string PatrolToken = "@patrol";   // DayPlan.sequence 에서 순찰 자리
     public const int MissedAnomalyRisk = 1;      // 놓친 이상현상 하나당 위험도
     public const int FalseReportPay = -2000;     // 멀쩡한 곳을 신고하면
 
