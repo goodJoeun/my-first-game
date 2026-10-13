@@ -11,6 +11,8 @@ using UnityEngine.Rendering;
 //   no_cctv        CCTV 에 비치지 않음
 //   light_sway     형광등이 흔들려 그림자가 흔들림
 //   phone_ring     계산대 전화가 울림
+// 발자국: 사람 손님만 나갈 때 문까지 젖은 발자국을 남긴다. 괴물은 남기지 않는다. 다음 손님이 오면 지운다.
+//         선택한 뒤에만 생기므로 판별 단서가 아니다 (위장 단골은 겉모습으로 구별되면 안 된다).
 public class StoreWorld : MonoBehaviour
 {
     const int HiddenFromCctvLayer = 31;
@@ -43,6 +45,7 @@ public class StoreWorld : MonoBehaviour
     GameObject customer;
     readonly List<GameObject> spawned = new List<GameObject>();
     readonly List<GameObject> dayObjects = new List<GameObject>();
+    readonly List<GameObject> footprints = new List<GameObject>();
     float[] baseIntensity;
     Quaternion counterLightRot;
     bool flicker, sway, phoneRinging, blackout;
@@ -90,6 +93,7 @@ public class StoreWorld : MonoBehaviour
         ClearCustomer();
         foreach (var o in dayObjects) Destroy(o);
         dayObjects.Clear();
+        ClearFootprints();
         flicker = sway = blackout = false;
         RingPhone(false);
         SetLights(1f);
@@ -119,6 +123,7 @@ public class StoreWorld : MonoBehaviour
     public void BeginEvent(EventData e)
     {
         ClearCustomer();
+        ClearFootprints(); // 이전 손님의 발자국은 남기지 않는다
         CustomerArrived = false;
         flicker = false;
         sway = HasFx(e, "light_sway");
@@ -145,6 +150,7 @@ public class StoreWorld : MonoBehaviour
         if (customer == null) return;
 
         bool mimic = e.truth == "mimic";
+        if (!mimic) StartCoroutine(LeaveFootprints(customer.transform));
         if (choice == "alarm")
         {
             PlayOnce(alarm);
@@ -246,23 +252,48 @@ public class StoreWorld : MonoBehaviour
     IEnumerator Vanish()
     {
         var c = customer;
-        var feet = c.transform.position;
         SetLights(0f);
         yield return new WaitForSeconds(0.5f);
         if (customer == c) ClearCustomer();
-        // 젖은 발자국
-        for (int i = 0; i < 4; i++)
-        {
-            var fp = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            Destroy(fp.GetComponent<Collider>());
-            fp.transform.position = feet + new Vector3((i % 2 == 0 ? -0.12f : 0.12f), 0.005f, 0.45f * i);
-            fp.transform.rotation = Quaternion.Euler(90, 0, 0);
-            fp.transform.localScale = new Vector3(0.12f, 0.26f, 1);
-            fp.GetComponent<Renderer>().sharedMaterial = footprintMaterial;
-            dayObjects.Add(fp);
-        }
+        // 괴물은 발자국 하나 남기지 않는다.
         yield return new WaitForSeconds(0.25f);
         SetLights(1f);
+    }
+
+    // 사람 손님이 걸어 나가는 동안 일정 간격으로 젖은 발자국을 찍는다. 다음 손님이 오면 지운다.
+    IEnumerator LeaveFootprints(Transform t)
+    {
+        const float Stride = 0.45f;
+        var last = t.position;
+        bool left = true;
+        while (t != null)
+        {
+            var p = t.position;
+            var step = p - last;
+            step.y = 0;
+            if (step.magnitude >= Stride)
+            {
+                var dir = step.normalized;
+                var side = Vector3.Cross(Vector3.up, dir) * (left ? -0.12f : 0.12f);
+                var fp = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                Destroy(fp.GetComponent<Collider>());
+                fp.transform.position = new Vector3(p.x, 0.005f, p.z) + side;
+                fp.transform.rotation = Quaternion.LookRotation(Vector3.down, dir);
+                fp.transform.localScale = new Vector3(0.12f, 0.26f, 1);
+                fp.GetComponent<Renderer>().sharedMaterial = footprintMaterial;
+                fp.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+                footprints.Add(fp);
+                last = p;
+                left = !left;
+            }
+            yield return null;
+        }
+    }
+
+    void ClearFootprints()
+    {
+        foreach (var o in footprints) if (o != null) Destroy(o);
+        footprints.Clear();
     }
 
     IEnumerator LeaveAndWatch()

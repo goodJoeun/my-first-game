@@ -358,12 +358,22 @@ public class GameController : MonoBehaviour
         font = Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "맑은 고딕", "Arial" }, 22);
         label = new GUIStyle(GUI.skin.label) { font = font, fontSize = 20, wordWrap = true, richText = true };
         label.normal.textColor = new Color(0.92f, 0.92f, 0.92f);
+        FixedColor(label);
         small = new GUIStyle(label) { fontSize = 16 };
         small.normal.textColor = new Color(0.65f, 0.65f, 0.7f);
+        FixedColor(small);
         obs = new GUIStyle(label) { fontSize = 18 };
         title = new GUIStyle(label) { fontSize = 40, alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
         button = new GUIStyle(GUI.skin.button) { font = font, fontSize = 20, wordWrap = true };
         box = new GUIStyle(GUI.skin.box) { font = font };
+    }
+
+    // 글자는 마우스를 올리거나 눌러도 색이 바뀌지 않게 한다 (기본 스킨의 hover 색은 가독성이 나쁘다).
+    static void FixedColor(GUIStyle s)
+    {
+        var c = s.normal.textColor;
+        s.hover.textColor = s.active.textColor = s.focused.textColor = c;
+        s.onNormal.textColor = s.onHover.textColor = s.onActive.textColor = s.onFocused.textColor = c;
     }
 
     void Fill(Rect r, Color c)
@@ -612,6 +622,7 @@ public class GameController : MonoBehaviour
         Fill(r, new Color(0.9f, 0.86f, 0.7f));
         var dark = new GUIStyle(label) { fontSize = 18 };
         dark.normal.textColor = new Color(0.15f, 0.12f, 0.08f);
+        FixedColor(dark);
         var sb = new StringBuilder("<b>야간 근무 수칙</b>\n\n");
         foreach (var rule in repo.Rules)
             if (!rule.hidden && rule.day <= state.day) sb.AppendLine("· " + rule.text).AppendLine();

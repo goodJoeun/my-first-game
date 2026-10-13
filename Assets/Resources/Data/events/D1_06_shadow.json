@@ -17,7 +17,7 @@
     "idle_10s": "빨리요.",
     "on_sell": "고마워요. 또 올게요.",
     "on_refuse": "(대답 없이 나가 창밖에 서 있다.)",
-    "on_alarm": "(형광등이 꺼졌다 켜지면 사라진다. 바닥에 젖은 발자국만 남았다.)"
+    "on_alarm": "(형광등이 꺼졌다 켜지면 사라진다. 발자국 하나 남지 않았다.)"
   },
   "clues": [
     { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래인데 그림자가 보이지 않는다." },
