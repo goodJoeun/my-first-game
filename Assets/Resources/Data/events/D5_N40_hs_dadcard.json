@@ -1,0 +1,35 @@
+{
+  "id": "D5_N40_hs_dadcard",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "highschooler",
+  "minor": true,
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_12", "outfit": "tracksuit", "prop": "", "fx": [] },
+  "look": ["트레이닝복 차림. 목 뒤로 교복 셔츠 깃이 삐져나와 있다.", "아빠 심부름이라며 카드를 내민다."],
+  "items": [ { "id": "cigarette", "name": "담배 (33번)", "qty": 2, "restricted": true } ],
+  "payment": "카드 (명의: 김정호, 남성)",
+  "dialogue": {
+    "enter": "33번 두 갑이요. 아빠 심부름이에요.",
+    "pay": "(카드를 댄다) 아빠가 이 카드로 사 오랬어요.",
+    "ask_id": "신분증요? 아빠 카드인데…",
+    "stare_3s": "…셔츠요? 아, 잠옷이에요.",
+    "idle_10s": "아빠 기다려요.",
+    "on_sell": "감사합니다.",
+    "on_refuse": "아빠한테 혼나는데…",
+    "on_alarm": "(카드를 두고 달아난다) 그냥 심부름이라고요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "uniform_collar", "rule": "R00", "visibility": 2, "text": "옷깃: 트레이닝복 안에 교복 셔츠를 입었다." },
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "pay": -10000, "flags": ["D{day}_manager_warning"] },
+    "refuse": { "correct": true },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "uniform_collar", "text": "트레이닝복 안에 교복 셔츠가 보였습니다. 부모님 심부름이라도 미성년자에게 담배는 팔 수 없습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

@@ -1,0 +1,38 @@
+{
+  "id": "D2_N61_smoker_number",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "smoker",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_25", "outfit": "work_clothes", "prop": "", "fx": [] },
+  "look": ["작업복 차림의 중년 남성. 손톱 밑이 까맣다.", "들어오자마자 담배 진열장 번호를 부른다."],
+  "items": [
+    { "id": "cigarette", "name": "담배 (33번)", "qty": 1, "restricted": true },
+    { "id": "lighter", "name": "라이터", "qty": 1 }
+  ],
+  "payment": "cash",
+  "id_card": "주민등록증: 1975년 2월 11일생",
+  "dialogue": {
+    "enter": "33번 하나, 라이터도.",
+    "pay": "(현금을 낸다) 야간 작업 끝났어요. 이거 한 대 피우고 자야지.",
+    "ask_id": "신분증? 허허, 이 나이에. 여기요.",
+    "stare_3s": "…뭐, 얼굴에 기름 묻었어요?",
+    "idle_10s": "빨리 좀 주세요. 졸려 죽겠네.",
+    "on_sell": "수고해요.",
+    "on_refuse": "아니, 왜 안 팔아요?",
+    "on_alarm": "(라이터를 떨어뜨린다) 일하고 온 사람한테 이게 뭐요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진과 얼굴이 같고 날짜도 멀쩡하다. 1975년생." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_smoker_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_smoker_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "야간 작업을 마친 평범한 어른 손님이었습니다. 신분증도 그림자도 멀쩡했습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

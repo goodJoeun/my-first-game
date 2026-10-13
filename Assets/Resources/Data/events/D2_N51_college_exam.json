@@ -1,0 +1,35 @@
+{
+  "id": "D2_N51_college_exam",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "collegian",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_16", "outfit": "college_jacket", "prop": "textbook", "fx": [] },
+  "look": ["대학교 과잠, 손가락에 형광펜 자국.", "전공 책을 옆구리에 끼고 있다."],
+  "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "coffee", "name": "캔커피", "qty": 2 } ],
+  "payment": "card",
+  "id_card": "주민등록증: 2003년 4월 9일생",
+  "dialogue": {
+    "enter": "(하품하며) 안녕하세요…",
+    "pay": "(카드를 댄다) 내일 전공 시험이에요. 밤새야 돼요.",
+    "ask_id": "신분증요? 스물셋이에요. 여기요.",
+    "stare_3s": "저 좀비 같죠? 시험 기간이라.",
+    "idle_10s": "커피 두 개 맞아요.",
+    "on_sell": "감사합니다! 시험 잘 보고 올게요.",
+    "on_refuse": "네? 컵라면인데요…",
+    "on_alarm": "(책을 떨어뜨린다) 시험 공부 중이라고요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진과 얼굴이 같고 날짜도 멀쩡하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_collegian_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_collegian_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "시험 기간 대학생이었습니다. 그림자도 신분증도 멀쩡했습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

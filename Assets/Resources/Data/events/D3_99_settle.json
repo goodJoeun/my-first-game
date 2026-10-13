@@ -1,0 +1,17 @@
+{
+  "id": "D3_99_settle",
+  "type": "settle",
+  "truth": "none",
+  "label": "3일차 정산",
+  "narration": "아침. 유리문에 소금 알갱이가 몇 개 붙어 있다.",
+  "base_pay": 60000,
+  "manager_texts": [
+    { "flag": "D3_fake_served", "text": "어젯밤 단골… 그거 진짜였어요? CCTV 다시 돌려 봐요." },
+    { "flag": "D3_manager_warning", "text": "미성년자 판매 민원, 또예요. 정말 문 닫고 싶어요?" },
+    { "flag": "D3_fake_refused", "text": "단골이… 단골이 아니었다고요? 잘 보냈어요. 나도 처음엔 몰랐어요." },
+    { "flag": "D3_bad_call_answered", "text": "그 전화 받으면 안 된다니까요. 목소리가 아는 사람 같아도요." },
+    { "flag": "", "text": "수고했어요. 돈도 잘 봐요. 요즘 이상한 돈이 돌아요." }
+  ],
+  "regular_news": "최 기사님 말로는 사거리 대리기사가 아직도 연락이 없다고 한다.",
+  "direction": { "bgm": "morning_birds", "idle_10s_fx": "" }
+}

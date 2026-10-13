@@ -1,0 +1,34 @@
+{
+  "id": "D4_N60_grandma_pas",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "grandma",
+  "condition": { "day": 4 },
+  "appearance": { "face": "f_24", "outfit": "flower_pants", "prop": "cart", "fx": [] },
+  "look": ["꽃무늬 몸빼 바지를 입은 할머니.", "손수레에 폐지가 반쯤 실려 있다."],
+  "items": [ { "id": "pas", "name": "파스", "qty": 1 }, { "id": "yogurt", "name": "요구르트", "qty": 2 } ],
+  "payment": "현금 (오천 원권 한 장)",
+  "dialogue": {
+    "enter": "총각, 파스 있지? 허리가 끊어지겠어.",
+    "pay": "(오천 원을 낸다) 요즘 밤에 폐지 줍는 사람이 나밖에 없어. 다들 무섭다고.",
+    "ask_id": "신분증? 이 할미가 무슨. 여기 있다.",
+    "stare_3s": "총각도 조심해. 밤엔 이상한 게 다녀.",
+    "idle_10s": "천천히 해. 할미 안 바빠.",
+    "on_sell": "고마워. 요구르트 하나 먹어.",
+    "on_refuse": "…파스도 안 파나.",
+    "on_alarm": "(주저앉는다) 아이고, 나 허리 아픈 할미야!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "speech", "rule": "R06", "visibility": 2, "text": "대화: 처음부터 끝까지 다정한 반말이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_grandma_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_grandma_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "말투는 처음부터 끝까지 똑같은 반말이었습니다. 허리 아픈 동네 할머니였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

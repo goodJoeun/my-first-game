@@ -1,0 +1,33 @@
+{
+  "id": "D2_N24_park_report",
+  "type": "regular",
+  "truth": "human",
+  "label": "박 대리",
+  "npc": "park",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },
+  "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다."],
+  "items": [ { "id": "kimbap", "name": "삼각김밥", "qty": 1 }, { "id": "energy", "name": "에너지드링크", "qty": 2 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "또 저예요. 오늘도 야근… 보고서가 안 끝나요.",
+    "pay": "(카드를 단말기에 댄다) 승진 발표는 아직이에요. 팀장님이 '곧'이래요. 곧이 언젠지.",
+    "ask_id": "사원증이요? 매번 보시면서. 여기요.",
+    "stare_3s": "다크서클 장난 아니죠? 야근 3주째예요.",
+    "idle_10s": "아, 천천히 하세요. 어차피 회사로 다시 들어가요.",
+    "on_sell": "고마워요. 내일 봬요.",
+    "on_refuse": "…네? 저 매일 오잖아요.",
+    "on_alarm": "(사원증을 꽉 쥔다) 저 박 대리라고요! 매일 오는!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_park_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_park_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "박 대리는 사람이었습니다. 야근, 삼각김밥과 에너지드링크, 카드 결제. 늘 보던 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

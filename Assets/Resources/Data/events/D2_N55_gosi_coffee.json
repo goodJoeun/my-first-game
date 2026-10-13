@@ -1,0 +1,35 @@
+{
+  "id": "D2_N55_gosi_coffee",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "gosi",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_23", "outfit": "tracksuit_old", "prop": "law_book", "fx": [] },
+  "look": ["삼선 슬리퍼에 무릎 나온 트레이닝복.", "두꺼운 형법 책을 옆구리에 꼈다."],
+  "items": [ { "id": "coffee", "name": "캔커피", "qty": 3 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
+  "payment": "card",
+  "id_card": "주민등록증: 1996년 12월 1일생",
+  "dialogue": {
+    "enter": "(작게) 안녕하세요… 캔커피 세 개요.",
+    "pay": "(카드를 댄다) 오늘 밤샘이에요. 시험이 얼마 안 남아서.",
+    "ask_id": "신분증요? 여기요. 사진은 합격하면 다시 찍으려고요.",
+    "stare_3s": "…고시원 사는 사람 티 나죠.",
+    "idle_10s": "천천히 하셔도 돼요. 쉬는 시간이라.",
+    "on_sell": "감사합니다. 힘내 볼게요.",
+    "on_refuse": "아… 네.",
+    "on_alarm": "(책을 떨어뜨린다) 저 공부만 하는 사람인데요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진과 얼굴이 같고 날짜도 멀쩡하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_gosi_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_gosi_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "고시원에 사는 평범한 수험생이었습니다. 그림자도 신분증도 멀쩡했습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

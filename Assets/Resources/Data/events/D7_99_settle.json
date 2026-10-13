@@ -1,0 +1,14 @@
+{
+  "id": "D7_99_settle",
+  "type": "settle",
+  "truth": "none",
+  "label": "7일차 정산",
+  "narration": "일곱 번째 아침. 해가 뜨고, 새소리가 들린다. 휴대폰에 마지막 문자가 와 있다.",
+  "base_pay": 60000,
+  "manager_texts": [
+    { "flag": "D7_monster_served", "text": "(점장) …수고했어요. 정말로. 다만 어젯밤 들여보낸 것들은, 이제 이 동네 사람이에요." },
+    { "flag": "", "text": "(점장) 7일 동안 수고했어요. 정산은 오늘 아침에 끝내요." }
+  ],
+  "regular_news": "단골들의 이야기는 오늘로 끝난다. 아니면, 이제 시작이다.",
+  "direction": { "bgm": "morning_birds", "idle_10s_fx": "" }
+}

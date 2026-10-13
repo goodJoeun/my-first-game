@@ -1,0 +1,39 @@
+{
+  "id": "D2_N43_halloween_vampire",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "halloween",
+  "trap": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_17", "outfit": "cape", "prop": "fake_fangs", "fx": [] },
+  "look": ["창백한 얼굴 분장에 가짜 송곳니. 검은 망토.", "망토 아래로 대학교 과잠이 보인다."],
+  "items": [
+    { "id": "tomatojuice", "name": "토마토주스", "qty": 2 },
+    { "id": "beer", "name": "캔맥주", "qty": 2, "restricted": true }
+  ],
+  "payment": "card",
+  "id_card": "주민등록증: 2004년 10월 31일생",
+  "dialogue": {
+    "enter": "(송곳니 때문에 발음이 샌다) 안녕하세여… 파티 끝나고 왔어여.",
+    "pay": "(카드를 댄다) 토마토주스는 컨셉이에여. 피 같잖아여.",
+    "ask_id": "신분증여? (송곳니를 빼고) 여기요. 스물둘이에요.",
+    "stare_3s": "분장 잘됐죠? 세 시간 걸렸어요.",
+    "idle_10s": "저 친구들 기다려요~",
+    "on_sell": "감사합니다! 해피 할로윈!",
+    "on_refuse": "에이, 분장인데…",
+    "on_alarm": "(망토가 문에 끼인 채 허둥댄다) 분장이라고요, 분장!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 분장 아래 얼굴과 사진 속 점 위치가 같다. 2004년생." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_halloween_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_halloween_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "창백한 얼굴은 분장이었습니다. 그림자가 있었고, 신분증도 멀쩡한 스물두 살 대학생이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

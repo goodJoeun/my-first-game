@@ -1,0 +1,39 @@
+{
+  "id": "D3_N39_hs_zombie",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "highschooler",
+  "trap": true,
+  "minor": true,
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_12", "outfit": "torn_uniform", "prop": "festival_band", "fx": [] },
+  "look": ["얼굴이 온통 회색 분장. 입가에 가짜 피가 흘러내린다.", "손목에 형광 팔찌를 찼다."],
+  "items": [
+    { "id": "cigarette", "name": "담배 (7번)", "qty": 1, "restricted": true },
+    { "id": "cola", "name": "콜라", "qty": 1 }
+  ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(그르렁거리다가 웃는다) 아, 놀라셨어요? 분장이에요.",
+    "pay": "(카드를 댄다) 축제 끝나고 뒤풀이 가는 길이에요. 담배는 선배 거요.",
+    "ask_id": "신분증… 학생증밖에 없는데요.",
+    "stare_3s": "피 진짜 같죠? 물감이에요.",
+    "idle_10s": "빨리요, 선배들 기다려요.",
+    "on_sell": "오, 감사합니다!",
+    "on_refuse": "아 왜요, 선배 거라니까요.",
+    "on_alarm": "(분장 그대로 도망친다) 저 사람이에요! 학생이라고요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "festival_band", "rule": "R00", "visibility": 2, "text": "팔찌: '○○고등학교 축제 STAFF'." },
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "pay": -10000, "flags": ["D{day}_manager_warning"] },
+    "refuse": { "correct": true },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "festival_band", "text": "무서운 분장은 학교 축제 분장이었고, 그림자도 있는 사람이었습니다. 다만 고등학생이라 담배를 팔면 안 됐습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "D3_N56_gosi_ramyun",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "gosi",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_23", "outfit": "cap_tracksuit", "prop": "flashcards", "fx": [] },
+  "look": ["트레이닝복에 안경, 모자를 눌러썼다.", "손에 단어장을 쥐고 있다."],
+  "items": [ { "id": "cupramen", "name": "컵라면", "qty": 2 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
+  "payment": "현금 (만 원권 한 장)",
+  "dialogue": {
+    "enter": "안녕하세요. 컵라면 두 개요.",
+    "pay": "(만 원을 낸다) 하나는 내일 아침 거예요.",
+    "ask_id": "신분증요? 네, 여기요.",
+    "stare_3s": "단어장 보면서 기다려도 되죠?",
+    "idle_10s": "거스름돈 동전 말고 지폐로 주실 수 있어요?",
+    "on_sell": "감사합니다.",
+    "on_refuse": "…컵라면인데.",
+    "on_alarm": "(단어장이 흩어진다) 수험생이에요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "item", "target": "payment", "rule": "R04", "visibility": 2, "text": "결제: 일련번호가 제각각인 평범한 만 원권 한 장." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_gosi_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_gosi_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "평범한 만 원권으로 컵라면을 산 수험생이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

@@ -3,6 +3,7 @@
   "type": "event",
   "truth": "none",
   "label": "전화",
+  "tags": ["phone"],
   "placeholder": true,
   "condition": { "day": 1 },
   "appearance": { "fx": ["phone_ring"] },

@@ -1,0 +1,39 @@
+{
+  "id": "D2_N41_drunk_photo",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "drunk",
+  "trap": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_14", "outfit": "suit_loose", "prop": "", "fx": [] },
+  "look": ["넥타이를 손목에 감은 정장 차림. 얼굴이 벌겋다.", "트로트를 흥얼거리며 비틀거린다."],
+  "items": [
+    { "id": "soju", "name": "소주", "qty": 1, "restricted": true },
+    { "id": "cupramen", "name": "컵라면", "qty": 1 }
+  ],
+  "payment": "cash_crumpled",
+  "id_card": "주민등록증: 1979년 9월 14일생 (사진은 20년 전)",
+  "dialogue": {
+    "enter": "(흥얼거리며) 알바야~ 소주 어딨어, 소주~",
+    "pay": "(구겨진 돈을 편다) 이거 다 줄게, 다 가져~",
+    "ask_id": "(신분증을 내밀며) 봐 봐, 이게 나야. 머리숱 봐라. 20년 전이야, 하하!",
+    "stare_3s": "왜 쳐다봐, 사진이랑 똑같지?",
+    "idle_10s": "빨리 해~ 노래 끊긴다~",
+    "on_sell": "최고야! 또 올게~",
+    "on_refuse": "나 단골이야, 단골! 몰라?",
+    "on_alarm": "(경찰에게 끌려가며) 나 그냥 술 사러 온 거라고오—!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 20년 전 사진이지만 왼쪽 눈썹 위 점이 똑같다. 날짜도 멀쩡하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_drunk_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_drunk_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "사진이 오래됐을 뿐, 점 위치도 생년월일도 수칙에 어긋나지 않았습니다. 그림자도 있었습니다." },
+  "direction": { "bgm": "comic", "idle_10s_fx": "" }
+}

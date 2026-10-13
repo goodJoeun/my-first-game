@@ -3,6 +3,7 @@
   "type": "regular",
   "truth": "human",
   "label": "박 대리",
+  "npc": "park",
   "placeholder": true,
   "condition": { "day": 1 },
   "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },

@@ -1,0 +1,33 @@
+{
+  "id": "D6_N11_echo_slip",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "echo",
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_34", "outfit": "shirt_glasses", "prop": "", "fx": [] },
+  "look": ["깔끔한 셔츠에 안경을 쓴 남성.", "말이 차분하다."],
+  "items": [ { "id": "milk", "name": "우유", "qty": 1 }, { "id": "bread", "name": "식빵", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요. 우유랑 식빵 계산 부탁드립니다.",
+    "pay": "(카드를 댄다) 내일 아침거리예요. 날씨가 좋다던데, 그치?",
+    "ask_id": "신분증이요? 여기 있습니다.",
+    "stare_3s": "늦게까지 일하시네요. 힘드시겠어요.",
+    "idle_10s": "아직이에요? …빨리 해.",
+    "on_sell": "감사합니다. 좋은 밤 되세요.",
+    "on_refuse": "(안경을 고쳐 쓰고 조용히 나간다.)",
+    "on_alarm": "(벨이 울리자 안경만 계산대 위에 남는다.)"
+  },
+  "clues": [
+    { "kind": "dialogue", "target": "speech", "rule": "R06", "visibility": 1, "text": "대화: 존댓말 사이에 반말이 슬쩍 섞인다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "speech", "text": "'날씨가 좋다던데, 그치?', '빨리 해.' 존댓말 사이에 반말이 섞였습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

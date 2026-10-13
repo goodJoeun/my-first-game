@@ -1,0 +1,15 @@
+{
+  "id": "D5_99_settle",
+  "type": "settle",
+  "truth": "none",
+  "label": "5일차 정산",
+  "narration": "아침. CCTV 녹화 파일에 새벽 3시부터 4시까지가 비어 있다.",
+  "base_pay": 60000,
+  "manager_texts": [
+    { "flag": "D5_monster_served", "text": "(점장 번호) CCTV 돌려 봐요. 매장 안에 당신 말고 하나 더 있었어요." },
+    { "flag": "D5_monster_alarmed", "text": "(점장 번호) 벨 소리 들었어요. 아직 거기 있는 거죠?" },
+    { "flag": "", "text": "(점장 번호) …아직 거기 있어요?" }
+  ],
+  "regular_news": "윤 간호사가 '요즘 응급실에 오는 사람이 줄었다'며 웃지 않았다.",
+  "direction": { "bgm": "morning_birds", "idle_10s_fx": "" }
+}

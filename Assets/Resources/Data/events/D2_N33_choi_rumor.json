@@ -1,0 +1,33 @@
+{
+  "id": "D2_N33_choi_rumor",
+  "type": "regular",
+  "truth": "human",
+  "label": "최 기사님",
+  "npc": "choi",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "fx": [] },
+  "look": ["형광 조끼에 접이식 헬멧을 든 대리기사.", "피곤한 얼굴로 연신 하품을 한다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 1 }, { "id": "bacchus", "name": "박카스", "qty": 1 } ],
+  "payment": "cash",
+  "dialogue": {
+    "enter": "(문을 닫으며 뒤를 돌아본다) …아, 안녕하세요.",
+    "pay": "(현금을 낸다) 그 얘기 들었어요? 사거리에서 대리 하나가 손님 태우러 갔다가 안 돌아왔대요. 이 동네 진짜 이상해요.",
+    "ask_id": "자격증 여기요. 사진 잘 나왔죠?",
+    "stare_3s": "밖에… 아무도 없었죠? 방금?",
+    "idle_10s": "빨리 하나만 마시고 콜 받으러 가야 돼요.",
+    "on_sell": "고마워요. 문단속 잘해요.",
+    "on_refuse": "…오늘은 되는 일이 없네.",
+    "on_alarm": "(벨 소리에 주저앉는다) 왜 이래, 사람한테!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_choi_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_choi_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "최 기사님은 사람이었습니다. 대리기사 이야기, 현금 결제, 동네가 이상하다는 말. 늘 듣던 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

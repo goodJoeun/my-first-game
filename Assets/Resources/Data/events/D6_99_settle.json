@@ -1,0 +1,14 @@
+{
+  "id": "D6_99_settle",
+  "type": "settle",
+  "truth": "none",
+  "label": "6일차 정산",
+  "narration": "정전이 끝나고 해가 뜬다. 벽시계가 다시 가기 시작한다.",
+  "base_pay": 60000,
+  "manager_texts": [
+    { "flag": "D6_monster_served", "text": "(점장) 하나만 더 버텨요. 내일이 마지막이에요. 들여보내지 마요." },
+    { "flag": "", "text": "(점장) 내일 마지막 밤에 내가 갈게요. 문 열어 줘요." }
+  ],
+  "regular_news": "최 기사님은 딸을 데리고 당분간 처가에 가 있겠다고 했다. 단골들이 한 명씩 동네를 떠날 채비를 한다.",
+  "direction": { "bgm": "morning_birds", "idle_10s_fx": "" }
+}

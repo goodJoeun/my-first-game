@@ -3,6 +3,7 @@
   "type": "trap",
   "truth": "human",
   "label": "손님",
+  "npc": "drunk",
   "condition": { "day": 1 },
   "appearance": { "face": "f_14", "outfit": "suit_tie_head", "prop": "", "fx": ["light_sway"] },
   "look": ["넥타이를 머리에 맨 정장 차림. 비틀거리고 눈이 풀렸다.", "형광등이 살짝 흔들려 그림자도 같이 흔들린다."],

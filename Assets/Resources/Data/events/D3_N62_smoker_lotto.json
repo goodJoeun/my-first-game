@@ -1,0 +1,37 @@
+{
+  "id": "D3_N62_smoker_lotto",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "smoker",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_25", "outfit": "taxi_jumper", "prop": "lotto_slip", "fx": [] },
+  "look": ["택시 회사 점퍼를 입은 남성.", "로또 용지를 만지작거린다."],
+  "items": [
+    { "id": "cigarette", "name": "담배 (17번)", "qty": 1, "restricted": true },
+    { "id": "coffee", "name": "캔커피", "qty": 1 }
+  ],
+  "payment": "현금 (만 원권 한 장)",
+  "dialogue": {
+    "enter": "17번 하나랑 캔커피요.",
+    "pay": "(만 원을 낸다) 이번 주엔 될 것 같아요. 꿈에 돼지가 나왔거든요.",
+    "ask_id": "신분증요? 여기.",
+    "stare_3s": "로또 번호 하나 불러 볼래요?",
+    "idle_10s": "천천히 해요. 손님도 없는데요.",
+    "on_sell": "고마워요. 당첨되면 한턱낼게요.",
+    "on_refuse": "…허, 별일이네요.",
+    "on_alarm": "(로또 용지를 구긴다) 아니, 담배 사러 왔는데!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "item", "target": "payment", "rule": "R04", "visibility": 2, "text": "결제: 일련번호가 제각각인 평범한 만 원권." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_smoker_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_smoker_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "평범한 만 원권으로 담배를 산 어른 손님이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

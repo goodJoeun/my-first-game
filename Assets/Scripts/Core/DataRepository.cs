@@ -2,13 +2,15 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-// Resources/Data/{events,days,rules} 아래 JSON 을 읽어 온다.
+// Resources/Data/{events,days,rules,npcs,endings} 아래 JSON 을 읽어 온다.
 // 새 날이나 새 이벤트는 파일만 추가하면 된다.
 public class DataRepository
 {
     public readonly Dictionary<string, EventData> Events = new Dictionary<string, EventData>();
     public readonly Dictionary<int, DayData> Days = new Dictionary<int, DayData>();
     public readonly List<RuleData> Rules = new List<RuleData>();
+    public readonly Dictionary<string, NpcData> Npcs = new Dictionary<string, NpcData>();
+    public readonly Dictionary<string, EndingData> Endings = new Dictionary<string, EndingData>();
 
     public void Load()
     {
@@ -26,6 +28,16 @@ public class DataRepository
         {
             var r = Parse<RuleData>(t);
             if (r != null && !string.IsNullOrEmpty(r.id)) Rules.Add(r);
+        }
+        foreach (var t in Resources.LoadAll<TextAsset>("Data/npcs"))
+        {
+            var n = Parse<NpcData>(t);
+            if (n != null && !string.IsNullOrEmpty(n.id)) Npcs[n.id] = n;
+        }
+        foreach (var t in Resources.LoadAll<TextAsset>("Data/endings"))
+        {
+            var en = Parse<EndingData>(t);
+            if (en != null && !string.IsNullOrEmpty(en.id)) Endings[en.id] = en;
         }
         Rules.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
         Validate();
@@ -52,8 +64,11 @@ public class DataRepository
             foreach (var s in day.slots)
                 if (!string.IsNullOrEmpty(s.@fixed)) Require(s.@fixed, "day" + day.day + " slot " + s.time);
         }
+        foreach (var id in RunRules.EndingOrder)
+            if (!Endings.ContainsKey(id)) Debug.LogError("엔딩 데이터가 없습니다: " + id);
         foreach (var e in Events.Values)
         {
+            if (!string.IsNullOrEmpty(e.npc) && !Npcs.ContainsKey(e.npc)) Debug.LogError(e.id + ": NPC '" + e.npc + "' 정의가 없습니다.");
             if (e.choices == null || e.outcomes == null) continue;
             foreach (var c in e.choices)
                 if (e.outcomes.Get(c) == null) Debug.LogError(e.id + ": 선택지 '" + c + "' 의 결과가 없습니다.");
@@ -81,6 +96,17 @@ public class DataRepository
     }
 
     public bool HasDay(int day) { return Days.ContainsKey(day); }
+
+    public NpcData Npc(string id)
+    {
+        NpcData n;
+        return !string.IsNullOrEmpty(id) && Npcs.TryGetValue(id, out n) ? n : null;
+    }
+
+    public RunPlanner.Source PlannerSource()
+    {
+        return new RunPlanner.Source { events = Events, days = Days, npcs = Npcs, rules = Rules };
+    }
 }
 
 public static class SaveFile

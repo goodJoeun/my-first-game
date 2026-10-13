@@ -1,0 +1,36 @@
+{
+  "id": "D2_N31_yoon_blood",
+  "type": "regular",
+  "truth": "human",
+  "label": "윤 간호사",
+  "npc": "yoon",
+  "trap": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다.", "점퍼 소매 끝과 바지에 피가 튀어 있다."],
+  "items": [ { "id": "soymilk", "name": "따뜻한 두유", "qty": 1 }, { "id": "wetwipe", "name": "물티슈", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(숨을 고르며) 놀라셨죠. 죄송해요.",
+    "pay": "(카드를 댄다) 교통사고 환자가 응급실로 들어와서… 씻을 시간도 없었어요.",
+    "ask_id": "출입증이요? 손이 좀… 여기요.",
+    "stare_3s": "제 피 아니에요. 환자분은 살았어요.",
+    "idle_10s": "물티슈로 좀 닦고 갈게요. 다시 들어가야 해서.",
+    "on_sell": "고마워요. 오늘은 진짜… 고마워요.",
+    "on_refuse": "…이 꼴로 오면 안 됐죠. 죄송해요.",
+    "on_alarm": "(굳는다) 저 간호사예요. 응급실…"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "appearance", "target": "blood", "rule": "", "visibility": 2, "text": "피: 소매와 바지에 마른 핏자국. 본인은 다친 곳이 없다." }
+  ],
+  "kindness": { "label": "온장고 캔커피 건네기", "text": "(피 묻은 손을 닦고 받는다) …오늘 처음으로 웃네요. 고마워요." },
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_yoon_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_yoon_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "피는 환자의 것이었습니다. 그림자도 있었고, 응급실 야간 근무와 따뜻한 두유까지 윤 간호사 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

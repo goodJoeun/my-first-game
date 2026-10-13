@@ -1,0 +1,37 @@
+{
+  "id": "D2_N25_park_cat",
+  "type": "regular",
+  "truth": "human",
+  "label": "박 대리",
+  "npc": "park",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },
+  "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다."],
+  "items": [
+    { "id": "lunchbox", "name": "도시락", "qty": 1 },
+    { "id": "energy", "name": "에너지드링크", "qty": 1 },
+    { "id": "cattreat", "name": "고양이 간식", "qty": 1 }
+  ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요. 야근 끝나고 이제 퇴근이에요.",
+    "pay": "(카드를 댄다) 집에 고양이가 혼자 있어서요. 간식이라도 사 가야죠. 승진하면 캣타워 사 주기로 했거든요.",
+    "ask_id": "사원증 보여 드릴까요? 여기.",
+    "stare_3s": "고양이 사진 보실래요? …아, 일하셔야지.",
+    "idle_10s": "에너지드링크는 하나만. 줄여 보려고요.",
+    "on_sell": "고마워요. 고양이가 기다려요.",
+    "on_refuse": "네? 고양이 간식인데요…",
+    "on_alarm": "(얼굴이 하얘진다) 저 그냥 회사원이에요! 박 대리!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_park_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_park_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "박 대리는 사람이었습니다. 야근, 에너지드링크, 승진 이야기까지 늘 하던 말 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

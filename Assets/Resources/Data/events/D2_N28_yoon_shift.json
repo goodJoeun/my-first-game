@@ -1,0 +1,34 @@
+{
+  "id": "D2_N28_yoon_shift",
+  "type": "regular",
+  "truth": "human",
+  "label": "윤 간호사",
+  "npc": "yoon",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다."],
+  "items": [ { "id": "soymilk", "name": "따뜻한 두유", "qty": 1 }, { "id": "kimbap", "name": "김밥", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "…안녕하세요. 응급실 야간이 원래 이렇게 길었나 싶어요.",
+    "pay": "(카드를 댄다) 교대까지 두 시간 남았어요. 두유 없으면 못 버텨요.",
+    "ask_id": "출입증이요? 여기요. 사진이 좀 옛날 거예요.",
+    "stare_3s": "눈이 감겨요… 아, 죄송해요.",
+    "idle_10s": "천천히 하세요. 저 서 있는 것도 쉬는 거예요.",
+    "on_sell": "고마워요. 또 올게요.",
+    "on_refuse": "…네? 아, 네…",
+    "on_alarm": "(출입증을 떨어뜨린다) 저… 저 간호사예요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "kindness": { "label": "온장고 캔커피 건네기", "text": "(두 손으로 받아 든다) …따뜻하다. 고마워요, 진짜로." },
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_yoon_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_yoon_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "윤 간호사는 사람이었습니다. 응급실 야간 근무, 따뜻한 두유, 카드. 늘 보던 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

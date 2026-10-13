@@ -1,0 +1,33 @@
+{
+  "id": "D2_N58_grandma_boxes",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "grandma",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_24", "outfit": "work_vest", "prop": "cotton_gloves", "fx": [] },
+  "look": ["허리가 굽은 할머니. 바깥에 폐지 실은 손수레를 세워 뒀다.", "목장갑을 끼고 있다."],
+  "items": [ { "id": "yogurt", "name": "요구르트", "qty": 5 }, { "id": "candy", "name": "사탕", "qty": 1 } ],
+  "payment": "현금 (천 원짜리 세 장)",
+  "dialogue": {
+    "enter": "(목장갑을 벗으며) 아이고, 총각 아직도 일하네.",
+    "pay": "(천 원짜리를 편다) 요구르트는 경비 아저씨 줄 거야.",
+    "ask_id": "신분증? 아이고, 이 할미가 술 사나. 여기 있어.",
+    "stare_3s": "총각 얼굴이 핼쑥하네. 밥은 먹었어?",
+    "idle_10s": "천천히 해, 천천히.",
+    "on_sell": "고마워. 사탕 하나 먹어.",
+    "on_refuse": "…늙은이라고 안 파나 보네.",
+    "on_alarm": "(손수레 손잡이를 꽉 쥔다) 아이고, 나 폐지 줍는 할미야!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_grandma_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_grandma_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "폐지를 줍는 동네 할머니였습니다. 그림자가 있었고 수칙에 어긋난 점이 없었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

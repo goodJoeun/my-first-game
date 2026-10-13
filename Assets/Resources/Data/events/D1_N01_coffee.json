@@ -3,6 +3,7 @@
   "type": "normal",
   "truth": "human",
   "label": "손님",
+  "npc": "hiker",
   "placeholder": true,
   "tags": ["calm"],
   "condition": { "day": 1 },
@@ -27,7 +28,7 @@
   "outcomes": {
     "sell": { "correct": true },
     "refuse": { "pay": -3000 },
-    "alarm": { "pay": -20000, "flags": ["D1_police_called"] }
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
   },
   "replay": { "focus": "floor_shadow", "text": "평범한 손님이었습니다. 그림자가 있었고 수칙에 어긋난 점이 없었습니다." },
   "direction": { "bgm": "normal", "idle_10s_fx": "" }

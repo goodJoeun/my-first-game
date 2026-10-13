@@ -1,0 +1,37 @@
+{
+  "id": "D5_N05_idcard_april31",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "idcard",
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_28", "outfit": "knit", "prop": "", "fx": [] },
+  "look": ["말끔한 니트를 입은 청년.", "말투가 공손하다."],
+  "items": [
+    { "id": "beer", "name": "캔맥주", "qty": 1, "restricted": true },
+    { "id": "snack", "name": "과자", "qty": 1 }
+  ],
+  "payment": "card",
+  "id_card": "주민등록증: 1999년 4월 31일생",
+  "dialogue": {
+    "enter": "안녕하세요. 이것 좀 계산해 주시겠어요?",
+    "pay": "(카드를 댄다) 봄에 태어났어요. 4월 말이요.",
+    "ask_id": "신분증이요? 물론이죠. 여기 있습니다.",
+    "stare_3s": "늦은 시간에 고생 많으십니다.",
+    "idle_10s": "천천히 확인하셔도 됩니다.",
+    "on_sell": "감사합니다. 좋은 밤 되세요.",
+    "on_refuse": "(정중히 인사하고 나간다. 문 밖에서 다시 인사한다.)",
+    "on_alarm": "(벨이 울리자 형광등이 꺼지고, 신분증만 남는다.)"
+  },
+  "clues": [
+    { "kind": "id", "target": "id_birth", "rule": "R02", "visibility": 1, "text": "신분증: 생년월일 1999. 04. 31." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "id_birth", "text": "4월은 30일까지입니다. 신분증의 '4월 31일'은 존재하지 않는 날짜였습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

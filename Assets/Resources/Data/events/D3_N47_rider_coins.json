@@ -1,0 +1,35 @@
+{
+  "id": "D3_N47_rider_coins",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "rider",
+  "trap": true,
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_18", "outfit": "delivery_vest", "prop": "delivery_bag", "fx": [] },
+  "look": ["배달 가방을 멘 채 동전을 한 움큼 쥐고 있다.", "눈가가 빨갛다."],
+  "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
+  "payment": "현금 (100원·500원 동전 한 움큼)",
+  "dialogue": {
+    "enter": "(동전을 쏟아 놓으며) 죄송해요, 동전이 많아서.",
+    "pay": "팁을 동전으로 주시는 분이 있어서요. 세어서 드릴게요.",
+    "ask_id": "신분증요? 여기요.",
+    "stare_3s": "…울어서 눈이 이래요. 신경 쓰지 마세요.",
+    "idle_10s": "천 원 모자라면 말씀하세요.",
+    "on_sell": "고마워요. 이게 오늘 첫 끼예요.",
+    "on_refuse": "동전도 돈인데…",
+    "on_alarm": "(동전이 바닥에 쏟아진다) 왜요?! 컵라면 하나인데!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "item", "target": "coins", "rule": "R04", "visibility": 2, "text": "결제: 동전 발행 연도는 2015~2021년. 지금 쓰는 돈이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_rider_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_rider_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "동전이 많았을 뿐, 모두 지금 쓰는 돈이었습니다. 수칙에 어긋나지 않는 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

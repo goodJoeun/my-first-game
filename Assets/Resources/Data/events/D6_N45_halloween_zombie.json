@@ -1,0 +1,35 @@
+{
+  "id": "D6_N45_halloween_zombie",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "halloween",
+  "trap": true,
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_17", "outfit": "torn_shirt", "prop": "club_stamp", "fx": [] },
+  "look": ["찢어진 셔츠, 회색 분장의 좀비. 한쪽 발을 질질 끈다.", "손목에 클럽 입장 도장이 찍혀 있다."],
+  "items": [ { "id": "hangover", "name": "숙취해소제", "qty": 1 }, { "id": "water", "name": "생수", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(발을 끌며) 으어… 아, 안녕하세요. 좀비 분장이에요.",
+    "pay": "(카드를 댄다) 발은 진짜로 삐었어요. 클럽에서 춤추다가요.",
+    "ask_id": "신분증 여기요. 분장 지우면 이 얼굴이에요.",
+    "stare_3s": "절뚝거리는 거 연기 아니에요…",
+    "idle_10s": "물 좀 빨리 마시고 싶어요.",
+    "on_sell": "감사합니다. 살았다.",
+    "on_refuse": "…다친 좀비한테 너무하시네.",
+    "on_alarm": "(발을 질질 끌며 도망친다) 진짜 사람이라고요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "sound", "target": "footsteps", "rule": "R08", "visibility": 2, "text": "소리: 질질 끄는 발소리가 매장 끝까지 들린다. 벽시계 초침도 돌아간다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_halloween_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_halloween_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "좀비 분장에 발을 끌었지만 발소리는 분명했고 시계도 멈추지 않았습니다. 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

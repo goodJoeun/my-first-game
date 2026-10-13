@@ -1,0 +1,35 @@
+{
+  "id": "D6_N48_rider_quiet",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "rider",
+  "trap": true,
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_18", "outfit": "wet_jacket", "prop": "phone_mount", "fx": [] },
+  "look": ["젖은 운동화. 걸을 때마다 조금 미끄러진다.", "휴대폰에서 배달 앱 알림이 계속 울린다."],
+  "items": [ { "id": "energy", "name": "에너지드링크", "qty": 1 }, { "id": "chocobar", "name": "초코바", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(조용히) 안녕하세요…",
+    "pay": "(카드를 댄다) 콜이 너무 밀려서요. 이거 마시고 다시 나가요.",
+    "ask_id": "신분증요? 여기.",
+    "stare_3s": "운동화가 젖어서 소리가 이상하죠. 찍찍거려서.",
+    "idle_10s": "아, 알림이… 죄송해요.",
+    "on_sell": "고마워요. 수고하세요.",
+    "on_refuse": "…네. 알겠어요.",
+    "on_alarm": "(앱 알림 소리 속에서 굳는다) 저 배달 중인데요?!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "sound", "target": "footsteps", "rule": "R08", "visibility": 2, "text": "소리: 발소리는 작지만 젖은 운동화가 바닥에서 찍찍거린다. 벽시계도 잘 간다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_rider_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_rider_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "발소리가 작았을 뿐, 젖은 운동화 소리는 분명히 났습니다. 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

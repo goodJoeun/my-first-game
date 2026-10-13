@@ -1,0 +1,33 @@
+{
+  "id": "D4_N09_echo_mix",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "echo",
+  "condition": { "day": 4 },
+  "appearance": { "face": "f_32", "outfit": "plain_jumper", "prop": "", "fx": [] },
+  "look": ["무난한 점퍼 차림의 남성.", "웃는 얼굴이 조금 굳어 있다."],
+  "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "kimchi", "name": "김치", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요. 이거 계산해.",
+    "pay": "(카드를 댄다) 봉투 하나 주세요. 빨리 줘.",
+    "ask_id": "신분증? 여기 있습니다. 봐.",
+    "stare_3s": "왜 봐요. 보지 마.",
+    "idle_10s": "계산해 주세요. 계산해.",
+    "on_sell": "고마워. 감사합니다.",
+    "on_refuse": "(웃는 얼굴이 그대로 굳은 채 나간다.)",
+    "on_alarm": "(벨이 울리자 형광등이 깜빡이고, 계산대 앞이 비어 있다.)"
+  },
+  "clues": [
+    { "kind": "dialogue", "target": "speech", "rule": "R06", "visibility": 2, "text": "대화: 존댓말과 반말이 한 문장 안에서 뒤섞인다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "speech", "text": "'안녕하세요. 이거 계산해.' 존댓말과 반말이 어색하게 섞였습니다. 수칙 제6조입니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

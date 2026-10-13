@@ -1,0 +1,33 @@
+{
+  "id": "D2_N32_choi_scooter",
+  "type": "regular",
+  "truth": "human",
+  "label": "최 기사님",
+  "npc": "choi",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "fx": [] },
+  "look": ["형광 조끼에 접이식 헬멧을 든 대리기사.", "피곤한 얼굴로 연신 하품을 한다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 1 }, { "id": "gum", "name": "껌", "qty": 1 } ],
+  "payment": "cash",
+  "dialogue": {
+    "enter": "에휴, 오늘은 콜이 좀 있었어요.",
+    "pay": "(꼬깃한 천 원짜리를 편다) 손님 차 몰고 강 건너까지 갔다가 이제 왔어요. 근데 이 동네는 밤에 콜이 안 잡혀요. 사람이 없어서.",
+    "ask_id": "기사 자격증요? 목에 걸고 있잖아요.",
+    "stare_3s": "하품이 멈추질 않네. 실례.",
+    "idle_10s": "현금 괜찮죠? 카드는 영 안 써서.",
+    "on_sell": "고마워요. 조심히 계세요.",
+    "on_refuse": "…허, 물 한 병인데.",
+    "on_alarm": "(헬멧을 떨어뜨린다) 아니, 나 대리기사라고!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_choi_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_choi_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "최 기사님은 사람이었습니다. 대리운전, 생수와 껌, 현금. 이 동네가 이상하다는 말까지 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

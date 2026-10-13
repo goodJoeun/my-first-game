@@ -3,6 +3,7 @@
   "type": "regular",
   "truth": "human",
   "label": "최 기사님",
+  "npc": "choi",
   "placeholder": true,
   "condition": { "day": 1 },
   "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "fx": [] },

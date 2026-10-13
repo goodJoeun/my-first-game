@@ -1,0 +1,38 @@
+{
+  "id": "D2_N29_yoon_missing",
+  "type": "regular",
+  "truth": "human",
+  "label": "윤 간호사",
+  "npc": "yoon",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다."],
+  "items": [
+    { "id": "soymilk", "name": "따뜻한 두유", "qty": 1 },
+    { "id": "painkiller", "name": "진통제", "qty": 1 },
+    { "id": "bandage", "name": "밴드", "qty": 1 }
+  ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요… 오늘도 응급실은 정신없어요.",
+    "pay": "(카드를 댄다) 실종된 분 가족이 또 왔어요. 다들 '밤에 편의점 다녀온다'고 나갔대요.",
+    "ask_id": "출입증이요? 네, 여기.",
+    "stare_3s": "…여기서 일하시는 거, 괜찮아요? 조심하세요.",
+    "idle_10s": "아, 제가 괜한 얘기를 했네요.",
+    "on_sell": "고마워요. 내일 또 올게요. …꼭 계세요.",
+    "on_refuse": "…제가 너무 이상한 얘길 했나 봐요.",
+    "on_alarm": "(창백해진다) 저한테… 왜요?"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "kindness": { "label": "핫팩 하나 건네기", "text": "(핫팩을 볼에 댄다) 응급실이 너무 추워서… 고마워요." },
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_yoon_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_yoon_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "윤 간호사는 사람이었습니다. 응급실 야간 근무 이야기와 따뜻한 두유, 그림자도 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

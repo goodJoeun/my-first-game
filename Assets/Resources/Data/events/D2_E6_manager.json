@@ -1,0 +1,21 @@
+{
+  "id": "D2_E6_manager",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "tags": ["phone"],
+  "condition": { "day": 2, "day_max": 3 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신: 점장님 (010-****-2741)",
+  "dialogue": {
+    "enter": "(따르르릉— 화면에 '점장님'이 뜬다.)",
+    "on_answer": "(점장) 별일 없죠? 수칙 노트 잘 보고요. 무슨 일 있으면 문자해요.",
+    "on_ignore": "(부재중 전화 1통: 점장님)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "correct": true },
+    "ignore": { "pay": -2000 }
+  },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

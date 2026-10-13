@@ -1,0 +1,35 @@
+{
+  "id": "D4_N02_shadow_smile",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "shadow",
+  "condition": { "day": 4 },
+  "appearance": { "face": "f_07", "outfit": "blouse", "prop": "", "fx": ["no_shadow"] },
+  "look": ["단정한 블라우스의 여성. 계속 미소 짓고 있다.", "계산대에 바짝 붙어 선다."],
+  "items": [ { "id": "candy", "name": "사탕", "qty": 1 } ],
+  "payment": "card",
+  "id_card": "주민등록증: 1990년 7월 12일생",
+  "dialogue": {
+    "enter": "안녕하세요. 사탕 하나만 주세요.",
+    "pay": "(카드를 댄다) 밤이 참 밝네요. 여기 형광등이 좋아요.",
+    "ask_id": "신분증이요? 여기 있어요.",
+    "stare_3s": "제 발은 보지 마세요. 부끄러워요.",
+    "idle_10s": "조금만 더 가까이 와 주실래요?",
+    "on_sell": "고마워요. 또 올게요.",
+    "on_refuse": "(미소를 지은 채 뒷걸음질로 나간다.)",
+    "on_alarm": "(형광등이 터질 듯 밝아졌다가, 그 자리에 아무도 없다.)"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 2, "text": "발밑: 바짝 붙어 섰지만, 형광등 아래 바닥에 그림자가 없다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진도 날짜도 멀쩡하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "신분증은 멀쩡했지만 발밑에 그림자가 없었습니다. 계산대에 바짝 붙은 건 그걸 가리려던 것이었습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

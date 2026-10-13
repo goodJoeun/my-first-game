@@ -1,0 +1,33 @@
+{
+  "id": "D6_N15_silent_clock",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "silent",
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_38", "outfit": "grey_coat", "prop": "", "fx": [] },
+  "look": ["회색 코트의 노인.", "들어오는 순간 매장이 조금 더 조용해졌다."],
+  "items": [ { "id": "candle", "name": "양초", "qty": 2 }, { "id": "match", "name": "성냥", "qty": 1 } ],
+  "payment": "현금 (천 원짜리 두 장)",
+  "dialogue": {
+    "enter": "양초 두 개.",
+    "pay": "(천 원짜리를 내민다) 오늘 밤은 길 거야.",
+    "ask_id": "…",
+    "stare_3s": "시간이 참 안 가지?",
+    "idle_10s": "서두를 거 없어.",
+    "on_sell": "고맙네.",
+    "on_refuse": "(천천히 나간다. 문이 닫히자 시계 소리가 다시 들린다.)",
+    "on_alarm": "(벨이 울리자 촛농 냄새만 남는다.)"
+  },
+  "clues": [
+    { "kind": "time", "target": "clock", "rule": "R08", "visibility": 2, "text": "시계: 손님이 들어온 뒤로 벽시계 초침이 12에서 멈춰 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "clock", "text": "손님이 있는 동안 벽시계 초침이 멈춰 있었습니다. 수칙 제8조입니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

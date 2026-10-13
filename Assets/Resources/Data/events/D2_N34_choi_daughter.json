@@ -1,0 +1,33 @@
+{
+  "id": "D2_N34_choi_daughter",
+  "type": "regular",
+  "truth": "human",
+  "label": "최 기사님",
+  "npc": "choi",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "fx": [] },
+  "look": ["형광 조끼에 접이식 헬멧을 든 대리기사.", "피곤한 얼굴로 연신 하품을 한다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 1 }, { "id": "jelly", "name": "젤리", "qty": 1 } ],
+  "payment": "cash",
+  "dialogue": {
+    "enter": "하… 대리 세 탕 뛰었어요.",
+    "pay": "(천 원짜리를 센다) 젤리는 딸내미 거예요. 저 이래 봬도 아빠예요. 요즘 동네가 이상해서 일찍 들어가려고요.",
+    "ask_id": "자격증요? 여기요. 딸이 이 사진 보고 웃더라고요.",
+    "stare_3s": "젤리 무슨 맛이 제일 잘 나가요?",
+    "idle_10s": "아이고, 졸려요.",
+    "on_sell": "고마워요. 딸이 좋아하겠다.",
+    "on_refuse": "…젤리 하나 사기 힘드네.",
+    "on_alarm": "(손을 내젓는다) 나 애 아빠예요! 대리기사!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_choi_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_choi_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "최 기사님은 사람이었습니다. 대리운전, 생수, 현금. 동네가 이상하다는 말까지 늘 하던 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

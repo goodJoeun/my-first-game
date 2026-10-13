@@ -1,0 +1,34 @@
+{
+  "id": "D2_N04_idcard_mole",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "idcard",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_27", "outfit": "trench_coat", "prop": "mole_right", "fx": [] },
+  "look": ["베이지색 트렌치코트의 여성.", "오른쪽 뺨에 작은 점이 있다."],
+  "items": [ { "id": "beer", "name": "캔맥주", "qty": 2, "restricted": true } ],
+  "payment": "card",
+  "id_card": "주민등록증: 1993년 3월 8일생 (사진: 왼쪽 뺨에 점)",
+  "dialogue": {
+    "enter": "맥주 두 캔이요.",
+    "pay": "(카드를 댄다) 오늘 좀 마시고 싶어서요.",
+    "ask_id": "신분증이요? 네, 여기.",
+    "stare_3s": "제 얼굴에 뭐 묻었어요?",
+    "idle_10s": "빨리 주세요. 미지근해지기 전에.",
+    "on_sell": "고마워요.",
+    "on_refuse": "(신분증을 쥔 채 웃으며 나간다.)",
+    "on_alarm": "(형광등이 깜빡이는 사이 사라진다. 신분증 사진만 이쪽을 보고 있다.)"
+  },
+  "clues": [
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진 속 점은 왼쪽 뺨, 손님의 점은 오른쪽 뺨이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "id_photo", "text": "신분증 사진의 점은 왼쪽, 손님의 점은 오른쪽이었습니다. 사진 속 사람이 아니었습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

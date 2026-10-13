@@ -10,6 +10,7 @@ public class Condition
     public int day;          // 0 이면 제한 없음
     public string flag;      // 이전 선택의 플래그
     public int risk_min;     // 위험도 하한
+    public int day_max;      // 0 이면 상한 없음 (무작위 배치에서 이 날까지만 나온다)
 }
 
 [Serializable]
@@ -27,6 +28,7 @@ public class Item
     public string id;
     public string name;
     public int qty;
+    public bool restricted;  // 술·담배 (미성년자 판매 금지)
 }
 
 [Serializable]
@@ -42,6 +44,14 @@ public class Dialogue
     public string on_alarm;
     public string on_answer;  // 전화 등 이벤트용
     public string on_ignore;
+    public string ask_last;   // '지난번에 뭐 사셨죠?' 대답. 비우면 실제 지난 구매로 대답한다 (진짜 단골)
+}
+
+[Serializable]
+public class Kindness
+{
+    public string label;      // 버튼 문구 (예: 따뜻한 캔커피 건네기)
+    public string text;       // 손님 반응
 }
 
 [Serializable]
@@ -112,9 +122,14 @@ public class TextVariant
 public class EventData
 {
     public string id;               // D{날}_{순번}_{이름}
-    public string type;             // normal / regular / trap / mimic / event / briefing / settle
+    public string type;             // normal / regular / trap / mimic / disguise / event / briefing / settle
     public string truth;            // human / mimic / none
     public string label;            // 화면에 표시되는 이름 (정체를 드러내지 않는다)
+    public string npc;              // 이 대사 변형의 주인 NPC (Data/npcs). 비면 고정 이벤트
+    public bool trap;               // 함정: 수상해 보이지만 사람
+    public bool minor;              // 미성년자
+    public bool suspicious;         // 받으면 안 되는 전화
+    public Kindness kindness;       // 친절 행동 (윤 간호사)
     public bool placeholder;        // 임시 내용이면 true
     public string[] tags;           // 풀 슬롯 선택용
     public Condition condition;
@@ -155,9 +170,11 @@ public class Slot
 public class Difficulty
 {
     public int customers;
-    public int mimics;
-    public int traps;
-    public int clue_visibility;
+    public int mimics;          // 닮은 것 수 (하한)
+    public int mimics_max;      // 0 이면 mimics 와 같다
+    public int traps;           // 함정 수 (하한)
+    public int traps_max;       // 0 이면 traps 와 같다
+    public int clue_visibility; // 1(미묘함) ~ 3(아주 분명). 단서 표시의 상한으로 쓴다
 }
 
 [Serializable]
@@ -181,6 +198,44 @@ public class RuleData
 }
 
 [Serializable]
+public class NpcData
+{
+    public string id;
+    public string label;
+    public string kind;         // regular / minor / trap / normal / monster
+    public string[] facts;      // 단골: 매번 보여 주는 고정 사실 (위장한 것은 여기에 어긋난다)
+    public string recall;       // 단골: '지난번에 뭐 사셨죠?' 대답. {items} 자리에 지난 구매 품목
+    public string recall_refused; // 지난번에 거절당했을 때
+}
+
+[Serializable]
+public class EndingData
+{
+    public string id;           // suspension / takeover / fired / receiver / romance / manager / regulars / happy / ordinary
+    public int priority;        // 1 이 가장 먼저 판정
+    public string title;
+    public string text;
+    public string hint;
+}
+
+[Serializable]
+public class DayPlan
+{
+    public int day;
+    public List<string> customers = new List<string>();
+    public string phone;
+}
+
+[Serializable]
+public class NpcMemory
+{
+    public string npc;
+    public int day;
+    public string items;
+    public bool sold;
+}
+
+[Serializable]
 public class GameState
 {
     public int day = 1;
@@ -188,6 +243,39 @@ public class GameState
     public int risk;
     public List<string> flags = new List<string>();
     public List<string> followups = new List<string>();
+
+    // 7일 회차: 날마다 나올 손님과 전화 (새로 시작할 때 RunPlanner 가 정한다)
+    public List<DayPlan> plan = new List<DayPlan>();
+    public List<NpcMemory> memories = new List<NpcMemory>();
+
+    // 엔딩 판정용 누적 값 (RunTracker 가 갱신한다)
+    public int customers_met;
+    public int customers_wrong;
+    public int monsters_met;
+    public int monster_served_count;
+    public int misjudged_human_count;
+    public int suspicious_calls_answered;
+    public bool minor_restricted_sale;
+    public int regulars_met;
+    public int regulars_wrong;
+    public int yoon_affection;     // 화면에 표시하지 않는다
+    public string ending;
+
+    public bool all_correct { get { return customers_met > 0 && customers_wrong == 0; } }
+    public bool regulars_all_correct { get { return regulars_met > 0 && regulars_wrong == 0; } }
+    public bool monsters_expelled_all { get { return monsters_met > 0 && monster_served_count == 0; } }
+
+    public DayPlan PlanFor(int d)
+    {
+        foreach (var p in plan) if (p.day == d) return p;
+        return null;
+    }
+
+    public NpcMemory MemoryOf(string npc)
+    {
+        foreach (var m in memories) if (m.npc == npc) return m;
+        return null;
+    }
 
     public bool Has(string flag) { return !string.IsNullOrEmpty(flag) && flags.Contains(flag); }
     public void Add(string flag) { if (!string.IsNullOrEmpty(flag) && !flags.Contains(flag)) flags.Add(flag); }

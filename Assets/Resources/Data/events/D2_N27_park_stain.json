@@ -1,0 +1,39 @@
+{
+  "id": "D2_N27_park_stain",
+  "type": "regular",
+  "truth": "human",
+  "label": "박 대리",
+  "npc": "park",
+  "trap": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },
+  "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다.", "와이셔츠 앞섶에 붉은 얼룩이 크게 번져 있다."],
+  "items": [
+    { "id": "hangover", "name": "숙취해소제", "qty": 1 },
+    { "id": "energy", "name": "에너지드링크", "qty": 1 },
+    { "id": "kimbap", "name": "삼각김밥", "qty": 1 }
+  ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(셔츠를 내려다보며) 아, 이거요? 놀라지 마세요.",
+    "pay": "(카드를 댄다) 야근하다 말고 회식에 끌려갔어요. 김칫국물이에요, 김칫국물.",
+    "ask_id": "사원증이요? 여기… 냄새나죠, 죄송해요.",
+    "stare_3s": "피 아니에요. 진짜 김칫국물이에요. 맡아 보실래요?",
+    "idle_10s": "다시 회사 들어가야 해요. 빨리 부탁드려요.",
+    "on_sell": "고마워요. 셔츠는… 내일 빨죠 뭐.",
+    "on_refuse": "아니, 김칫국물이라니까요!",
+    "on_alarm": "(두 손을 든다) 회식! 회식이었다고요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "appearance", "target": "shirt_stain", "rule": "", "visibility": 2, "text": "셔츠: 붉은 얼룩. 가까이서 맡으면 김칫국물 냄새가 난다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_park_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_park_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "셔츠의 붉은 얼룩은 김칫국물이었습니다. 그림자도 있었고, 야근·에너지드링크·카드까지 박 대리 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

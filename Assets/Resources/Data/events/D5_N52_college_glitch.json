@@ -1,0 +1,36 @@
+{
+  "id": "D5_N52_college_glitch",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "collegian",
+  "trap": true,
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_16", "outfit": "hoodie_01", "prop": "laptop_bag", "fx": [] },
+  "look": ["후드티에 노트북 가방을 멘 청년.", "들어올 때 CCTV 모니터가 잠깐 지직거렸다."],
+  "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "hotbar", "name": "핫바", "qty": 1 } ],
+  "payment": "card",
+  "cctv": "계산대 카메라: 화면이 한 번 지직거린 뒤, 후드티 차림의 손님이 또렷이 찍혀 있다.",
+  "dialogue": {
+    "enter": "안녕하세요. 컵라면 물 있죠?",
+    "pay": "(카드를 댄다) 과제 하다가 배고파서요.",
+    "ask_id": "신분증요? 여기요.",
+    "stare_3s": "저 모니터 원래 저렇게 지직거려요?",
+    "idle_10s": "핫바 데워 주실 수 있어요?",
+    "on_sell": "감사합니다!",
+    "on_refuse": "…컵라면 하나 사기 힘드네.",
+    "on_alarm": "(노트북 가방을 끌어안는다) 과제하던 학생인데요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "cctv", "target": "cctv_feed", "rule": "R07", "visibility": 2, "text": "CCTV: 화면이 잠깐 지직거렸지만 손님은 또렷이 비친다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_collegian_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_collegian_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "CCTV가 잠깐 지직거렸을 뿐, 손님은 화면에 제대로 비쳤습니다. 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

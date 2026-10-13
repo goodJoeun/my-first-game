@@ -1,0 +1,33 @@
+{
+  "id": "D2_N01_shadow_wet",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "shadow",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_07", "outfit": "long_coat", "prop": "umbrella_wet", "fx": ["no_shadow"] },
+  "look": ["긴 코트의 여성. 머리카락 끝에서 물이 똑똑 떨어진다.", "밖은 비가 오지 않는다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 2 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "…물이요.",
+    "pay": "(카드를 내민다. 카드가 젖어 있다.) 물이 더 필요해요.",
+    "ask_id": "…없어요.",
+    "stare_3s": "왜 그렇게 보세요?",
+    "idle_10s": "빨리요. 마르기 전에.",
+    "on_sell": "고마워요. 또 올게요.",
+    "on_refuse": "(대답 없이 나가 창밖에 선다. 바닥에 물이 고인다.)",
+    "on_alarm": "(형광등이 꺼졌다 켜지면 사라진다. 젖은 발자국만 남았다.)"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 2, "text": "발밑: 형광등 바로 아래인데 그림자가 보이지 않는다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "형광등 아래, 발밑을 보세요. 그림자가 없었습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "D5_E5_own_voice",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "tags": ["phone"],
+  "suspicious": true,
+  "condition": { "day": 5 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신번호: 표시되지 않음.",
+  "dialogue": {
+    "enter": "(따르르릉— 따르르릉—)",
+    "on_answer": "(수화기 너머에서 당신 목소리가 들린다) 교대할 시간이야.",
+    "on_ignore": "(벨이 열세 번 울리고 멈춘다. 매장이 아주 조용하다.)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "risk": 1, "flags": ["D{day}_bad_call_answered"] },
+    "ignore": { "correct": true, "flags": ["D{day}_bad_call_ignored"] }
+  },
+  "direction": { "bgm": "low_hum", "idle_10s_fx": "" }
+}

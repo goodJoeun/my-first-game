@@ -1,0 +1,33 @@
+{
+  "id": "D3_N06_salt_bags",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "salt",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_29", "outfit": "black_jumper", "prop": "plastic_bags", "fx": [] },
+  "look": ["검은 비닐봉지를 여러 장 든 남성.", "장바구니가 하얀 가루로 얼룩져 있다."],
+  "items": [ { "id": "salt", "name": "굵은소금", "qty": 12 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "소금. 소금 다 주세요.",
+    "pay": "(카드를 댄다) 짠 게 좋아요. 짠 게.",
+    "ask_id": "신분증? 여기요.",
+    "stare_3s": "…소금 냄새 좋죠?",
+    "idle_10s": "더 없어요? 소금.",
+    "on_sell": "고마워요. 짜게. 짜게.",
+    "on_refuse": "(봉지를 들고 나가 문 앞에 소금을 뿌린다.)",
+    "on_alarm": "(벨이 울리자 하얀 가루만 계산대 위에 쏟아져 있다.)"
+  },
+  "clues": [
+    { "kind": "item", "target": "items", "rule": "R04", "visibility": 3, "text": "구매 품목: 굵은소금 12봉지. 다른 건 없다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "items", "text": "소금만 12봉지. 수칙에 적힌 그대로였습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

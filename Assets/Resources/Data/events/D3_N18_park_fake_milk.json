@@ -1,0 +1,38 @@
+{
+  "id": "D3_N18_park_fake_milk",
+  "type": "disguise",
+  "truth": "mimic",
+  "label": "박 대리",
+  "npc": "park",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },
+  "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다."],
+  "items": [ { "id": "milk", "name": "흰 우유", "qty": 6 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요… 오늘도 늦었네요.",
+    "pay": "(카드를 단말기에 댄다) 승진이요? …제가 그런 얘기를 했던가요?",
+    "ask_id": "사원증이요? 여기요.",
+    "stare_3s": "왜요, 제 얼굴에 뭐 묻었어요?",
+    "idle_10s": "우유가 좋아요. 하얗고. 차갑고.",
+    "on_sell": "고마워요. 내일도… 올게요.",
+    "on_refuse": "(웃는 얼굴 그대로 뒷걸음질로 나간다.)",
+    "on_alarm": "(형광등이 깜빡이는 사이 사라진다. 바닥에 사원증만 떨어져 있다.)",
+    "ask_last": "지난번요? 우유 샀죠. 저 늘 우유잖아요."
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "dialogue", "rule": "R05", "visibility": 2, "text": "" }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served", "D{day}_fake_served"] },
+    "refuse": { "correct": true, "flags": ["D{day}_fake_refused", "D{day}_park_fake_refused"] },
+    "alarm": { "risk": 1, "flags": ["D{day}_fake_alarmed"] }
+  },
+  "replay": {
+    "focus": "dialogue",
+    "text": "박 대리는 1일차에 '내일 승진 발표'라고 했고, 늘 삼각김밥과 에너지드링크를 삽니다. 승진 얘기를 모르고 우유만 사는 그는 박 대리가 아니었습니다. 수칙대로 조용히 내보내야 했습니다."
+  },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

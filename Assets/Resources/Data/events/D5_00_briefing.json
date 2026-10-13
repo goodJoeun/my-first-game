@@ -1,0 +1,10 @@
+{
+  "id": "D5_00_briefing",
+  "type": "briefing",
+  "truth": "none",
+  "label": "5일차 출근",
+  "narration": "CCTV 모니터에 포스트잇이 붙어 있다. 점장 글씨인지 확실하지 않다.",
+  "memo": "모니터를 봐요. 앞에 서 있는데 화면에 없으면, 그건 거기 없는 거예요.",
+  "radio": "…일부 지역에서 CCTV에 찍히지 않는 인물에 대한 제보가… 지지직… 매장 안이라고 안전하지…",
+  "direction": { "bgm": "tense", "idle_10s_fx": "" }
+}

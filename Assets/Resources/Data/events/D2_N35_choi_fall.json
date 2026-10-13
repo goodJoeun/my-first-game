@@ -1,0 +1,39 @@
+{
+  "id": "D2_N35_choi_fall",
+  "type": "regular",
+  "truth": "human",
+  "label": "최 기사님",
+  "npc": "choi",
+  "trap": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "fx": [] },
+  "look": ["형광 조끼에 접이식 헬멧을 든 대리기사.", "피곤한 얼굴로 연신 하품을 한다.", "헬멧에 금이 가 있고, 무릎이 흙투성이다. 손이 떨린다."],
+  "items": [
+    { "id": "water", "name": "생수", "qty": 1 },
+    { "id": "gum", "name": "껌", "qty": 1 },
+    { "id": "bandage", "name": "밴드", "qty": 1 }
+  ],
+  "payment": "cash",
+  "dialogue": {
+    "enter": "하하… 놀라지 마요. 킥보드에서 굴렀어요.",
+    "pay": "(떨리는 손으로 현금을 낸다) 대리 끝나고 오는 길에, 길에 뭐가 서 있어서 피하다가. 이 동네 진짜 이상하다니까요.",
+    "ask_id": "자격증… 여기요. 손이 떨려서.",
+    "stare_3s": "괜찮아요, 괜찮아요. 무릎만 좀.",
+    "idle_10s": "밴드도 하나 주세요.",
+    "on_sell": "고마워요. 오늘은 걸어가야겠네요.",
+    "on_refuse": "…다친 사람한테 너무하네.",
+    "on_alarm": "(헬멧을 끌어안는다) 나 사람이에요! 넘어진 거라고!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "appearance", "target": "helmet_crack", "rule": "", "visibility": 2, "text": "헬멧: 금이 갔다. 바지 무릎이 찢어지고 피가 살짝 배어 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_choi_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_choi_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "금 간 헬멧과 흙투성이 무릎은 넘어진 흔적이었습니다. 그림자도 있었고, 대리운전·현금까지 최 기사님 그대로였습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

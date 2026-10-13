@@ -1,0 +1,36 @@
+{
+  "id": "D3_N21_yoon_fake_ward",
+  "type": "disguise",
+  "truth": "mimic",
+  "label": "윤 간호사",
+  "npc": "yoon",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다."],
+  "items": [ { "id": "soymilk", "name": "따뜻한 두유", "qty": 1 }, { "id": "painkiller", "name": "진통제", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요. 오늘 병동이 조용했어요.",
+    "pay": "(카드를 댄다) 응급실이요? 아니에요, 저 소아과 병동이에요. 응급실은 가 본 적도 없는데.",
+    "ask_id": "출입증이요? 여기.",
+    "stare_3s": "저 많이 피곤해 보이죠?",
+    "idle_10s": "천천히 하셔도 돼요.",
+    "on_sell": "고마워요. 또 올게요.",
+    "on_refuse": "(웃으며 나간다. 웃음소리가 문이 닫힌 뒤에도 조금 남는다.)",
+    "on_alarm": "(벨 소리와 함께 사라진다. 계산대 위 두유만 차갑게 식어 있다.)",
+    "ask_last": "글쎄요… 기억이 잘 안 나요. 그게 중요해요?"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "dialogue", "rule": "R05", "visibility": 2, "text": "" }
+  ],
+  "kindness": { "label": "핫팩 하나 건네기", "text": "(받아 든 손이 이상하게 차갑다) 고마워요. …따뜻하네요? 따뜻한 게 뭐였더라." },
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served", "D{day}_fake_served"] },
+    "refuse": { "correct": true, "flags": ["D{day}_fake_refused", "D{day}_yoon_fake_refused"] },
+    "alarm": { "risk": 1, "flags": ["D{day}_fake_alarmed"] }
+  },
+  "replay": { "focus": "dialogue", "text": "윤 간호사는 1일차부터 '응급실' 야간 근무를 이야기했습니다. 응급실에 가 본 적도 없다는 말은 그녀가 아니라는 뜻이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

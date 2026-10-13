@@ -1,0 +1,34 @@
+{
+  "id": "D2_N30_yoon_soup",
+  "type": "regular",
+  "truth": "human",
+  "label": "윤 간호사",
+  "npc": "yoon",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다."],
+  "items": [ { "id": "soymilk", "name": "따뜻한 두유", "qty": 2 }, { "id": "cupsoup", "name": "컵수프", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "두유 두 개요. 하나는 같이 야간 서는 선생님 거예요.",
+    "pay": "(카드를 댄다) 응급실 야간 조가 둘뿐이라, 하나 쓰러지면 끝이에요.",
+    "ask_id": "출입증 여기요. 병원 이름 보이시죠?",
+    "stare_3s": "저 요즘 여기 오는 게 낙이에요. 이상하죠.",
+    "idle_10s": "아, 컵수프도요. 깜빡할 뻔했다.",
+    "on_sell": "고마워요. 덕분에 버텨요.",
+    "on_refuse": "…오늘은 안 되는 날인가 봐요.",
+    "on_alarm": "(눈이 동그래진다) 지금… 저한테요?"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "kindness": { "label": "따뜻한 두유 하나 더 얹어 주기", "text": "(웃음이 샌다) 이건 제가 사 드려야 하는데. …고마워요." },
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_yoon_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_yoon_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "윤 간호사는 사람이었습니다. 응급실 야간 근무, 따뜻한 두유, 카드 결제. 어긋난 곳이 없었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

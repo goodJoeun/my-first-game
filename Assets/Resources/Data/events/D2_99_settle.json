@@ -1,0 +1,17 @@
+{
+  "id": "D2_99_settle",
+  "type": "settle",
+  "truth": "none",
+  "label": "2일차 정산",
+  "narration": "창밖이 밝아진다. 전봇대의 실종 전단이 바람에 펄럭인다.",
+  "base_pay": 60000,
+  "manager_texts": [
+    { "flag": "D2_manager_warning", "text": "미성년자한테 팔았다는 민원 들어왔어요. 한 번만 더 그러면 가게 문 닫아요." },
+    { "flag": "D2_monster_served", "text": "…CCTV 봤어요. 그거한테 계산해 줬죠. 다신 그러지 마요." },
+    { "flag": "D2_bad_call_answered", "text": "번호 없는 전화, 받았어요? 받지 말라니까요." },
+    { "flag": "D2_monster_alarmed", "text": "벨 눌렀다면서요. 잘했어요. 신분증도 계속 꼼꼼히 봐요." },
+    { "flag": "", "text": "수고했어요. 내일부터는 단골들 얼굴이랑 말을 잘 기억해 둬요." }
+  ],
+  "regular_news": "윤 간호사네 응급실에 실종자 가족이 계속 찾아온다고 한다.",
+  "direction": { "bgm": "morning_birds", "idle_10s_fx": "" }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "D5_N13_cctv_door",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "cctv",
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_36", "outfit": "slippers", "prop": "", "fx": ["no_door_chime"] },
+  "look": ["슬리퍼 차림의 여성. 진열대 사이에서 언제 나타났는지 모르게 계산대로 왔다.", "밖은 쌀쌀한데 반팔이다."],
+  "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 } ],
+  "payment": "card",
+  "cctv": "입구 카메라: 지난 30분 동안 문이 열린 기록이 없다.",
+  "dialogue": {
+    "enter": "이거요.",
+    "pay": "(카드를 댄다) 저 아까부터 있었어요.",
+    "ask_id": "신분증이요? 네.",
+    "stare_3s": "문이요? 열고 들어왔죠. 당연히.",
+    "idle_10s": "…계속 있었다니까요.",
+    "on_sell": "고마워요.",
+    "on_refuse": "(문 쪽이 아니라 진열대 안쪽으로 걸어간다.)",
+    "on_alarm": "(벨이 울리자 진열대 사이가 텅 빈다.)"
+  },
+  "clues": [
+    { "kind": "cctv", "target": "cctv_entrance", "rule": "R07", "visibility": 2, "text": "CCTV: 입구 카메라에 이 손님이 들어오는 모습이 없다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "cctv_entrance", "text": "입구 카메라에 들어오는 모습이 찍히지 않았습니다. 수칙 제7조입니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

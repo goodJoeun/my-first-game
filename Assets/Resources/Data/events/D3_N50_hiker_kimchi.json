@@ -1,0 +1,39 @@
+{
+  "id": "D3_N50_hiker_kimchi",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "hiker",
+  "trap": true,
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "shopping_bag", "fx": [] },
+  "look": ["등산 점퍼에 안경. 장바구니를 두 개나 들었다.", "'김장'이라고 쓴 메모를 쥐고 있다."],
+  "items": [
+    { "id": "salt", "name": "굵은소금", "qty": 5 },
+    { "id": "gloves", "name": "고무장갑", "qty": 1 },
+    { "id": "makgeolli", "name": "막걸리", "qty": 2, "restricted": true }
+  ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "소금 있는 거 다 주세요. 아니, 다섯 봉지면 돼요.",
+    "pay": "(카드를 댄다) 내일 김장이에요. 집사람이 소금 떨어졌다고 난리라.",
+    "ask_id": "신분증요? 막걸리 때문에요? 여기요.",
+    "stare_3s": "소금 많이 사는 사람 처음 보세요? 허허.",
+    "idle_10s": "고무장갑도요. 꼭.",
+    "on_sell": "고맙습니다. 김치 나오면 한 포기 갖다 드릴게요.",
+    "on_refuse": "…김장인데요?",
+    "on_alarm": "(장바구니를 떨어뜨린다) 아니 김장을 한다니까요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "item", "target": "items", "rule": "R04", "visibility": 2, "text": "구매 품목: 소금이 많지만 고무장갑과 막걸리도 샀다. 소금'만' 사는 건 아니다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_hiker_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_hiker_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "소금을 많이 샀지만 김장 재료와 함께였고, 결제도 평범한 카드였습니다. 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

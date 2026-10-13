@@ -1,0 +1,35 @@
+{
+  "id": "D2_N38_hs_friend",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "highschooler",
+  "minor": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_12", "outfit": "long_padding", "prop": "school_badge", "fx": [] },
+  "look": ["교복 위에 롱패딩. 친구 하나가 유리문 밖에서 휴대폰을 보며 기다린다.", "가방에 고등학교 배지가 달려 있다."],
+  "items": [ { "id": "beer", "name": "캔맥주", "qty": 4, "restricted": true } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "…맥주 네 개요.",
+    "pay": "(카드를 댄다) 형이 사 오래서요. 저 아니고 형이요.",
+    "ask_id": "신분증은… 형한테 있는데.",
+    "stare_3s": "(유리문 밖 친구를 힐끔 본다)",
+    "idle_10s": "안 돼요? 그냥 한 번만…",
+    "on_sell": "(문밖 친구와 하이파이브를 한다)",
+    "on_refuse": "아… 네. 죄송합니다.",
+    "on_alarm": "(둘이 같이 달아난다) 뭐야, 왜 벨을 눌러!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "school_badge", "rule": "R00", "visibility": 3, "text": "옷차림: 롱패딩 아래 교복, 가방에 고등학교 배지." },
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "pay": -10000, "flags": ["D{day}_manager_warning"] },
+    "refuse": { "correct": true },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "school_badge", "text": "롱패딩 아래 교복과 고등학교 배지가 보였습니다. 형 심부름이라도 미성년자에게 술은 팔 수 없습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

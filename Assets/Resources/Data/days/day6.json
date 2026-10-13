@@ -1,0 +1,16 @@
+{
+  "day": 6,
+  "briefing": "D6_00_briefing",
+  "new_rules": ["R08"],
+  "difficulty": { "customers": 6, "mimics": 2, "mimics_max": 3, "traps": 2, "traps_max": 3, "clue_visibility": 1 },
+  "slots": [
+    { "time": "00:30", "pool": "customer" },
+    { "time": "01:20", "pool": "customer" },
+    { "time": "02:10", "pool": "customer" },
+    { "time": "02:50", "pool": "phone" },
+    { "time": "03:30", "pool": "customer" },
+    { "time": "04:20", "pool": "customer" },
+    { "time": "05:10", "pool": "customer" }
+  ],
+  "settle": "D6_99_settle"
+}

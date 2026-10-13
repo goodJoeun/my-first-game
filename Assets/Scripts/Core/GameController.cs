@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-// 하루의 흐름: 브리핑 → 슬롯(손님/이벤트) → 정산.
+// 하루의 흐름: 브리핑 → 슬롯(손님/이벤트) → 정산. 마지막 날 정산 뒤 엔딩 판정.
 // 프로토타입이라 UI 는 IMGUI(OnGUI)로 그린다. 아트가 들어오면 이 부분만 교체하면 된다.
 public class GameController : MonoBehaviour
 {
-    enum Phase { Title, Briefing, Event, Reaction, Settlement, DayEnd, BadEnding }
+    enum Phase { Title, Briefing, Event, Reaction, Settlement, DayEnd, BadEnding, Ending }
 
     const int RiskLimit = 10;
     const float VirtualHeight = 720f;
@@ -36,6 +36,7 @@ public class GameController : MonoBehaviour
     Phase phase = Phase.Title;
     DayData day;
     int slotIndex;
+    int customerIndex;   // 오늘 배치(plan)에서 다음 손님 순번
     int dayPay;
     readonly List<Record> records = new List<Record>();
     readonly HashSet<string> usedIds = new HashSet<string>();
@@ -43,10 +44,10 @@ public class GameController : MonoBehaviour
     EventData briefing, settle, current;
     string currentTime = "00:00";
     float eventStart;
-    bool arrived, stareShown, idleShown, flicker, paid, askedId, notesRead, notesOpen;
+    bool arrived, stareShown, idleShown, flicker, paid, askedId, askedLast, kindDone, notesRead, notesOpen;
     readonly List<string> log = new List<string>();
     string reaction;
-    Vector2 scroll;
+    Vector2 scroll, notesScroll;
     string settlementText;
 
     Font font;
@@ -65,6 +66,7 @@ public class GameController : MonoBehaviour
     void NewGame()
     {
         state = new GameState();
+        EnsurePlan();
         StartDay();
     }
 
@@ -72,8 +74,19 @@ public class GameController : MonoBehaviour
     {
         var saved = SaveFile.Load();
         state = saved ?? new GameState();
+        if (!string.IsNullOrEmpty(state.ending)) { phase = Phase.Ending; return; }
         if (!repo.HasDay(state.day)) state.day = 1;
+        EnsurePlan();
         StartDay();
+    }
+
+    // 7일 회차의 손님 배치를 정한다. 저장 파일에 같이 남아서 다시 하기를 해도 같은 손님이 온다.
+    void EnsurePlan()
+    {
+        if (state.plan != null && state.plan.Count > 0) return;
+        var problems = new List<string>();
+        state.plan = RunPlanner.Build(repo.PlannerSource(), Random.Range(int.MinValue, int.MaxValue), problems);
+        foreach (var p in problems) Debug.LogWarning("회차 배치: " + p);
     }
 
     void StartDay()
@@ -85,6 +98,7 @@ public class GameController : MonoBehaviour
         records.Clear();
         usedIds.Clear();
         slotIndex = -1;
+        customerIndex = 0;
         briefing = repo.Get(day.briefing);
         settle = repo.Get(day.settle);
         currentTime = "00:00";
@@ -119,6 +133,19 @@ public class GameController : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(slot.@fixed)) return repo.Get(slot.@fixed);
 
+        // 회차 배치에서 꺼낸다 (2~7일차)
+        if (slot.pool == "customer" || slot.pool == "phone")
+        {
+            var p = state.PlanFor(state.day);
+            string id = null;
+            if (p != null)
+            {
+                if (slot.pool == "phone") id = p.phone;
+                else if (customerIndex < p.customers.Count) id = p.customers[customerIndex++];
+            }
+            return string.IsNullOrEmpty(id) ? null : repo.Get(id);
+        }
+
         var candidates = new List<EventData>();
         foreach (var e in repo.Events.Values)
         {
@@ -152,7 +179,7 @@ public class GameController : MonoBehaviour
         current = ev;
         currentTime = time;
         eventStart = Time.time;
-        arrived = stareShown = idleShown = flicker = paid = askedId = false;
+        arrived = stareShown = idleShown = flicker = paid = askedId = askedLast = kindDone = false;
         log.Clear();
         reaction = null;
         if (world != null) world.BeginEvent(ev);
@@ -166,9 +193,11 @@ public class GameController : MonoBehaviour
 
         dayPay += o.pay;
         state.risk = Mathf.Clamp(state.risk + o.risk, 0, RiskLimit);
-        if (o.flags != null) foreach (var f in o.flags) state.Add(f);
+        // 여러 날에 나올 수 있는 이벤트는 플래그에 {day} 를 써서 그 날의 플래그로 남긴다.
+        if (o.flags != null) foreach (var f in o.flags) state.Add(f.Replace("{day}", state.day.ToString()));
         if (!string.IsNullOrEmpty(o.followup) && !state.followups.Contains(o.followup)) state.followups.Add(o.followup);
         records.Add(new Record { ev = current, choice = choice, outcome = o });
+        RunTracker.Apply(state, current, choice, o);
 
         var d = current.dialogue;
         switch (choice)
@@ -255,9 +284,17 @@ public class GameController : MonoBehaviour
     {
         state.money += Mathf.Max(0, (settle != null ? settle.base_pay : 0) + dayPay);
         state.Add("D" + state.day + "_cleared");
-        if (repo.HasDay(state.day + 1)) state.day++;
+        if (repo.HasDay(state.day + 1))
+        {
+            state.day++;
+            SaveFile.Save(state);
+            phase = Phase.DayEnd;
+            return;
+        }
+        // 마지막 날 정산이 끝났다: 우선순위대로 엔딩 하나를 고른다.
+        state.ending = RunRules.Judge(state);
         SaveFile.Save(state);
-        phase = Phase.DayEnd;
+        phase = Phase.Ending;
     }
 
     void RetryDay()
@@ -348,7 +385,7 @@ public class GameController : MonoBehaviour
 
         // 3D 매장이 있으면 화면 대부분은 비워 두고 패널만 반투명으로 얹는다.
         if (world == null) Fill(new Rect(0, 0, W, H), new Color(0.05f, 0.05f, 0.07f));
-        else if (phase == Phase.Title || phase == Phase.DayEnd || phase == Phase.BadEnding)
+        else if (phase == Phase.Title || phase == Phase.DayEnd || phase == Phase.BadEnding || phase == Phase.Ending)
             Fill(new Rect(0, 0, W, H), new Color(0, 0, 0, 0.78f));
 
         switch (phase)
@@ -360,9 +397,10 @@ public class GameController : MonoBehaviour
             case Phase.Settlement: DrawHud(W); DrawSettlement(W, H); break;
             case Phase.DayEnd: DrawDayEnd(W, H); break;
             case Phase.BadEnding: DrawBadEnding(W, H); break;
+            case Phase.Ending: DrawEnding(W, H); break;
         }
 
-        if (phase != Phase.Title && phase != Phase.DayEnd && phase != Phase.BadEnding)
+        if (phase != Phase.Title && phase != Phase.DayEnd && phase != Phase.BadEnding && phase != Phase.Ending)
         {
             if (GUI.Button(new Rect(W - 180, 12, 160, 40), "수칙 노트", button))
             {
@@ -450,6 +488,26 @@ public class GameController : MonoBehaviour
                 log.Add(string.IsNullOrEmpty(line) ? "(신분증을 보여준다.)" : line);
             }
             GUI.enabled = arrived;
+
+            // 단골 확인 질문과 친절 행동은 아래 줄에 둔다 (최종 선택이 아니다).
+            float y2 = y + 56, x2 = x;
+            if (CanAskLast())
+            {
+                GUI.enabled = arrived && !askedLast;
+                if (GUI.Button(new Rect(x2, y2, 260, 44), "지난번에 뭐 사셨죠?", button)) { askedLast = true; log.Add(AskLastLine()); }
+                x2 += 270;
+            }
+            if (current.kindness != null && !string.IsNullOrEmpty(current.kindness.label))
+            {
+                GUI.enabled = arrived && !kindDone;
+                if (GUI.Button(new Rect(x2, y2, 260, 44), current.kindness.label, button))
+                {
+                    kindDone = true;
+                    RunTracker.Kindness(state, current);
+                    log.Add(string.IsNullOrEmpty(current.kindness.text) ? "…" : current.kindness.text);
+                }
+            }
+            GUI.enabled = arrived;
         }
 
         var choices = current.choices;
@@ -461,6 +519,22 @@ public class GameController : MonoBehaviour
                 if (GUI.Button(new Rect(cx + (bw + gap) * i, y, bw, 50), Label(choices[i]), button)) { GUI.enabled = true; Choose(choices[i]); return; }
         }
         GUI.enabled = true;
+    }
+
+    // 전에 온 적 있는 단골에게만 물을 수 있다. 위장한 것도 같은 얼굴이라 똑같이 물을 수 있다.
+    bool CanAskLast()
+    {
+        return RunRules.IsRegular(current.npc) && state.MemoryOf(current.npc) != null;
+    }
+
+    string AskLastLine()
+    {
+        if (current.dialogue != null && !string.IsNullOrEmpty(current.dialogue.ask_last)) return current.dialogue.ask_last;
+        var m = state.MemoryOf(current.npc);
+        var npc = repo.Npc(current.npc);
+        string template = npc == null ? null : (m.sold ? npc.recall : npc.recall_refused);
+        if (string.IsNullOrEmpty(template)) template = "지난번엔 {items} 샀죠.";
+        return template.Replace("{items}", m.items);
     }
 
     void DrawObservation(float W)
@@ -480,14 +554,17 @@ public class GameController : MonoBehaviour
             sb.AppendLine();
         }
         if (!string.IsNullOrEmpty(current.payment)) sb.AppendLine("결제: " + current.payment);
+        if (askedId && !string.IsNullOrEmpty(current.id_card)) sb.AppendLine(current.id_card); // 예: "주민등록증: 1985년 2월 30일생"
         if (!string.IsNullOrEmpty(current.cctv)) sb.AppendLine("CCTV: " + current.cctv);
         sb.AppendLine();
+        // 그 날의 clue_visibility 가 단서가 드러나는 정도의 상한이다. 1 이면 3초 응시해야 보인다.
+        int cap = day.difficulty != null && day.difficulty.clue_visibility > 0 ? day.difficulty.clue_visibility : 3;
         if (current.clues != null)
             foreach (var c in current.clues)
             {
                 if (string.IsNullOrEmpty(c.text)) continue;
                 if (world != null && world.Renders(c.target)) continue; // 3D 로 직접 확인
-                if (c.visibility >= 2 || stareShown) sb.AppendLine(c.text);
+                if (Mathf.Min(c.visibility, cap) >= 2 || stareShown) sb.AppendLine(c.text);
             }
         GUI.Label(new Rect(px + 14, py + 8, pw - 28, ph - 16), sb.ToString(), obs);
     }
@@ -531,14 +608,32 @@ public class GameController : MonoBehaviour
     void DrawNotes(float W, float H)
     {
         Fill(new Rect(0, 0, W, H), new Color(0, 0, 0, 0.6f));
-        var r = new Rect(W / 2 - 360, 100, 720, 480);
+        var r = new Rect(W / 2 - 380, 70, 760, H - 110);
         Fill(r, new Color(0.9f, 0.86f, 0.7f));
-        var dark = new GUIStyle(label);
+        var dark = new GUIStyle(label) { fontSize = 18 };
         dark.normal.textColor = new Color(0.15f, 0.12f, 0.08f);
         var sb = new StringBuilder("<b>야간 근무 수칙</b>\n\n");
         foreach (var rule in repo.Rules)
             if (!rule.hidden && rule.day <= state.day) sb.AppendLine("· " + rule.text).AppendLine();
-        GUI.Label(new Rect(r.x + 30, r.y + 24, r.width - 60, r.height - 100), sb.ToString(), dark);
+
+        // 날이 갈수록 수칙이 늘어나 스크롤한다.
+        float w = r.width - 80;
+        var content = new Rect(0, 0, w, dark.CalcHeight(new GUIContent(sb.ToString()), w));
+        notesScroll = GUI.BeginScrollView(new Rect(r.x + 30, r.y + 20, r.width - 50, r.height - 96), notesScroll, content);
+        GUI.Label(content, sb.ToString(), dark);
+        GUI.EndScrollView();
         if (GUI.Button(new Rect(r.xMax - 180, r.yMax - 64, 150, 46), "닫기", button)) { notesOpen = false; notesRead = true; }
+    }
+
+    void DrawEnding(float W, float H)
+    {
+        EndingData e;
+        repo.Endings.TryGetValue(state.ending ?? "", out e);
+        int n = System.Array.IndexOf(RunRules.EndingOrder, state.ending) + 1;
+        GUI.Label(new Rect(0, 110, W, 30), "엔딩 " + n + " / " + RunRules.EndingOrder.Length, new GUIStyle(small) { alignment = TextAnchor.MiddleCenter });
+        GUI.Label(new Rect(0, 140, W, 60), e != null ? e.title : state.ending, title);
+        GUI.Label(new Rect(120, 230, W - 240, 220), e != null ? e.text : "", new GUIStyle(label) { alignment = TextAnchor.UpperCenter });
+        GUI.Label(new Rect(0, 470, W, 30), "7일 누적 급여 " + Won(state.money), new GUIStyle(small) { alignment = TextAnchor.MiddleCenter });
+        if (GUI.Button(new Rect(W / 2 - 150, 530, 300, 56), "처음으로", button)) phase = Phase.Title;
     }
 }

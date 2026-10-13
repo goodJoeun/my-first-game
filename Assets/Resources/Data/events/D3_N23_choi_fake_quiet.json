@@ -1,0 +1,38 @@
+{
+  "id": "D3_N23_choi_fake_quiet",
+  "type": "disguise",
+  "truth": "mimic",
+  "label": "최 기사님",
+  "npc": "choi",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "fx": [] },
+  "look": ["형광 조끼에 접이식 헬멧을 든 대리기사.", "피곤한 얼굴로 연신 하품을 한다."],
+  "items": [
+    { "id": "water", "name": "생수", "qty": 1 },
+    { "id": "soju", "name": "소주", "qty": 1, "restricted": true }
+  ],
+  "payment": "cash",
+  "dialogue": {
+    "enter": "안녕하세요. 좋은 밤이네요.",
+    "pay": "(현금을 낸다) 이 동네요? 조용하고 좋죠. 이상한 거 하나도 없어요. 밤에도 사람 많고.",
+    "ask_id": "자격증요? 여기요.",
+    "stare_3s": "…밖이 참 조용하죠?",
+    "idle_10s": "빨리요. 콜이 와서요.",
+    "on_sell": "고마워요. 좋은 밤 되세요.",
+    "on_refuse": "(유리문 밖에 서서 한참 이쪽을 본다.)",
+    "on_alarm": "(벨이 울리는 순간 형광등이 꺼지고, 다시 켜지자 아무도 없다.)",
+    "ask_last": "음… 기억 안 나는데요. 뭐였죠?"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "dialogue", "rule": "R05", "visibility": 2, "text": "" }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served", "D{day}_fake_served"] },
+    "refuse": { "correct": true, "flags": ["D{day}_fake_refused", "D{day}_choi_fake_refused"] },
+    "alarm": { "risk": 1, "flags": ["D{day}_fake_alarmed"] }
+  },
+  "replay": { "focus": "dialogue", "text": "최 기사님은 늘 '이 동네 이상하다, 밤에 사람이 없다'고 했습니다. 정반대의 말과 기억하지 못하는 지난번은 위장한 것이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

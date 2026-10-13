@@ -1,0 +1,21 @@
+{
+  "id": "D4_E9_police",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "tags": ["phone"],
+  "condition": { "day": 4 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신: ○○지구대 (02-***-0112)",
+  "dialogue": {
+    "enter": "(따르르릉— 지구대 번호다.)",
+    "on_answer": "(경찰) 순찰 중입니다. 요즘 이 동네 실종 신고가 많아서요. 문 잘 잠그시고, 이상하면 바로 신고하세요.",
+    "on_ignore": "(부재중 전화: ○○지구대)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "correct": true },
+    "ignore": {}
+  },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

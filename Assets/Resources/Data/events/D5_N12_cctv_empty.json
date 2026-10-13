@@ -1,0 +1,34 @@
+{
+  "id": "D5_N12_cctv_empty",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "cctv",
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_35", "outfit": "black_padding", "prop": "cap", "fx": ["no_cctv"] },
+  "look": ["검은 롱패딩의 남성. 모자를 깊게 눌러썼다.", "계산대 바로 앞에 서 있다."],
+  "items": [ { "id": "hotbar", "name": "핫바", "qty": 1 } ],
+  "payment": "card",
+  "cctv": "계산대 카메라: 손님이 서 있어야 할 자리가 비어 있다.",
+  "dialogue": {
+    "enter": "…핫바.",
+    "pay": "(카드를 댄다) 데워 줘요.",
+    "ask_id": "…",
+    "stare_3s": "모니터 보지 마요.",
+    "idle_10s": "나 여기 있어요.",
+    "on_sell": "…고마워요.",
+    "on_refuse": "(모자를 더 눌러쓰고 나간다.)",
+    "on_alarm": "(벨이 울리자 핫바만 바닥에 떨어진다.)"
+  },
+  "clues": [
+    { "kind": "cctv", "target": "cctv_feed", "rule": "R07", "visibility": 2, "text": "CCTV: 계산대 앞이 비어 있다. 핫바만 공중에 떠 있다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "cctv_feed", "text": "CCTV 모니터를 보세요. 계산대 앞에 서 있었는데 화면에는 아무도 없었습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

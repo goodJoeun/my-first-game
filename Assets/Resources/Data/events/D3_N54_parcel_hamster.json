@@ -1,0 +1,35 @@
+{
+  "id": "D3_N54_parcel_hamster",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "parcel",
+  "trap": true,
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_22", "outfit": "padded_vest", "prop": "holed_box", "fx": [] },
+  "look": ["구멍이 숭숭 뚫린 상자를 든 청년.", "상자 안에서 사각사각 긁는 소리가 난다."],
+  "items": [ { "id": "seeds", "name": "해바라기씨", "qty": 1 }, { "id": "water", "name": "생수", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(상자를 조심스럽게 내려놓는다) 안녕하세요.",
+    "pay": "(카드를 댄다) 아, 이거요? 햄스터예요. 이사 가는 중이라.",
+    "ask_id": "신분증요? 여기요. 햄스터는 신분증 없어요, 하하.",
+    "stare_3s": "긁는 소리 무섭죠? 배고파서 그래요.",
+    "idle_10s": "해바라기씨 빨리 주고 싶어요.",
+    "on_sell": "감사합니다! 얘도 고맙대요.",
+    "on_refuse": "…햄스터 밥인데.",
+    "on_alarm": "(상자를 감싸 안는다) 햄스터라고요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "item", "target": "items", "rule": "R04", "visibility": 2, "text": "구매 품목: 해바라기씨와 생수. 결제도 평범한 카드다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_parcel_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_parcel_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "긁는 소리는 상자 속 햄스터였습니다. 산 것도 결제도 평범한 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

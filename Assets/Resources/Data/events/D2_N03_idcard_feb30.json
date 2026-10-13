@@ -1,0 +1,37 @@
+{
+  "id": "D2_N03_idcard_feb30",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "idcard",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_26", "outfit": "grey_suit", "prop": "wallet", "fx": [] },
+  "look": ["회색 정장의 남성. 넥타이가 지나치게 반듯하다.", "지갑에서 신분증을 미리 꺼내 들고 있다."],
+  "items": [
+    { "id": "cigarette", "name": "담배 (21번)", "qty": 1, "restricted": true },
+    { "id": "lighter", "name": "라이터", "qty": 1 }
+  ],
+  "payment": "card",
+  "id_card": "주민등록증: 1985년 2월 30일생",
+  "dialogue": {
+    "enter": "신분증 먼저 드릴게요. 다들 보시더라고요.",
+    "pay": "(카드를 댄다) 21번. 라이터도.",
+    "ask_id": "(이미 내밀고 있다) 여기요. 잘 보세요.",
+    "stare_3s": "생일이요? 겨울이에요. 2월 말.",
+    "idle_10s": "…아직이에요?",
+    "on_sell": "감사합니다. 생일 축하해 주셔서.",
+    "on_refuse": "(신분증을 받아 들고 천천히 나간다.)",
+    "on_alarm": "(벨이 울리자 신분증만 계산대 위에 남는다. 사진 속 얼굴이 지워져 있다.)"
+  },
+  "clues": [
+    { "kind": "id", "target": "id_birth", "rule": "R02", "visibility": 3, "text": "신분증: 생년월일이 2월 30일이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "id_birth", "text": "신분증의 생년월일이 2월 30일이었습니다. 존재하지 않는 날짜입니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

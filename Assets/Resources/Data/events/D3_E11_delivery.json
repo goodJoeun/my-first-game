@@ -1,0 +1,21 @@
+{
+  "id": "D3_E11_delivery",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "tags": ["phone"],
+  "condition": { "day": 3 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신: 우리택배 (1588-1255)",
+  "dialogue": {
+    "enter": "(따르르릉— 택배사 번호다.)",
+    "on_answer": "(택배 기사) 내일 아침 수거 갈게요. 접수된 상자 문 앞에 둬 주세요.",
+    "on_ignore": "(부재중 전화: 우리택배)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "correct": true },
+    "ignore": {}
+  },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

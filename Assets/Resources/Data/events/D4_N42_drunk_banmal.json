@@ -1,0 +1,38 @@
+{
+  "id": "D4_N42_drunk_banmal",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "drunk",
+  "trap": true,
+  "condition": { "day": 4 },
+  "appearance": { "face": "f_14", "outfit": "suit_shoulder", "prop": "", "fx": [] },
+  "look": ["양복 상의를 어깨에 걸쳤다. 혀가 꼬였다.", "계산대에 팔꿈치를 대고 기댄다."],
+  "items": [
+    { "id": "soju", "name": "소주", "qty": 2, "restricted": true },
+    { "id": "hangover", "name": "숙취해소제", "qty": 1 }
+  ],
+  "payment": "cash_crumpled",
+  "dialogue": {
+    "enter": "어이 젊은이, 소주 어딨어?",
+    "pay": "(구겨진 만 원을 편다) 거스름돈은 됐어. 아, 아니다, 줘.",
+    "ask_id": "신분증? 내가 몇 살로 보여? 오십이야, 오십.",
+    "stare_3s": "왜, 내가 무서워?",
+    "idle_10s": "빨리 해, 마누라 기다려.",
+    "on_sell": "고마워! 젊은이 최고야!",
+    "on_refuse": "뭐야, 술 좀 먹었다고 안 팔아?",
+    "on_alarm": "(경찰에게 꾸벅 인사한다) 아이고 순경 양반, 나 그냥 술 사러 왔어!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "speech", "rule": "R06", "visibility": 2, "text": "대화: 처음부터 끝까지 반말이다. 존댓말과 섞어 쓰지는 않는다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_drunk_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_drunk_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "말투가 거칠 뿐, 처음부터 끝까지 반말이었습니다. 섞어 쓰지 않았으니 수칙에 걸리지 않는 사람이었습니다." },
+  "direction": { "bgm": "comic", "idle_10s_fx": "" }
+}

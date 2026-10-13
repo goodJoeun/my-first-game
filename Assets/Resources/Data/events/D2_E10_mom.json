@@ -1,0 +1,21 @@
+{
+  "id": "D2_E10_mom",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "tags": ["phone"],
+  "condition": { "day": 2 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신: 엄마",
+  "dialogue": {
+    "enter": "(따르르릉— 화면에 '엄마'가 뜬다.)",
+    "on_answer": "(엄마) 밥은 먹었니? 밤에 일하는 거 걱정돼서… 아침에 꼭 전화해.",
+    "on_ignore": "(부재중 전화: 엄마)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "correct": true },
+    "ignore": {}
+  },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

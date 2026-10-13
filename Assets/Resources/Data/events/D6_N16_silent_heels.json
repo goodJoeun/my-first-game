@@ -1,0 +1,33 @@
+{
+  "id": "D6_N16_silent_heels",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "silent",
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_39", "outfit": "dress", "prop": "high_heels", "fx": [] },
+  "look": ["하이힐을 신은 여성.", "또각거려야 할 걸음인데, 아무 소리도 없었다."],
+  "items": [ { "id": "lipbalm", "name": "립밤", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "립밤 하나요.",
+    "pay": "(카드를 댄다) 입술이 말라서요.",
+    "ask_id": "신분증이요? 여기요.",
+    "stare_3s": "구두 예쁘죠?",
+    "idle_10s": "…조용하네요, 여기.",
+    "on_sell": "고마워요.",
+    "on_refuse": "(소리 없이 걸어 나간다.)",
+    "on_alarm": "(벨이 울리자 하이힐 한 짝만 남는다.)"
+  },
+  "clues": [
+    { "kind": "sound", "target": "footsteps", "rule": "R08", "visibility": 2, "text": "소리: 하이힐인데 발소리가 전혀 들리지 않는다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "footsteps", "text": "하이힐을 신고 걸어 들어왔는데 발소리가 한 번도 나지 않았습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

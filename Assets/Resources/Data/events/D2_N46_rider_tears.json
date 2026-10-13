@@ -1,0 +1,36 @@
+{
+  "id": "D2_N46_rider_tears",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "rider",
+  "trap": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_18", "outfit": "rain_coat", "prop": "delivery_helmet", "fx": [] },
+  "look": ["배달 헬멧을 쓴 채 눈이 퉁퉁 부었다.", "우비가 젖어 있고 소매에 진흙이 묻었다."],
+  "items": [ { "id": "bananamilk", "name": "바나나우유", "qty": 1 }, { "id": "tissue", "name": "휴지", "qty": 1 } ],
+  "payment": "card",
+  "id_card": "주민등록증: 1998년 1월 23일생",
+  "dialogue": {
+    "enter": "(코를 훌쩍이며) …죄송해요. 안녕하세요.",
+    "pay": "(카드를 댄다) 배달하다 넘어져서 음식을 다 쏟았어요. 물어 줘야 한대요.",
+    "ask_id": "신분증요? 여기… 사진 이상하게 나왔죠.",
+    "stare_3s": "울어서 그래요. 이상한 사람 아니에요.",
+    "idle_10s": "휴지 먼저 좀 써도 돼요?",
+    "on_sell": "고마워요… 진짜로.",
+    "on_refuse": "…오늘 진짜 왜 이러지.",
+    "on_alarm": "(헬멧을 끌어안고 운다) 저 배달기사예요…"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진 속 점 위치도, 생년월일도 멀쩡하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_rider_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_rider_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "부은 눈과 진흙은 넘어져서 운 흔적이었습니다. 신분증도 그림자도 멀쩡한 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

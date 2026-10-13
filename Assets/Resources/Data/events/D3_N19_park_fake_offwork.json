@@ -1,0 +1,35 @@
+{
+  "id": "D3_N19_park_fake_offwork",
+  "type": "disguise",
+  "truth": "mimic",
+  "label": "박 대리",
+  "npc": "park",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },
+  "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다."],
+  "items": [ { "id": "kimbap", "name": "삼각김밥", "qty": 2 }, { "id": "energy", "name": "에너지드링크", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요. 오늘은 일찍 끝났어요.",
+    "pay": "(카드를 댄다) 저희 회사는 야근이 없거든요. 칼퇴죠, 칼퇴.",
+    "ask_id": "사원증이요? 여기요.",
+    "stare_3s": "…왜 그렇게 보세요? 저 박 대리잖아요.",
+    "idle_10s": "계산 부탁드려요.",
+    "on_sell": "고마워요. 수고하세요.",
+    "on_refuse": "(고개를 끝까지 이쪽으로 돌린 채 나간다.)",
+    "on_alarm": "(벨이 울리자 얼굴이 잠깐 녹아내리듯 일그러지고, 사라진다.)",
+    "ask_last": "지난번에… 뭐였더라. 소주? 네, 소주 샀어요."
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "dialogue", "rule": "R05", "visibility": 2, "text": "" }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served", "D{day}_fake_served"] },
+    "refuse": { "correct": true, "flags": ["D{day}_fake_refused", "D{day}_park_fake_refused"] },
+    "alarm": { "risk": 1, "flags": ["D{day}_fake_alarmed"] }
+  },
+  "replay": { "focus": "dialogue", "text": "박 대리는 매일 야근하는 사람입니다. '야근이 없는 회사'라는 말은 지금까지의 박 대리와 어긋났고, 지난번 산 것도 틀렸습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

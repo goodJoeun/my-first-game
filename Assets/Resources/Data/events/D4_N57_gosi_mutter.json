@@ -1,0 +1,35 @@
+{
+  "id": "D4_N57_gosi_mutter",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "gosi",
+  "trap": true,
+  "condition": { "day": 4 },
+  "appearance": { "face": "f_23", "outfit": "tracksuit_old", "prop": "law_book", "fx": [] },
+  "look": ["눈 밑이 시커멓다. 입술이 쉴 새 없이 움직인다.", "중얼거리는 소리가 들린다. '민법 제750조…'"],
+  "items": [ { "id": "energy", "name": "에너지드링크", "qty": 2 }, { "id": "chocobar", "name": "초코바", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "(중얼) …제750조 불법행위… 아, 안녕하세요.",
+    "pay": "(카드를 댄다) 죄송해요, 시험이 사흘 남아서요. (중얼) 제751조, 재산 이외의 손해…",
+    "ask_id": "신분증요? 네, 여기요. (중얼) 제752조…",
+    "stare_3s": "제가 이상해 보이죠. 외우는 중이에요.",
+    "idle_10s": "(중얼) 제753조… 아, 계산 다 됐나요?",
+    "on_sell": "감사합니다. (중얼) 제754조…",
+    "on_refuse": "…제가 너무 중얼거렸죠. 죄송해요.",
+    "on_alarm": "(책을 떨어뜨린다) 공부하던 거예요! 진짜로요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "speech", "rule": "R06", "visibility": 2, "text": "대화: 계속 중얼거리지만 매번 다른 조문이고, 말투는 끝까지 존댓말이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_gosi_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_gosi_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "중얼거림은 시험 공부였습니다. 같은 말을 되풀이하지도, 말투를 섞지도 않았습니다. 사람이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

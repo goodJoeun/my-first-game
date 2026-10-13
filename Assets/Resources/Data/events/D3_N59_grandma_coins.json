@@ -1,0 +1,35 @@
+{
+  "id": "D3_N59_grandma_coins",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "grandma",
+  "trap": true,
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_24", "outfit": "work_vest", "prop": "coin_pouch", "fx": [] },
+  "look": ["허리 굽은 할머니. 손바닥 가득 10원짜리 동전.", "폐지 판 돈이라며 동전을 하나하나 센다."],
+  "items": [ { "id": "soymilk", "name": "두유", "qty": 1 }, { "id": "banana", "name": "바나나", "qty": 1 } ],
+  "payment": "현금 (10원짜리 동전 한 움큼)",
+  "dialogue": {
+    "enter": "총각, 동전도 받지?",
+    "pay": "(동전을 센다) 폐지 판 돈이야. 하나, 둘, 셋…",
+    "ask_id": "신분증? 여기.",
+    "stare_3s": "10원짜리도 돈이야. 옛날 돈 아니야.",
+    "idle_10s": "모자라면 말해. 더 있어.",
+    "on_sell": "고마워, 총각. 내일 또 올게.",
+    "on_refuse": "…동전이라고 안 받나.",
+    "on_alarm": "(동전이 쏟아진다) 아이고, 내 돈!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "item", "target": "coins", "rule": "R04", "visibility": 2, "text": "결제: 10원짜리지만 2019년 발행. 지금도 쓰는 돈이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_grandma_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_grandma_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "동전은 모두 지금 쓰는 돈이었습니다. 옛날 돈이 아니었으니 수칙에 걸리지 않았습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

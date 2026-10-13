@@ -1,0 +1,36 @@
+{
+  "id": "D5_N44_halloween_ghost",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "halloween",
+  "trap": true,
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_17", "outfit": "white_sheet", "prop": "", "fx": [] },
+  "look": ["머리부터 흰 천을 뒤집어쓴 유령 분장. 눈구멍 두 개가 뚫려 있다.", "천 아래로 운동화가 보인다."],
+  "items": [ { "id": "snack", "name": "과자", "qty": 3 }, { "id": "cola", "name": "콜라", "qty": 2 } ],
+  "payment": "card",
+  "cctv": "계산대 카메라: 흰 천을 쓴 손님이 또렷이 찍혀 있다.",
+  "dialogue": {
+    "enter": "(천 속에서) 우우— 아, 장난이에요. 안녕하세요.",
+    "pay": "(천 밖으로 손만 내밀어 카드를 댄다) 동아리 공포 체험 준비 중이에요.",
+    "ask_id": "신분증요? 천 벗을게요. 여기요.",
+    "stare_3s": "눈구멍이 좀 작아서 잘 안 보여요.",
+    "idle_10s": "과자 빠진 거 없죠?",
+    "on_sell": "감사합니다! 우우—",
+    "on_refuse": "…천 쓴 게 죄인가요.",
+    "on_alarm": "(천에 걸려 넘어진다) 사람이에요, 사람!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "cctv", "target": "cctv_feed", "rule": "R07", "visibility": 2, "text": "CCTV: 흰 천을 쓴 손님이 화면에 또렷이 비친다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_halloween_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_halloween_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "흰 천 아래는 동아리 대학생이었습니다. CCTV에 제대로 비쳤고 그림자도 있었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

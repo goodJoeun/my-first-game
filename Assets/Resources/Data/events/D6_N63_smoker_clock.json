@@ -1,0 +1,38 @@
+{
+  "id": "D6_N63_smoker_clock",
+  "type": "trap",
+  "truth": "human",
+  "label": "손님",
+  "npc": "smoker",
+  "trap": true,
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_25", "outfit": "guard_uniform", "prop": "", "fx": [] },
+  "look": ["야간 경비원 제복을 입은 남성.", "들어오자마자 벽시계를 올려다보며 혀를 찬다."],
+  "items": [
+    { "id": "cigarette", "name": "담배 (5번)", "qty": 1, "restricted": true },
+    { "id": "hotbar", "name": "핫바", "qty": 1 }
+  ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "5번 하나. 저 시계 또 5분 느리네.",
+    "pay": "(카드를 댄다) 초침은 잘 가는데 말이야. 배터리 바꿔. 내가 경비라 시계는 잘 봐.",
+    "ask_id": "신분증? 경비원 신분증 줄까, 주민등록증 줄까. 여기.",
+    "stare_3s": "왜, 제복 처음 봐?",
+    "idle_10s": "빨리 줘, 순찰 돌아야 돼.",
+    "on_sell": "수고해.",
+    "on_refuse": "경비한테 담배도 안 파네.",
+    "on_alarm": "(무전기를 떨어뜨린다) 나 경비라니까!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "time", "target": "clock", "rule": "R08", "visibility": 2, "text": "시계: 벽시계가 5분 느리지만 초침은 멈추지 않고 돈다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_smoker_served"] },
+    "refuse": { "pay": -5000, "flags": ["D{day}_smoker_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "시계가 느렸을 뿐 초침은 멈추지 않았습니다. 순찰 중인 경비원이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

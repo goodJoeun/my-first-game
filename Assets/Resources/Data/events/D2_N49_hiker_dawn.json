@@ -1,0 +1,35 @@
+{
+  "id": "D2_N49_hiker_dawn",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "hiker",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "flashlight", "fx": [] },
+  "look": ["등산 점퍼에 안경을 쓴 중년 남성.", "새벽 산행 준비인지 손전등을 들고 있다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 2 }, { "id": "chocobar", "name": "초코바", "qty": 2 } ],
+  "payment": "card",
+  "id_card": "주민등록증: 1968년 6월 3일생",
+  "dialogue": {
+    "enter": "안녕하세요. 또 왔습니다.",
+    "pay": "(카드를 댄다) 해 뜨는 거 보러 가요. 뒷산이지만.",
+    "ask_id": "신분증요? 허허, 네. 여기.",
+    "stare_3s": "요즘 밤길이 무섭다더군요.",
+    "idle_10s": "천천히 하세요.",
+    "on_sell": "수고하세요~",
+    "on_refuse": "…허, 이상하네요.",
+    "on_alarm": "(손전등을 떨어뜨린다) 아니, 산에 가는 사람한테!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "id", "target": "id_photo", "rule": "R02", "visibility": 2, "text": "신분증: 사진 속 안경과 얼굴이 같고 날짜도 멀쩡하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_hiker_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_hiker_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "새벽 산행을 가는 평범한 손님이었습니다. 신분증도 그림자도 멀쩡했습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

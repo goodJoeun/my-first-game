@@ -1,0 +1,10 @@
+{
+  "id": "D7_00_briefing",
+  "type": "briefing",
+  "truth": "none",
+  "label": "7일차 출근",
+  "narration": "마지막 밤. 매장이 너무 조용하다. 휴대폰에 점장 문자가 와 있다. '오늘 갈게요.'",
+  "memo": "지금까지의 수칙을 전부 기억해요. 누가 오든, 무슨 말을 하든. 나라도. —점장",
+  "radio": "(라디오가 켜지지 않는다.)",
+  "direction": { "bgm": "last_night", "idle_10s_fx": "" }
+}

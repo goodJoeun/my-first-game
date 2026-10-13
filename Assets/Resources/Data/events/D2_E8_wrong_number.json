@@ -1,0 +1,21 @@
+{
+  "id": "D2_E8_wrong_number",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "tags": ["phone"],
+  "condition": { "day": 2 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신: 010-5521-****",
+  "dialogue": {
+    "enter": "(따르르릉— 모르는 휴대폰 번호다.)",
+    "on_answer": "(술 취한 목소리) 거기 치킨집 아니에요? …아, 죄송합니다.",
+    "on_ignore": "(벨이 멈춘다. 잠시 뒤 '치킨집 아닌가요?' 문자가 온다.)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "correct": true },
+    "ignore": {}
+  },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

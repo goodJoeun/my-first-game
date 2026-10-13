@@ -1,0 +1,35 @@
+{
+  "id": "D3_N22_choi_fake_taxi",
+  "type": "disguise",
+  "truth": "mimic",
+  "label": "최 기사님",
+  "npc": "choi",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_09", "outfit": "driver_vest", "prop": "folding_helmet", "fx": [] },
+  "look": ["형광 조끼에 접이식 헬멧을 든 대리기사.", "피곤한 얼굴로 연신 하품을 한다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 1 }, { "id": "gum", "name": "껌", "qty": 1 } ],
+  "payment": "cash",
+  "dialogue": {
+    "enter": "하… 오늘 손님 한 명 겨우 태웠네요.",
+    "pay": "(현금을 낸다) 대리요? 아니, 저 택시 해요. 법인택시. 십 년째.",
+    "ask_id": "기사 자격증요? 여기, 목에 걸고 있잖아요.",
+    "stare_3s": "제 얼굴이 그렇게 이상한가요?",
+    "idle_10s": "아이고, 졸음이 쏟아지네요…",
+    "on_sell": "고마워요. 조심히 들어가세요.",
+    "on_refuse": "(헬멧을 든 채 뒷걸음질로 나간다.)",
+    "on_alarm": "(벨 소리에 헬멧만 바닥에 구른다. 사람은 없다.)",
+    "ask_last": "지난번에? 캔커피 샀지. 늘 캔커피."
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "dialogue", "rule": "R05", "visibility": 2, "text": "" }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served", "D{day}_fake_served"] },
+    "refuse": { "correct": true, "flags": ["D{day}_fake_refused", "D{day}_choi_fake_refused"] },
+    "alarm": { "risk": 1, "flags": ["D{day}_fake_alarmed"] }
+  },
+  "replay": { "focus": "dialogue", "text": "최 기사님은 1일차부터 대리기사였습니다. '택시 십 년째'라는 말과 틀린 대답은 그가 아니라는 뜻이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

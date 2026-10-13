@@ -1,0 +1,37 @@
+{
+  "id": "D2_N26_park_umbrella",
+  "type": "regular",
+  "truth": "human",
+  "label": "박 대리",
+  "npc": "park",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_02", "outfit": "shirt_01", "prop": "id_badge", "fx": [] },
+  "look": ["소매를 걷은 와이셔츠, 목에 사원증을 건 회사원.", "피곤해 보이지만 매일 오는 얼굴이다."],
+  "items": [
+    { "id": "kimbap", "name": "삼각김밥", "qty": 2 },
+    { "id": "energy", "name": "에너지드링크", "qty": 1 },
+    { "id": "umbrella", "name": "비닐우산", "qty": 1 }
+  ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "안녕하세요… 밖에 비 오는 거 아셨어요?",
+    "pay": "(카드를 댄다) 야근하다 보니 비 오는 줄도 몰랐어요. 우산은 회사에 있고요.",
+    "ask_id": "사원증이요? 젖었는데… 여기요.",
+    "stare_3s": "머리 젖은 거 보지 마세요. 부끄러워요.",
+    "idle_10s": "저기… 우산도 같이 계산해 주세요.",
+    "on_sell": "고마워요. 덕분에 덜 젖겠네요.",
+    "on_refuse": "…비 맞고 가라고요?",
+    "on_alarm": "(우산을 떨어뜨린다) 왜요?! 저 박 대리예요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_park_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_park_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "박 대리는 사람이었습니다. 늘 사는 삼각김밥과 에너지드링크, 카드 결제. 어긋난 말이 없었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

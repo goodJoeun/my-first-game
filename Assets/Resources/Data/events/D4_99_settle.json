@@ -1,0 +1,15 @@
+{
+  "id": "D4_99_settle",
+  "type": "settle",
+  "truth": "none",
+  "label": "4일차 정산",
+  "narration": "아침. 점장에게 보낸 문자 세 통이 아직 읽지 않음으로 남아 있다.",
+  "base_pay": 60000,
+  "manager_texts": [
+    { "flag": "D4_monster_served", "text": "(점장 번호로 문자가 왔다) 왜 들여보냈어요 왜 들여보냈어요 왜" },
+    { "flag": "D4_fake_served", "text": "(점장 번호로 문자가 왔다) 단골 얼굴을 한 걸 들였네요." },
+    { "flag": "", "text": "(점장에게 보낸 문자: 읽지 않음)" }
+  ],
+  "regular_news": "라디오가 처음으로 '닮은 것'이라는 말을 썼다. 박 대리는 승진 발표가 또 미뤄졌다며 한숨을 쉬었다.",
+  "direction": { "bgm": "morning_birds", "idle_10s_fx": "" }
+}

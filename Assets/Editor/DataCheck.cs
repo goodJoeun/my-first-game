@@ -1,15 +1,21 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 // Unity -batchmode -executeMethod DataCheck.Run  : JSON 데이터가 스키마대로 읽히는지 확인한다.
+// 이어서 7일 회차 배치를 여러 번 만들어 합의한 규칙(Docs/RULES.md)을 지키는지,
+// 어떤 배치에서도 9개 엔딩에 모두 닿을 수 있는지 시뮬레이션한다.
 public static class DataCheck
 {
+    const int Seeds = 2000;
+
     [MenuItem("Tools/Check Data")]
     public static void Run()
     {
         var repo = new DataRepository();
         repo.Load();
-        Debug.Log("DATACHECK events=" + repo.Events.Count + " days=" + repo.Days.Count + " rules=" + repo.Rules.Count);
+        Debug.Log("DATACHECK events=" + repo.Events.Count + " days=" + repo.Days.Count + " rules=" + repo.Rules.Count
+                  + " npcs=" + repo.Npcs.Count + " endings=" + repo.Endings.Count);
 
         foreach (var day in repo.Days.Values)
         {
@@ -17,7 +23,7 @@ public static class DataCheck
             foreach (var s in day.slots)
             {
                 var id = s.@fixed;
-                if (string.IsNullOrEmpty(id)) { customers++; continue; }
+                if (string.IsNullOrEmpty(id)) { if (s.pool != "phone") customers++; continue; }
                 var e = repo.Get(id);
                 if (e != null && (e.truth == "human" || e.truth == "mimic")) customers++;
             }
@@ -31,6 +37,211 @@ public static class DataCheck
             Debug.Log("DATACHECK " + e.id + " type=" + e.type + " truth=" + e.truth + " choices=" + choices + " clues=" + clues
                       + (e.outcomes != null && e.outcomes.sell != null ? " sell.correct=" + e.outcomes.sell.correct : ""));
         }
-        Debug.Log("DATACHECK done");
+
+        int problems = CheckContent(repo) + CheckRuns(repo, Seeds);
+        Debug.Log("DATACHECK done problems=" + problems);
+    }
+
+    [MenuItem("Tools/Check Runs")]
+    public static void Runs()
+    {
+        var repo = new DataRepository();
+        repo.Load();
+        int problems = CheckContent(repo) + CheckRuns(repo, Seeds);
+        Debug.Log("DATACHECK runs done problems=" + problems);
+    }
+
+    // ------------------------------------------------------------ 콘텐츠 규칙
+
+    static int CheckContent(DataRepository repo)
+    {
+        int bad = 0;
+        var src = repo.PlannerSource();
+        var variants = new Dictionary<string, List<EventData>>();
+        foreach (var e in repo.Events.Values)
+        {
+            if (string.IsNullOrEmpty(e.npc) || !RunRules.IsCustomer(e)) continue;
+            List<EventData> l;
+            if (!variants.TryGetValue(e.npc, out l)) variants[e.npc] = l = new List<EventData>();
+            l.Add(e);
+
+            int from = e.condition != null && e.condition.day > 0 ? e.condition.day : 1;
+            if (!RunPlanner.Solvable(src, e, from)) bad += Fail(e.id + ": " + from + "일차까지 공개된 수칙으로 확인되는 단서가 없음");
+            if (!RunPlanner.RulesKnown(src, e, from)) bad += Fail(e.id + ": " + from + "일차에 아직 공개되지 않은 수칙을 단서로 씀");
+            if (e.minor && !RunRules.HasRestricted(e)) bad += Fail(e.id + ": 미성년자인데 술·담배가 없음");
+            if (RunRules.IsDisguise(e) && (e.dialogue == null || string.IsNullOrEmpty(e.dialogue.ask_last)))
+                bad += Fail(e.id + ": 위장 단골에 '지난번' 오답(ask_last)이 없음");
+            if (RunRules.IsRealRegular(e) && e.dialogue != null && !string.IsNullOrEmpty(e.dialogue.ask_last))
+                bad += Fail(e.id + ": 진짜 단골은 ask_last 를 비워 실제 지난 구매로 대답해야 함");
+            if (e.npc == "yoon" && (e.kindness == null || string.IsNullOrEmpty(e.kindness.label)))
+                bad += Fail(e.id + ": 윤 간호사 변형에 친절 행동이 없음");
+        }
+
+        foreach (var n in repo.Npcs.Values)
+        {
+            List<EventData> l;
+            int count = variants.TryGetValue(n.id, out l) ? l.Count : 0;
+            int real = 0;
+            if (l != null) foreach (var e in l) if (e.truth == "human" || n.kind == "monster") real++;
+            if (real < 3) bad += Fail("NPC " + n.id + ": 대사 변형 " + real + "개 (3개 이상이어야 함)");
+            Debug.Log("DATACHECK npc " + n.id + " kind=" + n.kind + " variants=" + count);
+        }
+
+        // 위장 단골의 오답이 진짜 단골이 산 적 있는 물건과 겹치면 안 된다.
+        foreach (var npc in RunRules.Regulars)
+        {
+            List<EventData> l;
+            if (!variants.TryGetValue(npc, out l)) continue;
+            foreach (var fake in l)
+            {
+                if (!RunRules.IsDisguise(fake)) continue;
+                foreach (var real in l)
+                {
+                    if (!RunRules.IsRealRegular(real) || real.items == null) continue;
+                    foreach (var it in real.items)
+                        if (fake.dialogue.ask_last.Contains(it.name))
+                            bad += Fail(fake.id + ": 오답 '" + it.name + "' 을 진짜 " + npc + " 도 산 적 있음 (" + real.id + ")");
+                }
+            }
+        }
+        return bad;
+    }
+
+    // ------------------------------------------------------------ 회차 시뮬레이션
+
+    static int CheckRuns(DataRepository repo, int seeds)
+    {
+        var src = repo.PlannerSource();
+        int hardRuns = 0, softRuns = 0, bad = 0, riskOver = 0;
+        var unreachable = new Dictionary<string, int>();
+        var counts = new Dictionary<string, int>();
+        foreach (var id in RunRules.EndingOrder) unreachable[id] = 0;
+
+        for (int seed = 0; seed < seeds; seed++)
+        {
+            var notes = new List<string>();
+            var plan = RunPlanner.Build(src, seed, notes);
+            var sched = RunPlanner.Expand(src, plan);
+            var hard = new List<string>();
+            var soft = new List<string>();
+            RunPlanner.Check(src, sched, hard, soft);
+            if (hard.Count > 0)
+            {
+                hardRuns++;
+                if (hardRuns <= 5) bad += Fail("seed " + seed + ": " + string.Join(" / ", hard.ToArray()));
+            }
+            if (soft.Count > 0)
+            {
+                softRuns++;
+                if (softRuns <= 3) Debug.LogWarning("DATACHECK seed " + seed + " 난이도 조정: " + string.Join(" / ", soft.ToArray()));
+            }
+            Tally(counts, sched);
+
+            foreach (var target in RunRules.EndingOrder)
+            {
+                bool over;
+                var st = Play(sched, target, out over);
+                string got = over ? "risk10" : RunRules.Judge(st);
+                if (got != target)
+                {
+                    unreachable[target]++;
+                    if (unreachable[target] <= 3) bad += Fail("seed " + seed + ": " + target + " 전략 → " + got);
+                }
+            }
+
+            bool overAll;
+            Play(sched, "sell_all", out overAll);
+            if (overAll) riskOver++;
+        }
+
+        var sb = new System.Text.StringBuilder();
+        foreach (var kv in unreachable) sb.Append(kv.Key).Append('=').Append(seeds - kv.Value).Append('/').Append(seeds).Append(' ');
+        Debug.Log("DATACHECK runs seeds=" + seeds + " hard_violations=" + hardRuns + " difficulty_adjusted=" + softRuns);
+        Debug.Log("DATACHECK endings reachable: " + sb);
+        Debug.Log("DATACHECK risk10 game over when serving everyone: " + riskOver + "/" + seeds);
+        var cs = new System.Text.StringBuilder();
+        foreach (var kv in counts) cs.Append(kv.Key).Append('=').Append((kv.Value / (float)seeds).ToString("0.00")).Append(' ');
+        Debug.Log("DATACHECK average per run: " + cs);
+        return bad + hardRuns;
+    }
+
+    static void Tally(Dictionary<string, int> c, List<RunPlanner.DaySchedule> sched)
+    {
+        foreach (var ds in sched)
+        {
+            foreach (var e in ds.customers)
+            {
+                Inc(c, "customers");
+                if (RunRules.IsMonster(e)) Inc(c, "monsters");
+                if (RunRules.IsDisguise(e)) Inc(c, "disguises");
+                if (RunRules.IsTrap(e)) Inc(c, "traps");
+                if (e.minor) Inc(c, "minors");
+                if (RunRules.IsRealRegular(e)) Inc(c, e.npc);
+            }
+            foreach (var e in ds.phones) if (e.suspicious) Inc(c, "suspicious_calls");
+        }
+    }
+
+    static void Inc(Dictionary<string, int> c, string k) { int v; c.TryGetValue(k, out v); c[k] = v + 1; }
+
+    // 목표 엔딩을 노리는 단순한 전략으로 회차를 끝까지 둔다. 위험도 10 에 닿으면 over.
+    static GameState Play(List<RunPlanner.DaySchedule> sched, string target, out bool over)
+    {
+        var s = new GameState();
+        int risk = 0, minorsSold = 0, monstersSold = 0, humansRefused = 0, callsAnswered = 0;
+        bool regularMissed = false, parkMissed = false;
+        over = false;
+
+        foreach (var ds in sched)
+        {
+            s.day = ds.day;
+            foreach (var e in ds.ordered)
+            {
+                string choice = Correct(e);
+                bool customer = RunRules.IsCustomer(e);
+                bool plainHuman = customer && e.truth == "human" && !e.minor && !RunRules.IsRegular(e.npc);
+
+                switch (target)
+                {
+                    case "suspension": if (e.minor && minorsSold < 1) { choice = "sell"; minorsSold++; } break;
+                    case "takeover": if (RunRules.IsMonster(e) && monstersSold < RunRules.TakeoverServed) { choice = "sell"; monstersSold++; } break;
+                    case "fired": if (plainHuman && humansRefused < RunRules.FiredMisjudged) { choice = "refuse"; humansRefused++; } break;
+                    case "receiver": if (e.suspicious && callsAnswered < RunRules.ReceiverCalls) { choice = "answer"; callsAnswered++; } break;
+                    case "regulars": if (plainHuman && !regularMissed) { choice = "refuse"; regularMissed = true; } break;
+                    case "happy": if (RunRules.IsRealRegular(e) && e.npc == "park" && !parkMissed) { choice = "refuse"; parkMissed = true; } break;
+                    case "ordinary": // 괴물 하나를 들이고 단골 하나를 놓친다 → 7·8번 조건도 못 채운다
+                        if (RunRules.IsMonster(e) && !RunRules.IsDisguise(e) && monstersSold < 1) { choice = "sell"; monstersSold++; }
+                        else if (RunRules.IsRealRegular(e) && e.npc == "park" && !parkMissed) { choice = "refuse"; parkMissed = true; }
+                        break;
+                    case "sell_all": if (customer) choice = "sell"; break;
+                }
+                if (target == "romance" && e.kindness != null && !string.IsNullOrEmpty(e.kindness.label)) RunTracker.Kindness(s, e);
+
+                var o = e.outcomes != null ? e.outcomes.Get(choice) : null;
+                if (o == null) continue;
+                risk = Mathf.Clamp(risk + o.risk, 0, 10);
+                RunTracker.Apply(s, e, choice, o);
+                if (risk >= 10) { over = true; return s; }
+            }
+        }
+        return s;
+    }
+
+    static string Correct(EventData e)
+    {
+        if (e.choices == null || e.outcomes == null) return null;
+        foreach (var c in e.choices)
+        {
+            var o = e.outcomes.Get(c);
+            if (o != null && o.correct) return c;
+        }
+        foreach (var c in e.choices) if (c == "ignore") return c;
+        return e.choices[0];
+    }
+
+    static int Fail(string msg)
+    {
+        Debug.LogError("DATACHECK FAIL " + msg);
+        return 1;
     }
 }

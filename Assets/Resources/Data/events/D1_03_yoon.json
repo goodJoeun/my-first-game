@@ -3,6 +3,7 @@
   "type": "regular",
   "truth": "human",
   "label": "윤 간호사",
+  "npc": "yoon",
   "placeholder": true,
   "condition": { "day": 1 },
   "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
@@ -22,6 +23,7 @@
   "clues": [
     { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
   ],
+  "kindness": { "label": "따뜻한 캔커피 건네기", "text": "(잠시 멍하니 보다가 받는다) …오늘 처음으로 누가 저한테 뭘 주네요. 고마워요." },
   "choices": ["sell", "refuse", "alarm"],
   "outcomes": {
     "sell": { "correct": true, "flags": ["D1_yoon_served"] },

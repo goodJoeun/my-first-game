@@ -1,0 +1,22 @@
+{
+  "id": "D2_E3_fake_manager",
+  "type": "event",
+  "truth": "none",
+  "label": "전화",
+  "tags": ["phone"],
+  "suspicious": true,
+  "condition": { "day": 2 },
+  "appearance": { "fx": ["phone_ring"] },
+  "narration": "계산대 옆 전화가 울린다. 발신번호: 표시되지 않음.",
+  "dialogue": {
+    "enter": "(따르르릉— 따르르릉—)",
+    "on_answer": "(점장 목소리다) 알바님, 문 좀 열어 줄래요? 밖이 추워서… (점장은 가게 열쇠를 갖고 있다.)",
+    "on_ignore": "(벨이 멈춘다. 유리문 밖에서 누군가 손잡이를 한 번 당긴다.)"
+  },
+  "choices": ["answer", "ignore"],
+  "outcomes": {
+    "answer": { "risk": 1, "flags": ["D{day}_bad_call_answered"] },
+    "ignore": { "correct": true, "flags": ["D{day}_bad_call_ignored"] }
+  },
+  "direction": { "bgm": "low_hum", "idle_10s_fx": "" }
+}

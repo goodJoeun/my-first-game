@@ -176,7 +176,8 @@ public class StoreWorld : MonoBehaviour
         var root = new GameObject("Customer_" + e.id);
         root.transform.position = doorOutside.position;
 
-        var rng = new System.Random(e.id.GetHashCode());
+        // 같은 NPC 는 대사 변형이 달라도(위장한 단골 포함) 똑같이 보여야 한다.
+        var rng = new System.Random((string.IsNullOrEmpty(e.npc) ? e.id : e.npc).GetHashCode());
         var clothes = Color.HSVToRGB((float)rng.NextDouble(), 0.35f + (float)rng.NextDouble() * 0.3f, 0.35f + (float)rng.NextDouble() * 0.35f);
 
         var body = Part(PrimitiveType.Capsule, root.transform, new Vector3(0, 0.82f, 0), new Vector3(0.5f, 0.62f, 0.32f), customerMaterial, clothes);

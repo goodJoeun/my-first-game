@@ -1,0 +1,36 @@
+{
+  "id": "D3_N20_yoon_fake_dayshift",
+  "type": "disguise",
+  "truth": "mimic",
+  "label": "윤 간호사",
+  "npc": "yoon",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다."],
+  "items": [ { "id": "icecoffee", "name": "아이스 아메리카노", "qty": 1 }, { "id": "painkiller", "name": "진통제", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "…안녕하세요.",
+    "pay": "(카드를 댄다) 요즘 낮 근무로 바뀌어서요. 이 시간엔 원래 자는데, 잠이 안 와서.",
+    "ask_id": "출입증이요? 여기 있어요.",
+    "stare_3s": "저 많이 피곤해 보이죠?",
+    "idle_10s": "아, 천천히 하셔도 돼요.",
+    "on_sell": "고마워요. 내일 또 올게요.",
+    "on_refuse": "(아무 표정 없이 고개를 끄덕이고 나간다. 문 앞에서 한참 서 있다.)",
+    "on_alarm": "(형광등이 꺼졌다 켜지면 출입증만 바닥에 남아 있다.)",
+    "ask_last": "지난번요? 아이스 아메리카노요. 저 그거 좋아하잖아요."
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." },
+    { "kind": "dialogue", "target": "dialogue", "rule": "R05", "visibility": 2, "text": "" }
+  ],
+  "kindness": { "label": "온장고 캔커피 건네기", "text": "(캔을 받아 그대로 주머니에 넣는다. 고맙다는 말이 없다.)" },
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served", "D{day}_fake_served"] },
+    "refuse": { "correct": true, "flags": ["D{day}_fake_refused", "D{day}_yoon_fake_refused"] },
+    "alarm": { "risk": 1, "flags": ["D{day}_fake_alarmed"] }
+  },
+  "replay": { "focus": "dialogue", "text": "윤 간호사는 응급실 야간 근무를 하고 늘 따뜻한 두유를 삽니다. '낮 근무'와 아이스 아메리카노는 지금까지의 윤 간호사와 어긋났습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

@@ -1,0 +1,38 @@
+{
+  "id": "D2_N36_student_cig",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "student",
+  "minor": true,
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_11", "outfit": "hoodie_03", "prop": "backpack_tag", "fx": [] },
+  "look": ["후드티에 슬리퍼. 앳된 얼굴에 일부러 목소리를 깔았다.", "백팩 지퍼 사이로 학생증 끈이 삐져나와 있다."],
+  "items": [
+    { "id": "cigarette", "name": "담배 (21번)", "qty": 1, "restricted": true },
+    { "id": "gum", "name": "껌", "qty": 1 }
+  ],
+  "payment": "cash",
+  "dialogue": {
+    "enter": "(목소리를 낮추며) 21번 하나요.",
+    "pay": "(구겨진 오천 원을 낸다) 아, 아빠 심부름이에요. 진짜로.",
+    "ask_id": "신분증이요…? 집에 두고 왔는데. 저 성인이에요.",
+    "stare_3s": "왜요… 빨리 주세요.",
+    "idle_10s": "아 진짜, 그냥 주시면 안 돼요?",
+    "on_sell": "(신나서) 감사합니다!",
+    "on_refuse": "아… 껌만 살게요.",
+    "on_alarm": "(학생증을 떨어뜨리고 도망친다) 아니 왜요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "student_id", "rule": "R00", "visibility": 3, "text": "가방: 지퍼 사이로 학생증이 보인다. ○○고등학교 1학년." },
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "pay": -10000, "flags": ["D{day}_manager_warning"] },
+    "refuse": { "correct": true },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "student_id", "text": "가방 사이로 고등학교 학생증이 보였습니다. 사람이지만 담배를 팔면 안 되는 손님이었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "D3_N07_salt_oldbill",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "salt",
+  "condition": { "day": 3 },
+  "appearance": { "face": "f_30", "outfit": "old_hat", "prop": "old_wallet", "fx": [] },
+  "look": ["낡은 중절모의 노신사.", "지갑이 바스러질 듯 낡았다."],
+  "items": [ { "id": "newspaper", "name": "신문", "qty": 1 }, { "id": "mint", "name": "박하사탕", "qty": 1 } ],
+  "payment": "현금 (오백 원짜리 지폐)",
+  "dialogue": {
+    "enter": "여보게, 신문 한 부 주게.",
+    "pay": "(지폐를 내민다) 거스름은 됐네. 오백 원이면 넉넉하지.",
+    "ask_id": "신분증? 허허, 그런 게 다 있나.",
+    "stare_3s": "요즘 물가가 어떤가?",
+    "idle_10s": "신문이 오늘 거 맞나?",
+    "on_sell": "고맙네. 또 오지.",
+    "on_refuse": "(모자를 들어 인사하고 나간다. 발소리가 오래된 레코드처럼 끊긴다.)",
+    "on_alarm": "(벨이 울리자 낡은 지폐만 남고, 노신사는 없다.)"
+  },
+  "clues": [
+    { "kind": "item", "target": "payment", "rule": "R04", "visibility": 2, "text": "결제: 오백 원짜리 '지폐'. 지금은 쓰지 않는 옛날 돈이다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "payment", "text": "오백 원짜리 지폐는 지금 쓰지 않는 옛날 돈입니다. 수칙대로 벨을 눌러야 했습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

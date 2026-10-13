@@ -1,0 +1,33 @@
+{
+  "id": "D2_N53_parcel_return",
+  "type": "normal",
+  "truth": "human",
+  "label": "손님",
+  "npc": "parcel",
+  "condition": { "day": 2 },
+  "appearance": { "face": "f_22", "outfit": "tracksuit", "prop": "parcel_box", "fx": [] },
+  "look": ["운동복 차림의 청년. 반품 상자를 들었다.", "송장에 '반품' 도장이 찍혀 있다."],
+  "items": [ { "id": "parcel", "name": "택배 접수(반품)", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "반품 접수 되죠? 늦게 와서 죄송해요.",
+    "pay": "(카드를 댄다) 사이즈가 안 맞아서요. 세 번째 반품이에요, 하하.",
+    "ask_id": "송장에 다 적었는데, 신분증도요? 여기요.",
+    "stare_3s": "상자 좀 찌그러졌죠?",
+    "idle_10s": "접수 부탁드려요.",
+    "on_sell": "감사합니다! 안녕히 계세요.",
+    "on_refuse": "반품도 안 돼요…?",
+    "on_alarm": "(상자를 끌어안는다) 반품하러 왔다고요!"
+  },
+  "clues": [
+    { "kind": "appearance", "target": "floor_shadow", "rule": "R01", "visibility": 3, "text": "발밑: 형광등 아래 그림자가 또렷하다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "correct": true, "flags": ["D{day}_parcel_served"] },
+    "refuse": { "pay": -3000, "flags": ["D{day}_parcel_refused"] },
+    "alarm": { "pay": -20000, "flags": ["D{day}_police_called"] }
+  },
+  "replay": { "focus": "floor_shadow", "text": "평범한 반품 접수 손님이었습니다. 그림자가 있었고 수칙에 어긋난 점이 없었습니다." },
+  "direction": { "bgm": "normal", "idle_10s_fx": "" }
+}

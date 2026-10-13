@@ -1,0 +1,33 @@
+{
+  "id": "D4_N10_echo_repeat",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "echo",
+  "condition": { "day": 4 },
+  "appearance": { "face": "f_33", "outfit": "grey_workwear", "prop": "", "fx": [] },
+  "look": ["회색 작업복 차림의 여성.", "눈을 거의 깜빡이지 않는다."],
+  "items": [ { "id": "water", "name": "생수", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "늦은 밤에 고생이 많으시네요.",
+    "pay": "(카드를 댄다) 늦은 밤에 고생이 많으시네요.",
+    "ask_id": "(신분증을 내민다) 늦은 밤에 고생이 많으시네요.",
+    "stare_3s": "늦은 밤에 고생이 많으시네요.",
+    "idle_10s": "늦은 밤에 고생이 많으시네요.",
+    "on_sell": "늦은 밤에 고생이 많으시네요.",
+    "on_refuse": "(같은 말을 하며 나간다. 문이 닫혀도 들린다.)",
+    "on_alarm": "(벨 소리에 말이 끊긴다. 그것도 함께 사라진다.)"
+  },
+  "clues": [
+    { "kind": "dialogue", "target": "speech", "rule": "R06", "visibility": 2, "text": "대화: 같은 문장을 토씨 하나 틀리지 않고 되풀이한다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "speech", "text": "같은 문장을 토씨 하나 틀리지 않고 되풀이했습니다. 수칙 제6조입니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}
