@@ -174,6 +174,7 @@ public static class DataCheck
                 Inc(c, "customers");
                 if (RunRules.IsMonster(e)) Inc(c, "monsters");
                 if (RunRules.IsDisguise(e)) Inc(c, "disguises");
+                if (RunRules.HidesFromCctv(e)) Inc(c, "cctv_hidden");
                 if (RunRules.IsTrap(e)) Inc(c, "traps");
                 if (e.minor) Inc(c, "minors");
                 if (RunRules.IsRealRegular(e)) Inc(c, e.npc);

@@ -164,9 +164,11 @@ public class StoreWorld : MonoBehaviour
     public void SetFlicker(bool on) { flicker = on; if (!on && !blackout) SetLights(1f); }
 
     // 3D 로 직접 보이는 단서는 관찰 패널에 글로 쓰지 않는다.
+    // cctv_feed: 계산대 CCTV 모니터 화면 (no_cctv 손님은 거기 비치지 않는다)
     public bool Renders(string clueTarget)
     {
-        return clueTarget == "floor_shadow" || clueTarget == "door_chime";
+        return clueTarget == "floor_shadow" || clueTarget == "door_chime"
+            || (clueTarget == "cctv_feed" && cctvCamera != null && cctvMonitor != null);
     }
 
     // ------------------------------------------------------------ 손님

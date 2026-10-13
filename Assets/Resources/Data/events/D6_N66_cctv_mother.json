@@ -1,0 +1,33 @@
+{
+  "id": "D6_N66_cctv_mother",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "cctv",
+  "condition": { "day": 6 },
+  "appearance": { "face": "f_43", "outfit": "cardigan", "prop": "", "fx": ["no_cctv"] },
+  "look": ["카디건을 걸친 여성. 왼손을 아래로 내밀고 있다. 누군가의 손을 잡은 것처럼.", "옆에는 아무도 없다."],
+  "items": [ { "id": "milk", "name": "우유", "qty": 1 }, { "id": "babysnack", "name": "아기 과자", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "우유랑 과자요. 애가 배고프대서.",
+    "pay": "(카드를 댄다) 얘가 밤에 잠을 안 자요. 그쵸, 우리 애기?",
+    "ask_id": "신분증이요? 여기 있어요.",
+    "stare_3s": "애 보고 웃어 주세요. 낯가려서.",
+    "idle_10s": "우리 애기, 조금만 기다려.",
+    "on_sell": "고마워요. 인사해야지.",
+    "on_refuse": "(왼손을 내민 채 나간다. 문이 두 번 닫힌다.)",
+    "on_alarm": "(벨이 울리자 형광등이 꺼지고, 아기 과자 봉지만 바닥에 구른다.)"
+  },
+  "clues": [
+    { "kind": "cctv", "target": "cctv_feed", "rule": "R07", "visibility": 1, "text": "CCTV: 아무도 비치지 않는다. 계산대 위 우유만 혼자 조금 움직인다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "cctv_feed", "text": "계산대 앞에 서 있었지만 CCTV 화면에는 아무도 없었습니다. 아이도, 엄마도." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

@@ -15,6 +15,9 @@ public static class RunRules
     // 호감도가 5 가 되어 점장 엔딩에 닿을 수 없기 때문이다.
     public const int YoonAppearances = 4;
 
+    // 계산대 앞에 서 있는데 CCTV 화면에는 없는 괴물 (appearance.fx 에 no_cctv). CCTV 수칙(R07)이 나오는 5일차부터.
+    public const int MinCctvHidden = 1;
+
     public const int MinDisguises = 2;
     public const int MaxDisguises = 3;
     public const int DisguiseFromDay = 3;
@@ -40,6 +43,7 @@ public static class RunRules
     public static bool IsTrap(EventData e) { return e != null && e.truth == "human" && (e.trap || e.type == "trap"); }
     public static bool IsRealRegular(EventData e) { return e != null && e.truth == "human" && IsRegular(e.npc); }
     public static bool IsPhone(EventData e) { return e != null && e.type == "event" && Has(e.tags, "phone"); }
+    public static bool HidesFromCctv(EventData e) { return IsMonster(e) && e.appearance != null && Has(e.appearance.fx, "no_cctv"); }
 
     public static bool HasRestricted(EventData e)
     {

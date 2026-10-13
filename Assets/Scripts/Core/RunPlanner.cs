@@ -146,7 +146,7 @@ public class RunPlanner
         var sched = new List<DaySchedule>();
         var poolDays = new List<DaySchedule>();
         var firstSeen = new Dictionary<string, int>();
-        int fixedYoon = 0, fixedPark = 0, fixedChoi = 0, fixedMinors = 0, fixedSusp = 0;
+        int fixedYoon = 0, fixedPark = 0, fixedChoi = 0, fixedMinors = 0, fixedSusp = 0, fixedHidden = 0;
 
         foreach (var d in dayOrder)
         {
@@ -171,6 +171,7 @@ public class RunPlanner
                             if (e.npc == "choi") fixedChoi++;
                         }
                         if (e.minor) fixedMinors++;
+                        if (RunRules.HidesFromCctv(e)) fixedHidden++;
                     }
                     else if (RunRules.IsPhone(e) || e.type == "event")
                     {
@@ -243,7 +244,14 @@ public class RunPlanner
         var minorDays = PickDays(dayIds, minorNeed);
         if (minorDays == null) return null;
 
-        // 4) 하루씩 채운다
+        // 4) CCTV 에 비치지 않는 괴물: 그런 변형이 나올 수 있고 괴물 칸이 남는 날 중에서
+        var hiddenOptions = new List<int>();
+        foreach (var d in dayIds)
+            if (mim[d] - (fakeAt.ContainsKey(d) ? 1 : 0) >= 1 && Hidden(d, used, new HashSet<string>()).Count > 0) hiddenOptions.Add(d);
+        var hiddenDays = PickDays(hiddenOptions, System.Math.Max(0, RunRules.MinCctvHidden - fixedHidden));
+        if (hiddenDays == null) return null;
+
+        // 5) 하루씩 채운다
         foreach (var ds in poolDays)
         {
             int d = ds.day;
@@ -278,6 +286,14 @@ public class RunPlanner
                 Take(ds, v, used, today);
             }
 
+            if (hiddenDays.Contains(d))
+            {
+                var list = Hidden(d, used, today);
+                if (list.Count == 0) return null;
+                Take(ds, Pick(list), used, today);
+                monstersLeft--;
+            }
+
             while (monstersLeft > 0 && ds.picked.Count < cap[d])
             {
                 var npcs = Npcs("monster", d, used, today, x => RunRules.IsMonster(x) && !RunRules.IsDisguise(x));
@@ -305,7 +321,7 @@ public class RunPlanner
             ds.customers.AddRange(ds.picked);
         }
 
-        // 5) 전화: 받으면 안 되는 전화를 최소치 이상 섞는다
+        // 6) 전화: 받으면 안 되는 전화를 최소치 이상 섞는다
         var phoneSlots = new List<int>();
         foreach (var ds in poolDays) for (int i = 0; i < phoneCap[ds.day]; i++) phoneSlots.Add(ds.day);
         int suspNeed = System.Math.Max(0, RunRules.MinSuspiciousCalls - fixedSusp) + Range(0, 1);
@@ -372,6 +388,19 @@ public class RunPlanner
             if (Variant(kv.Key, d, used, ok) != null) list.Add(kv.Key);
         }
         list.Sort(System.StringComparer.Ordinal);
+        return list;
+    }
+
+    // CCTV 에 비치지 않는 괴물 변형 (위장 단골 제외)
+    List<EventData> Hidden(int d, HashSet<string> used, HashSet<string> today)
+    {
+        var list = new List<EventData>();
+        foreach (var kv in byNpc)
+        {
+            if (today.Contains(kv.Key)) continue;
+            foreach (var e in kv.Value)
+                if (!used.Contains(e.id) && RunRules.HidesFromCctv(e) && !RunRules.IsDisguise(e) && Eligible(e, d)) list.Add(e);
+        }
         return list;
     }
 
@@ -470,7 +499,7 @@ public class RunPlanner
     {
         var seen = new HashSet<string>();
         var firstReal = new Dictionary<string, int>();
-        int monsters = 0, minors = 0, susp = 0, yoon = 0, park = 0, choi = 0, fakes = 0;
+        int monsters = 0, minors = 0, susp = 0, yoon = 0, park = 0, choi = 0, fakes = 0, hidden = 0;
 
         foreach (var ds in sched)
         {
@@ -492,6 +521,7 @@ public class RunPlanner
                 if (RunRules.IsMonster(e)) { monsters++; mon++; }
                 if (RunRules.IsTrap(e)) trap++;
                 if (e.minor) minors++;
+                if (RunRules.HidesFromCctv(e)) hidden++;
                 if (RunRules.IsRealRegular(e))
                 {
                     if (!firstReal.ContainsKey(e.npc)) firstReal[e.npc] = d;
@@ -524,6 +554,7 @@ public class RunPlanner
         if (yoon != RunRules.YoonAppearances) hard.Add("윤 간호사(진짜) " + yoon + " != " + RunRules.YoonAppearances);
         if (park < RunRules.MinPark) hard.Add("박 대리(진짜) " + park + " < " + RunRules.MinPark);
         if (choi < RunRules.MinChoi) hard.Add("최 기사님(진짜) " + choi + " < " + RunRules.MinChoi);
+        if (hidden < RunRules.MinCctvHidden) hard.Add("CCTV 에 비치지 않는 괴물 " + hidden + " < " + RunRules.MinCctvHidden);
         if (fakes < RunRules.MinDisguises || fakes > RunRules.MaxDisguises) hard.Add("위장 단골 " + fakes + " (2~3 이어야 함)");
     }
 }

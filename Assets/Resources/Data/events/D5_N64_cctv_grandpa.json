@@ -1,0 +1,36 @@
+{
+  "id": "D5_N64_cctv_grandpa",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "cctv",
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_41", "outfit": "old_jumper", "prop": "umbrella_cane", "fx": ["no_cctv"] },
+  "look": ["낡은 점퍼의 노인. 접은 우산을 지팡이처럼 짚었다.", "계산대 앞에 오래 서 있다."],
+  "items": [
+    { "id": "makgeolli", "name": "막걸리", "qty": 1, "restricted": true },
+    { "id": "tofu", "name": "두부", "qty": 1 }
+  ],
+  "payment": "현금 (만 원권 한 장)",
+  "dialogue": {
+    "enter": "막걸리 하나, 두부 하나 주시오.",
+    "pay": "(만 원을 내민다) 거스름은 천천히 주시오.",
+    "ask_id": "신분증? 여기 있소.",
+    "stare_3s": "저 화면은 뭘 비추는 거요?",
+    "idle_10s": "나 여기 있소. 여기.",
+    "on_sell": "고맙소.",
+    "on_refuse": "(우산을 짚고 천천히 나간다. 모니터 속 문이 저 혼자 열렸다 닫힌다.)",
+    "on_alarm": "(벨이 울리자 계산대 앞에 젖은 우산만 남는다.)"
+  },
+  "clues": [
+    { "kind": "cctv", "target": "cctv_feed", "rule": "R07", "visibility": 2, "text": "CCTV: 계산대 앞에 막걸리와 두부만 놓여 있다. 노인은 비치지 않는다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "cctv_feed", "text": "계산대 앞에 서 있었지만 CCTV 화면에는 막걸리와 두부만 있었습니다. 수칙 제7조입니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "D5_N65_cctv_courier",
+  "type": "mimic",
+  "truth": "mimic",
+  "label": "손님",
+  "npc": "cctv",
+  "condition": { "day": 5 },
+  "appearance": { "face": "f_42", "outfit": "courier_uniform", "prop": "parcel_box", "fx": ["no_cctv"] },
+  "look": ["택배 회사 조끼를 입은 남성. 상자를 계산대에 올려 둔다.", "모자 챙에 가려 눈이 보이지 않는다."],
+  "items": [ { "id": "parcel", "name": "택배 접수(소형)", "qty": 1 } ],
+  "payment": "card",
+  "dialogue": {
+    "enter": "택배 접수요.",
+    "pay": "(카드를 댄다) 받는 사람은… 여기 주소예요. 이 가게요.",
+    "ask_id": "신분증이요? 여기요.",
+    "stare_3s": "상자는 열어 보지 마세요.",
+    "idle_10s": "접수 부탁드려요.",
+    "on_sell": "감사합니다. 곧 도착할 거예요.",
+    "on_refuse": "(상자를 두고 나간다. 모니터에는 상자만 계산대 위에서 조금 움직인다.)",
+    "on_alarm": "(벨이 울리자 상자도, 기사도 사라진다.)"
+  },
+  "clues": [
+    { "kind": "cctv", "target": "cctv_feed", "rule": "R07", "visibility": 2, "text": "CCTV: 계산대 위로 상자만 미끄러져 온다. 들고 온 사람은 비치지 않는다." }
+  ],
+  "choices": ["sell", "refuse", "alarm"],
+  "outcomes": {
+    "sell": { "risk": 3, "flags": ["D{day}_monster_served"] },
+    "refuse": { "risk": 1, "flags": ["D{day}_monster_refused"] },
+    "alarm": { "pay": 10000, "risk": -1, "correct": true, "flags": ["D{day}_monster_alarmed"] }
+  },
+  "replay": { "focus": "cctv_feed", "text": "CCTV 화면에는 상자만 있었고 택배 기사는 비치지 않았습니다." },
+  "direction": { "bgm": "fade_to_silence", "idle_10s_fx": "light_flicker" }
+}
