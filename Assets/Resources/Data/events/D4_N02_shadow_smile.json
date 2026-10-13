@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "shadow",
   "condition": { "day": 4 },
-  "appearance": { "face": "f_07", "outfit": "blouse", "prop": "", "fx": ["no_shadow"] },
+  "appearance": { "face": "f_07", "outfit": "blouse", "prop": "", "steps": "heels", "fx": ["no_shadow"] },
   "look": ["단정한 블라우스의 여성. 계속 미소 짓고 있다.", "계산대에 바짝 붙어 선다."],
   "items": [ { "id": "candy", "name": "사탕", "qty": 1 } ],
   "payment": "card",

@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "parcel",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_22", "outfit": "tracksuit", "prop": "parcel_box", "fx": [] },
+  "appearance": { "face": "f_22", "outfit": "tracksuit", "prop": "parcel_box", "steps": "plain", "fx": [] },
   "look": ["운동복 차림의 청년. 반품 상자를 들었다.", "송장에 '반품' 도장이 찍혀 있다."],
   "items": [ { "id": "parcel", "name": "택배 접수(반품)", "qty": 1 } ],
   "payment": "card",

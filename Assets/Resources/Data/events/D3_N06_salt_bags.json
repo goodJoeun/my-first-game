@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "salt",
   "condition": { "day": 3 },
-  "appearance": { "face": "f_29", "outfit": "black_jumper", "prop": "plastic_bags", "fx": [] },
+  "appearance": { "face": "f_29", "outfit": "black_jumper", "prop": "plastic_bags", "steps": "plain", "fx": [] },
   "look": ["검은 비닐봉지를 여러 장 든 남성.", "장바구니가 하얀 가루로 얼룩져 있다."],
   "items": [ { "id": "salt", "name": "굵은소금", "qty": 12 } ],
   "payment": "card",

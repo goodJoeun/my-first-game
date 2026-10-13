@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "salt",
   "condition": { "day": 5 },
-  "appearance": { "face": "f_31", "outfit": "casual", "prop": "", "fx": [] },
+  "appearance": { "face": "f_31", "outfit": "casual", "prop": "", "steps": "plain", "fx": [] },
   "look": ["캐주얼한 차림의 여성. 평범하다.", "만 원권 다섯 장을 가지런히 펴서 내민다."],
   "items": [
     { "id": "wine", "name": "와인", "qty": 1, "restricted": true },

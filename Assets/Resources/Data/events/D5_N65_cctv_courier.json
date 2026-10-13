@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "cctv",
   "condition": { "day": 5 },
-  "appearance": { "face": "f_42", "outfit": "courier_uniform", "prop": "parcel_box", "fx": ["no_cctv"] },
+  "appearance": { "face": "f_42", "outfit": "courier_uniform", "prop": "parcel_box", "steps": "boots", "fx": ["no_cctv"] },
   "look": ["택배 회사 조끼를 입은 남성. 상자를 계산대에 올려 둔다.", "모자 챙에 가려 눈이 보이지 않는다."],
   "items": [ { "id": "parcel", "name": "택배 접수(소형)", "qty": 1 } ],
   "payment": "card",

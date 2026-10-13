@@ -6,7 +6,7 @@
   "npc": "student",
   "minor": true,
   "condition": { "day": 4 },
-  "appearance": { "face": "f_11", "outfit": "suit_big", "prop": "", "fx": [] },
+  "appearance": { "face": "f_11", "outfit": "suit_big", "prop": "", "steps": "plain", "fx": [] },
   "look": ["소매가 손등을 덮는 큰 정장. 아버지 옷 같다.", "구두 대신 흰 운동화를 신었다."],
   "items": [
     { "id": "soju", "name": "소주", "qty": 2, "restricted": true },

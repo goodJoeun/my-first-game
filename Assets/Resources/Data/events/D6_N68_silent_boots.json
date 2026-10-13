@@ -5,7 +5,13 @@
   "label": "손님",
   "npc": "silent",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_45", "outfit": "work_clothes_mud", "prop": "work_boots", "fx": ["no_footprints"] },
+  "appearance": {
+    "face": "f_45",
+    "outfit": "work_clothes_mud",
+    "prop": "work_boots",
+    "steps": "boots",
+    "fx": ["no_footprints"]
+  },
   "look": ["흙투성이 작업화를 신은 남성.", "공사장에서 막 온 듯 바지에도 진흙이 묻었다."],
   "items": [ { "id": "coffee", "name": "캔커피", "qty": 2 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
   "payment": "card",

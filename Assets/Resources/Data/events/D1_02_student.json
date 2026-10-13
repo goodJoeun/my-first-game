@@ -7,7 +7,7 @@
   "minor": true,
   "condition": { "day": 1 },
   "tags": ["tutorial"],
-  "appearance": { "face": "f_11", "outfit": "hoodie_02", "prop": "backpack_tag", "fx": [] },
+  "appearance": { "face": "f_11", "outfit": "hoodie_02", "prop": "backpack_tag", "steps": "plain", "fx": [] },
   "look": ["후드티를 입었고, 후드 아래로 교복 바지가 보인다.", "백팩에 학교 이름표가 달려 있다."],
   "items": [ { "id": "beer", "name": "캔맥주", "qty": 2, "restricted": true }, { "id": "snack", "name": "과자", "qty": 1 } ],
   "payment": "card",

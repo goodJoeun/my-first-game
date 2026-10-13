@@ -6,7 +6,7 @@
   "npc": "highschooler",
   "minor": true,
   "condition": { "day": 5 },
-  "appearance": { "face": "f_12", "outfit": "tracksuit", "prop": "", "fx": [] },
+  "appearance": { "face": "f_12", "outfit": "tracksuit", "prop": "", "steps": "plain", "fx": [] },
   "look": ["트레이닝복 차림. 목 뒤로 교복 셔츠 깃이 삐져나와 있다.", "아빠 심부름이라며 카드를 내민다."],
   "items": [ { "id": "cigarette", "name": "담배 (33번)", "qty": 2, "restricted": true } ],
   "payment": "카드 (명의: 김정호, 남성)",

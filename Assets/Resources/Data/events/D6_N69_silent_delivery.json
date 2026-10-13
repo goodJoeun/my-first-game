@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "silent",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_46", "outfit": "padded_jacket", "prop": "food_bag", "fx": ["no_footprints"] },
+  "appearance": { "face": "f_46", "outfit": "padded_jacket", "prop": "food_bag", "steps": "plain", "fx": ["no_footprints"] },
   "look": ["음식 봉투를 든 패딩 차림의 남성.", "평범하다."],
   "items": [ { "id": "cola", "name": "콜라", "qty": 2 } ],
   "payment": "card",

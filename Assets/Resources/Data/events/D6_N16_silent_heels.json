@@ -5,7 +5,13 @@
   "label": "손님",
   "npc": "silent",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_39", "outfit": "dress", "prop": "high_heels", "fx": ["no_footprints", "no_footsteps"] },
+  "appearance": {
+    "face": "f_39",
+    "outfit": "dress",
+    "prop": "high_heels",
+    "steps": "heels",
+    "fx": ["no_footprints", "no_footsteps"]
+  },
   "look": ["하이힐을 신은 여성.", "또각거려야 할 걸음인데, 아무 소리도 없었다."],
   "items": [ { "id": "lipbalm", "name": "립밤", "qty": 1 } ],
   "payment": "card",

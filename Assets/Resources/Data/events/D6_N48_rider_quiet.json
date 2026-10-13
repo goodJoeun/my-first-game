@@ -6,7 +6,7 @@
   "npc": "rider",
   "trap": true,
   "condition": { "day": 6 },
-  "appearance": { "face": "f_18", "outfit": "wet_jacket", "prop": "phone_mount", "fx": [] },
+  "appearance": { "face": "f_18", "outfit": "wet_jacket", "prop": "phone_mount", "steps": "plain", "fx": [] },
   "look": ["젖은 운동화. 걸을 때마다 조금 미끄러진다.", "휴대폰에서 배달 앱 알림이 계속 울린다."],
   "items": [ { "id": "energy", "name": "에너지드링크", "qty": 1 }, { "id": "chocobar", "name": "초코바", "qty": 1 } ],
   "payment": "card",

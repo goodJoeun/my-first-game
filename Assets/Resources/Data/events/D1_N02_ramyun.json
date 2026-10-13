@@ -7,7 +7,7 @@
   "placeholder": true,
   "tags": ["calm"],
   "condition": { "day": 1 },
-  "appearance": { "face": "f_16", "outfit": "college_jacket", "prop": "earphones", "fx": [] },
+  "appearance": { "face": "f_16", "outfit": "college_jacket", "prop": "earphones", "steps": "plain", "fx": [] },
   "look": ["대학교 과잠을 입고 이어폰을 낀 청년.", "하품을 하며 컵라면 진열대로 직행한다."],
   "items": [ { "id": "cupramen", "name": "컵라면", "qty": 2 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
   "payment": "card",

@@ -6,7 +6,7 @@
   "npc": "rider",
   "trap": true,
   "condition": { "day": 3 },
-  "appearance": { "face": "f_18", "outfit": "delivery_vest", "prop": "delivery_bag", "fx": [] },
+  "appearance": { "face": "f_18", "outfit": "delivery_vest", "prop": "delivery_bag", "steps": "boots", "fx": [] },
   "look": ["배달 가방을 멘 채 동전을 한 움큼 쥐고 있다.", "눈가가 빨갛다."],
   "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
   "payment": "현금 (100원·500원 동전 한 움큼)",

@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "echo",
   "condition": { "day": 4 },
-  "appearance": { "face": "f_33", "outfit": "grey_workwear", "prop": "", "fx": [] },
+  "appearance": { "face": "f_33", "outfit": "grey_workwear", "prop": "", "steps": "boots", "fx": [] },
   "look": ["회색 작업복 차림의 여성.", "눈을 거의 깜빡이지 않는다."],
   "items": [ { "id": "water", "name": "생수", "qty": 1 } ],
   "payment": "card",

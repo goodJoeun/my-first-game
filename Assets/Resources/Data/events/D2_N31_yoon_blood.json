@@ -6,7 +6,7 @@
   "npc": "yoon",
   "trap": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "fx": [] },
+  "appearance": { "face": "f_05", "outfit": "nurse_jacket", "prop": "hospital_pass", "steps": "plain", "fx": [] },
   "look": ["병원 로고가 있는 점퍼, 지친 얼굴.", "손에 야간 근무 출입증을 쥐고 있다.", "점퍼 소매 끝과 바지에 피가 튀어 있다."],
   "items": [ { "id": "soymilk", "name": "따뜻한 두유", "qty": 1 }, { "id": "wetwipe", "name": "물티슈", "qty": 1 } ],
   "payment": "card",

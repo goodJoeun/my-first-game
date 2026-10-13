@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "gosi",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_23", "outfit": "tracksuit_old", "prop": "law_book", "fx": [] },
+  "appearance": { "face": "f_23", "outfit": "tracksuit_old", "prop": "law_book", "steps": "slippers", "fx": [] },
   "look": ["삼선 슬리퍼에 무릎 나온 트레이닝복.", "두꺼운 형법 책을 옆구리에 꼈다."],
   "items": [ { "id": "coffee", "name": "캔커피", "qty": 3 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
   "payment": "card",

@@ -7,7 +7,7 @@
   "trap": true,
   "minor": true,
   "condition": { "day": 3 },
-  "appearance": { "face": "f_12", "outfit": "torn_uniform", "prop": "festival_band", "fx": [] },
+  "appearance": { "face": "f_12", "outfit": "torn_uniform", "prop": "festival_band", "steps": "plain", "fx": [] },
   "look": ["얼굴이 온통 회색 분장. 입가에 가짜 피가 흘러내린다.", "손목에 형광 팔찌를 찼다."],
   "items": [
     { "id": "cigarette", "name": "담배 (7번)", "qty": 1, "restricted": true },

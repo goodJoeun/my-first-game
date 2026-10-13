@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "idcard",
   "condition": { "day": 5 },
-  "appearance": { "face": "f_28", "outfit": "knit", "prop": "", "fx": [] },
+  "appearance": { "face": "f_28", "outfit": "knit", "prop": "", "steps": "plain", "fx": [] },
   "look": ["말끔한 니트를 입은 청년.", "말투가 공손하다."],
   "items": [
     { "id": "beer", "name": "캔맥주", "qty": 1, "restricted": true },

@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "cctv",
   "condition": { "day": 5 },
-  "appearance": { "face": "f_35", "outfit": "black_padding", "prop": "cap", "fx": ["no_cctv"] },
+  "appearance": { "face": "f_35", "outfit": "black_padding", "prop": "cap", "steps": "plain", "fx": ["no_cctv"] },
   "look": ["검은 롱패딩의 남성. 모자를 깊게 눌러썼다.", "계산대 바로 앞에 서 있다."],
   "items": [ { "id": "hotbar", "name": "핫바", "qty": 1 } ],
   "payment": "card",

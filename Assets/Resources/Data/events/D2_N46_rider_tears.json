@@ -6,7 +6,7 @@
   "npc": "rider",
   "trap": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_18", "outfit": "rain_coat", "prop": "delivery_helmet", "fx": [] },
+  "appearance": { "face": "f_18", "outfit": "rain_coat", "prop": "delivery_helmet", "steps": "boots", "fx": [] },
   "look": ["배달 헬멧을 쓴 채 눈이 퉁퉁 부었다.", "우비가 젖어 있고 소매에 진흙이 묻었다."],
   "items": [ { "id": "bananamilk", "name": "바나나우유", "qty": 1 }, { "id": "tissue", "name": "휴지", "qty": 1 } ],
   "payment": "card",

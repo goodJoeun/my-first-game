@@ -6,7 +6,7 @@
   "npc": "smoker",
   "trap": true,
   "condition": { "day": 6 },
-  "appearance": { "face": "f_25", "outfit": "guard_uniform", "prop": "", "fx": [] },
+  "appearance": { "face": "f_25", "outfit": "guard_uniform", "prop": "", "steps": "boots", "fx": [] },
   "look": ["야간 경비원 제복을 입은 남성.", "들어오자마자 벽시계를 올려다보며 혀를 찬다."],
   "items": [
     { "id": "cigarette", "name": "담배 (5번)", "qty": 1, "restricted": true },

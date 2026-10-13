@@ -5,7 +5,13 @@
   "label": "손님",
   "npc": "silent",
   "condition": { "day": 6 },
-  "appearance": { "face": "f_40", "outfit": "sportswear", "prop": "earphones", "fx": ["no_footprints", "no_footsteps"] },
+  "appearance": {
+    "face": "f_40",
+    "outfit": "sportswear",
+    "prop": "earphones",
+    "steps": "plain",
+    "fx": ["no_footprints", "no_footsteps"]
+  },
   "look": ["운동복 차림의 청년. 이어폰을 꼈다.", "평범하다."],
   "items": [ { "id": "isotonic", "name": "이온음료", "qty": 1 } ],
   "payment": "card",

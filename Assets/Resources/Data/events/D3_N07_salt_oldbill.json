@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "salt",
   "condition": { "day": 3 },
-  "appearance": { "face": "f_30", "outfit": "old_hat", "prop": "old_wallet", "fx": [] },
+  "appearance": { "face": "f_30", "outfit": "old_hat", "prop": "old_wallet", "steps": "shoes", "fx": [] },
   "look": ["낡은 중절모의 노신사.", "지갑이 바스러질 듯 낡았다."],
   "items": [ { "id": "newspaper", "name": "신문", "qty": 1 }, { "id": "mint", "name": "박하사탕", "qty": 1 } ],
   "payment": "현금 (오백 원짜리 지폐)",

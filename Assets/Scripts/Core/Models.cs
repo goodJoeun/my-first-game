@@ -19,6 +19,7 @@ public class Appearance
     public string face;
     public string outfit;
     public string prop;
+    public string steps;      // 발소리: plain(운동화) / shoes(구두) / heels(하이힐) / boots(작업화·장화) / slippers(슬리퍼). 비우면 plain
     public string[] fx;
 }
 

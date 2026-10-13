@@ -6,7 +6,7 @@
   "npc": "gosi",
   "trap": true,
   "condition": { "day": 4 },
-  "appearance": { "face": "f_23", "outfit": "tracksuit_old", "prop": "law_book", "fx": [] },
+  "appearance": { "face": "f_23", "outfit": "tracksuit_old", "prop": "law_book", "steps": "slippers", "fx": [] },
   "look": ["눈 밑이 시커멓다. 입술이 쉴 새 없이 움직인다.", "중얼거리는 소리가 들린다. '민법 제750조…'"],
   "items": [ { "id": "energy", "name": "에너지드링크", "qty": 2 }, { "id": "chocobar", "name": "초코바", "qty": 1 } ],
   "payment": "card",

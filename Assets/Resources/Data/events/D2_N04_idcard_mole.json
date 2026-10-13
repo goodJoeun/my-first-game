@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "idcard",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_27", "outfit": "trench_coat", "prop": "mole_right", "fx": [] },
+  "appearance": { "face": "f_27", "outfit": "trench_coat", "prop": "mole_right", "steps": "heels", "fx": [] },
   "look": ["베이지색 트렌치코트의 여성.", "오른쪽 뺨에 작은 점이 있다."],
   "items": [ { "id": "beer", "name": "캔맥주", "qty": 2, "restricted": true } ],
   "payment": "card",

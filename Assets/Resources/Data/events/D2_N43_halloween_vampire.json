@@ -6,7 +6,7 @@
   "npc": "halloween",
   "trap": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_17", "outfit": "cape", "prop": "fake_fangs", "fx": [] },
+  "appearance": { "face": "f_17", "outfit": "cape", "prop": "fake_fangs", "steps": "plain", "fx": [] },
   "look": ["창백한 얼굴 분장에 가짜 송곳니. 검은 망토.", "망토 아래로 대학교 과잠이 보인다."],
   "items": [
     { "id": "tomatojuice", "name": "토마토주스", "qty": 2 },

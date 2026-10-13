@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "gosi",
   "condition": { "day": 3 },
-  "appearance": { "face": "f_23", "outfit": "cap_tracksuit", "prop": "flashcards", "fx": [] },
+  "appearance": { "face": "f_23", "outfit": "cap_tracksuit", "prop": "flashcards", "steps": "plain", "fx": [] },
   "look": ["트레이닝복에 안경, 모자를 눌러썼다.", "손에 단어장을 쥐고 있다."],
   "items": [ { "id": "cupramen", "name": "컵라면", "qty": 2 }, { "id": "kimbap", "name": "삼각김밥", "qty": 1 } ],
   "payment": "현금 (만 원권 한 장)",

@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "cctv",
   "condition": { "day": 5 },
-  "appearance": { "face": "f_41", "outfit": "old_jumper", "prop": "umbrella_cane", "fx": ["no_cctv"] },
+  "appearance": { "face": "f_41", "outfit": "old_jumper", "prop": "umbrella_cane", "steps": "shoes", "fx": ["no_cctv"] },
   "look": ["낡은 점퍼의 노인. 접은 우산을 지팡이처럼 짚었다.", "계산대 앞에 오래 서 있다."],
   "items": [
     { "id": "makgeolli", "name": "막걸리", "qty": 1, "restricted": true },

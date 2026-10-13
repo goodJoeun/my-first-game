@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "idcard",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_26", "outfit": "grey_suit", "prop": "wallet", "fx": [] },
+  "appearance": { "face": "f_26", "outfit": "grey_suit", "prop": "wallet", "steps": "shoes", "fx": [] },
   "look": ["회색 정장의 남성. 넥타이가 지나치게 반듯하다.", "지갑에서 신분증을 미리 꺼내 들고 있다."],
   "items": [
     { "id": "cigarette", "name": "담배 (21번)", "qty": 1, "restricted": true },

@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "echo",
   "condition": { "day": 4 },
-  "appearance": { "face": "f_32", "outfit": "plain_jumper", "prop": "", "fx": [] },
+  "appearance": { "face": "f_32", "outfit": "plain_jumper", "prop": "", "steps": "plain", "fx": [] },
   "look": ["무난한 점퍼 차림의 남성.", "웃는 얼굴이 조금 굳어 있다."],
   "items": [ { "id": "cupramen", "name": "컵라면", "qty": 1 }, { "id": "kimchi", "name": "김치", "qty": 1 } ],
   "payment": "card",

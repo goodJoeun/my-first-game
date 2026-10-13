@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-// 3D 매장 연출: 손님 입장/퇴장, 조명, 그림자, 소리(차임·발소리), CCTV, 벽시계.
+// 3D 매장 연출: 손님 입장/퇴장, 조명, 그림자, 소리(차임·발소리), CCTV(점원 포함), 벽시계.
+// 손님 모델: Resources/Characters/{이벤트 ID 또는 NPC ID}.prefab 이 있으면 그 모델을 쓰고, 없으면 기본 도형으로 만든다.
+//   점원(CCTV 속 나)은 Characters/clerk. Animator 에 float 파라미터 Speed(m/s, 0 = 서 있기)가 있으면 걸을 때 넣어 준다.
+// 발소리 종류는 appearance.steps: plain(운동화) / shoes(뚜벅뚜벅) / heels(또각또각) / boots(저벅저벅) / slippers(질질).
 // 판별 로직은 GameController 에 있고, 여기는 보이는 것만 담당한다.
 // 이벤트 JSON 의 appearance.fx 로 연출을 켠다:
 //   no_shadow      그림자를 드리우지 않음 (제1조)
@@ -19,6 +22,7 @@ using UnityEngine.Rendering;
 public class StoreWorld : MonoBehaviour
 {
     const int HiddenFromCctvLayer = 31;
+    const int OnlyCctvLayer = 30;   // 점원(플레이어): CCTV 에만 비치고 내 시점에는 안 보인다
 
     [Header("위치")]
     public Transform doorOutside;
@@ -54,8 +58,12 @@ public class StoreWorld : MonoBehaviour
     bool flicker, sway, phoneRinging, blackout;
     AudioSource audioSource;
     AudioClip chime, ring, alarm;
-    AudioClip[] steps;
-    readonly HashSet<Transform> silentWalkers = new HashSet<Transform>();
+    readonly Dictionary<string, AudioClip[]> stepClips = new Dictionary<string, AudioClip[]>();
+    readonly Dictionary<Transform, string> walkerSteps = new Dictionary<Transform, string>(); // "none" = 발소리 없음
+    readonly HashSet<Transform> modelWalkers = new HashSet<Transform>();   // 실제 모델(애니메이션)로 만든 손님
+    static readonly Dictionary<string, GameObject> prefabCache = new Dictionary<string, GameObject>();
+    const string CharacterDir = "Characters/";
+    Transform clerk;
     float nextRing;
 
     // 벽시계 (출입문 위). 장면을 다시 만들지 않아도 되게 Awake 에서 만든다.
@@ -80,7 +88,8 @@ public class StoreWorld : MonoBehaviour
         chime = Tone("chime", new[] { 880f, 660f }, 0.35f, false);
         ring = Tone("ring", new[] { 440f, 480f, 440f, 480f }, 0.12f, false);
         alarm = Tone("alarm", new[] { 950f, 700f, 950f, 700f, 950f, 700f }, 0.15f, true);
-        steps = new[] { Step("step_l", 1, 110f), Step("step_r", 2, 95f) };
+        foreach (var kind in new[] { "plain", "shoes", "heels", "boots", "slippers" })
+            stepClips[kind] = new[] { Step(kind, 1), Step(kind, 2) };
         BuildClock();
 
         if (windowGlass != null)
@@ -95,6 +104,7 @@ public class StoreWorld : MonoBehaviour
             cctvCamera.targetTexture = rt;
             cctvCamera.cullingMask = ~(1 << HiddenFromCctvLayer);
             cctvMonitor.material.mainTexture = rt;
+            BuildClerk();
         }
     }
 
@@ -107,7 +117,8 @@ public class StoreWorld : MonoBehaviour
         foreach (var o in dayObjects) Destroy(o);
         dayObjects.Clear();
         ClearFootprints();
-        silentWalkers.Clear();
+        walkerSteps.Clear();
+        modelWalkers.Clear();
         clockStopped = false;
         flicker = sway = blackout = false;
         RingPhone(false);
@@ -152,7 +163,8 @@ public class StoreWorld : MonoBehaviour
         }
 
         customer = BuildCustomer(e);
-        if (HasFx(e, "no_footsteps")) silentWalkers.Add(customer.transform);
+        walkerSteps[customer.transform] = HasFx(e, "no_footsteps") ? "none"
+            : (e.appearance != null && !string.IsNullOrEmpty(e.appearance.steps) && stepClips.ContainsKey(e.appearance.steps) ? e.appearance.steps : "plain");
         if (HasFx(e, "clock_stop")) { SetClock(null); clockStopped = true; } // 지금 시각에서 멈춘다
         StartCoroutine(Enter(e));
     }
@@ -205,15 +217,25 @@ public class StoreWorld : MonoBehaviour
         var root = new GameObject("Customer_" + e.id);
         root.transform.position = doorOutside.position;
 
-        // 같은 NPC 는 대사 변형이 달라도(위장한 단골 포함) 똑같이 보여야 한다.
-        var rng = new System.Random((string.IsNullOrEmpty(e.npc) ? e.id : e.npc).GetHashCode());
-        var clothes = Color.HSVToRGB((float)rng.NextDouble(), 0.35f + (float)rng.NextDouble() * 0.3f, 0.35f + (float)rng.NextDouble() * 0.35f);
+        // 실제 모델이 있으면 그것을 쓴다. 이벤트 ID 전용 모델이 먼저, 없으면 NPC 모델.
+        // 위장 단골은 진짜와 같은 NPC 모델을 쓰므로 똑같이 보인다 (위장 이벤트 ID 로 따로 만들지 말 것).
+        var prefab = CharacterPrefab(e.id, e.npc);
+        if (prefab != null)
+        {
+            AttachModel(root.transform, prefab);
+        }
+        else
+        {
+            // 같은 NPC 는 대사 변형이 달라도(위장한 단골 포함) 똑같이 보여야 한다.
+            var rng = new System.Random((string.IsNullOrEmpty(e.npc) ? e.id : e.npc).GetHashCode());
+            var clothes = Color.HSVToRGB((float)rng.NextDouble(), 0.35f + (float)rng.NextDouble() * 0.3f, 0.35f + (float)rng.NextDouble() * 0.35f);
 
-        var body = Part(PrimitiveType.Capsule, root.transform, new Vector3(0, 0.82f, 0), new Vector3(0.5f, 0.62f, 0.32f), customerMaterial, clothes);
-        Part(PrimitiveType.Cube, body.transform.parent, new Vector3(0, 0.4f, 0), new Vector3(0.36f, 0.8f, 0.24f), customerMaterial, clothes * 0.6f);
-        var head = Part(PrimitiveType.Sphere, root.transform, new Vector3(0, 1.6f, 0), new Vector3(0.26f, 0.3f, 0.26f), skinMaterial, Color.white);
-        Part(PrimitiveType.Cube, head.transform, new Vector3(-0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
-        Part(PrimitiveType.Cube, head.transform, new Vector3(0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
+            var body = Part(PrimitiveType.Capsule, root.transform, new Vector3(0, 0.82f, 0), new Vector3(0.5f, 0.62f, 0.32f), customerMaterial, clothes);
+            Part(PrimitiveType.Cube, body.transform.parent, new Vector3(0, 0.4f, 0), new Vector3(0.36f, 0.8f, 0.24f), customerMaterial, clothes * 0.6f);
+            var head = Part(PrimitiveType.Sphere, root.transform, new Vector3(0, 1.6f, 0), new Vector3(0.26f, 0.3f, 0.26f), skinMaterial, Color.white);
+            Part(PrimitiveType.Cube, head.transform, new Vector3(-0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
+            Part(PrimitiveType.Cube, head.transform, new Vector3(0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
+        }
 
         bool noShadow = HasFx(e, "no_shadow");
         bool noCctv = HasFx(e, "no_cctv");
@@ -223,6 +245,62 @@ public class StoreWorld : MonoBehaviour
             if (noCctv) r.gameObject.layer = HiddenFromCctvLayer;
         }
         return root;
+    }
+
+    // ------------------------------------------------------------ 실제 사람 모델
+
+    static GameObject CharacterPrefab(params string[] keys)
+    {
+        foreach (var k in keys)
+        {
+            if (string.IsNullOrEmpty(k)) continue;
+            GameObject p;
+            if (!prefabCache.TryGetValue(k, out p))
+            {
+                p = Resources.Load<GameObject>(CharacterDir + k);
+                prefabCache[k] = p;   // 없는 것도 기억해 매번 찾지 않는다
+            }
+            if (p != null) return p;
+        }
+        return null;
+    }
+
+    // 모델을 루트 밑에 붙인다. 발이 원점, 앞이 +z 인 모델을 기준으로 한다.
+    // 단위가 잘못된 모델(cm 로 들어와 100배 등)은 키 1.7m 로 맞춘다.
+    void AttachModel(Transform root, GameObject prefab)
+    {
+        var model = Instantiate(prefab, root, false);
+        model.transform.localPosition = Vector3.zero;
+        model.transform.localRotation = Quaternion.identity;
+
+        var renderers = model.GetComponentsInChildren<Renderer>();
+        if (renderers.Length > 0)
+        {
+            var b = renderers[0].bounds;
+            foreach (var r in renderers) b.Encapsulate(r.bounds);
+            if (b.size.y > 3f || (b.size.y > 0.01f && b.size.y < 0.8f))
+                model.transform.localScale *= 1.7f / b.size.y;
+        }
+        foreach (var c in model.GetComponentsInChildren<Collider>()) c.enabled = false;
+        foreach (var a in model.GetComponentsInChildren<Animator>())
+        {
+            a.applyRootMotion = false;                          // 위치는 Walk 가 움직인다
+            a.cullingMode = AnimatorCullingMode.AlwaysAnimate; // CCTV 화면에서도 움직이게
+        }
+        modelWalkers.Add(root);
+        SetSpeed(root, 0f);
+    }
+
+    // Animator 의 Speed 파라미터(m/s)를 맞춘다. 0 이면 서 있기.
+    void SetSpeed(Transform t, float speed)
+    {
+        if (t == null || !modelWalkers.Contains(t)) return;
+        foreach (var a in t.GetComponentsInChildren<Animator>())
+        {
+            if (a.runtimeAnimatorController == null) continue;
+            foreach (var p in a.parameters)
+                if (p.name == "Speed" && p.type == AnimatorControllerParameterType.Float) a.SetFloat("Speed", speed);
+        }
     }
 
     GameObject Part(PrimitiveType type, Transform parent, Vector3 pos, Vector3 scale, Material mat, Color color)
@@ -256,6 +334,7 @@ public class StoreWorld : MonoBehaviour
     IEnumerator Walk(Transform t, Vector3 target, float speed, bool destroyAtEnd)
     {
         Face(t, target);
+        SetSpeed(t, speed);
         var start = t.position;
         float dist = Vector3.Distance(start, target), d = 0;
         int stepIndex = 0;
@@ -263,20 +342,24 @@ public class StoreWorld : MonoBehaviour
         {
             if (t == null) yield break;
             d = Mathf.Min(dist, d + speed * Time.deltaTime);
-            // 보폭마다 발소리 (no_footsteps 손님은 소리가 없다)
+            // 보폭마다 신발에 맞는 발소리 (no_footsteps 손님은 소리가 없다)
             int s = (int)(d / StepLength);
             if (s != stepIndex)
             {
                 stepIndex = s;
-                if (!silentWalkers.Contains(t)) AudioSource.PlayClipAtPoint(steps[s % 2], t.position, 0.7f);
+                string kind;
+                if (!walkerSteps.TryGetValue(t, out kind)) kind = "plain";
+                if (kind != "none") AudioSource.PlayClipAtPoint(stepClips[kind][s % 2], t.position, StepVolume(kind));
             }
             var p = Vector3.Lerp(start, target, d / dist);
-            p.y = start.y + Mathf.Abs(Mathf.Sin(d * 5f)) * 0.04f;
+            // 기본 도형은 위아래로 살짝 흔들어 걷는 느낌을 낸다 (모델은 애니메이션이 한다)
+            p.y = start.y + (modelWalkers.Contains(t) ? 0f : Mathf.Abs(Mathf.Sin(d * 5f)) * 0.04f);
             t.position = p;
             yield return null;
         }
         if (t == null) yield break;
         t.position = target;
+        SetSpeed(t, 0f);
         if (destroyAtEnd && t.gameObject == customer) ClearCustomer();
     }
 
@@ -398,6 +481,9 @@ public class StoreWorld : MonoBehaviour
     void Update()
     {
         UpdateClock();
+        // CCTV 속 점원은 내가 보는 방향으로 몸을 돌린다.
+        var main = Camera.main;
+        if (clerk != null && main != null) clerk.rotation = Quaternion.Euler(0, main.transform.eulerAngles.y, 0);
         if (blackout) return;
 
         if (flicker) SetLights(Random.value < 0.2f ? 0.15f : 1f);
@@ -514,23 +600,91 @@ public class StoreWorld : MonoBehaviour
         return clip;
     }
 
-    // 발소리: 낮은 '쿵' 소리에 짧은 잡음을 섞는다.
-    static AudioClip Step(string name, int seed, float thump)
+    // 발소리: 신발마다 '쿵' 하는 몸통 소리, 잡음, 딱 소리의 비율을 다르게 섞는다.
+    //   plain    부드러운 쿵 (운동화)          shoes    또렷한 똑 + 쿵 (구두, 뚜벅뚜벅)
+    //   heels    높고 짧은 딱 (또각또각)       boots    무거운 쿵 + 거친 자갈 소리 (저벅저벅)
+    //   slippers 천천히 끌리는 쓱 (질질)
+    static AudioClip Step(string kind, int seed)
     {
         const int rate = 44100;
-        int len = (int)(rate * 0.12f);
-        var data = new float[len];
-        var rng = new System.Random(seed);
+        float len = 0.12f, thump = 100f, thumpDecay = 45f, thumpAmp = 0.7f;
+        float noiseAmp = 0.8f, noiseDecay = 60f, noiseSmooth = 0.85f, attack = 0f;
+        float click = 0f, clickFreq = 0f, clickDecay = 0f;
+        switch (kind)
+        {
+            case "plain": len = 0.10f; thump = 85f; thumpDecay = 40f; thumpAmp = 0.6f; noiseAmp = 0.35f; noiseSmooth = 0.93f; break;
+            case "shoes": len = 0.13f; thump = 180f; thumpDecay = 38f; thumpAmp = 0.6f; noiseAmp = 0.5f; noiseDecay = 90f; noiseSmooth = 0.5f; click = 0.5f; clickFreq = 900f; clickDecay = 120f; break;
+            case "heels": len = 0.08f; thump = 320f; thumpDecay = 70f; thumpAmp = 0.25f; noiseAmp = 0.45f; noiseDecay = 200f; noiseSmooth = 0.1f; click = 0.8f; clickFreq = 2600f; clickDecay = 90f; break;
+            case "boots": len = 0.24f; thump = 70f; thumpDecay = 25f; thumpAmp = 0.8f; noiseAmp = 0.9f; noiseDecay = 16f; noiseSmooth = 0.6f; break;
+            case "slippers": len = 0.20f; thump = 0f; thumpAmp = 0f; noiseAmp = 0.7f; noiseDecay = 14f; noiseSmooth = 0.75f; attack = 0.04f; break;
+        }
+        int n = (int)(rate * len);
+        var data = new float[n];
+        var rng = new System.Random(seed * 31 + kind.Length);
+        float pitch = seed == 1 ? 1f : 0.9f;   // 왼발·오른발을 살짝 다르게
         float noise = 0;
-        for (int i = 0; i < len; i++)
+        for (int i = 0; i < n; i++)
         {
             float t = i / (float)rate;
-            noise = noise * 0.85f + ((float)rng.NextDouble() * 2f - 1f) * 0.15f; // 거친 잡음을 조금 뭉갠다
-            float body = Mathf.Sin(2 * Mathf.PI * thump * t) * Mathf.Exp(-t * 45f);
-            data[i] = (body * 0.7f + noise * Mathf.Exp(-t * 60f) * 1.2f) * 0.8f;
+            float env = attack > 0 ? Mathf.Min(1f, t / attack) : 1f;
+            noise = noise * noiseSmooth + ((float)rng.NextDouble() * 2f - 1f) * (1f - noiseSmooth);
+            float grit = kind == "boots" ? (rng.NextDouble() < 0.08 ? 1.8f : 1f) : 1f;   // 저벅저벅: 자갈 밟는 알갱이
+            float v = Mathf.Sin(2 * Mathf.PI * thump * pitch * t) * Mathf.Exp(-t * thumpDecay) * thumpAmp
+                    + noise * grit * Mathf.Exp(-t * noiseDecay) * noiseAmp * env * 3f;
+            if (click > 0) v += Mathf.Sin(2 * Mathf.PI * clickFreq * pitch * t) * Mathf.Exp(-t * clickDecay) * click;
+            data[i] = Mathf.Clamp(v * 0.7f, -1f, 1f);
         }
-        var clip = AudioClip.Create(name, len, 1, rate, false);
+        var clip = AudioClip.Create("step_" + kind + seed, n, 1, rate, false);
         clip.SetData(data, 0);
         return clip;
+    }
+
+    static float StepVolume(string kind)
+    {
+        switch (kind)
+        {
+            case "plain": return 0.5f;
+            case "slippers": return 0.55f;
+            case "boots": return 0.85f;
+            default: return 0.75f;
+        }
+    }
+
+    // ------------------------------------------------------------ CCTV 속 점원
+
+    // 계산대 뒤 내 자리에 점원을 세운다. CCTV 에만 비치고 메인 카메라에는 그리지 않는다.
+    // 그림자는 남긴다 (CCTV 속 내가 그림자가 없으면 제1조처럼 보인다).
+    void BuildClerk()
+    {
+        var main = Camera.main;
+        if (main == null || customerMaterial == null) return;
+        main.cullingMask &= ~(1 << OnlyCctvLayer);
+
+        clerk = new GameObject("Clerk_CCTV_Only").transform;
+        clerk.SetParent(transform, false);
+        clerk.position = new Vector3(main.transform.position.x, 0, main.transform.position.z);
+
+        var model = CharacterPrefab("clerk");
+        if (model != null) AttachModel(clerk, model);
+        else BuildClerkPrimitive();
+
+        foreach (var r in clerk.GetComponentsInChildren<Renderer>())
+        {
+            r.gameObject.layer = OnlyCctvLayer;
+            r.shadowCastingMode = ShadowCastingMode.On;
+        }
+    }
+
+    void BuildClerkPrimitive()
+    {
+        var shirt = new Color(0.82f, 0.82f, 0.8f);
+        var vest = new Color(0.16f, 0.5f, 0.32f);       // 편의점 조끼
+        Part(PrimitiveType.Capsule, clerk, new Vector3(0, 0.82f, 0), new Vector3(0.5f, 0.62f, 0.32f), customerMaterial, shirt);
+        Part(PrimitiveType.Cube, clerk, new Vector3(0, 0.95f, 0), new Vector3(0.52f, 0.5f, 0.34f), customerMaterial, vest);
+        Part(PrimitiveType.Cube, clerk, new Vector3(0, 0.4f, 0), new Vector3(0.36f, 0.8f, 0.24f), customerMaterial, new Color(0.15f, 0.15f, 0.18f));
+        var head = Part(PrimitiveType.Sphere, clerk, new Vector3(0, 1.6f, 0), new Vector3(0.26f, 0.3f, 0.26f), skinMaterial, Color.white);
+        Part(PrimitiveType.Cube, head.transform, new Vector3(-0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
+        Part(PrimitiveType.Cube, head.transform, new Vector3(0.22f, 0.08f, 0.45f), new Vector3(0.14f, 0.06f, 0.05f), customerMaterial, Color.black);
+        Part(PrimitiveType.Cube, clerk, new Vector3(0.12f, 1.12f, 0.175f), new Vector3(0.1f, 0.05f, 0.01f), customerMaterial, Color.white); // 명찰
     }
 }

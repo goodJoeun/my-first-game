@@ -6,7 +6,7 @@
   "npc": "drunk",
   "trap": true,
   "condition": { "day": 4 },
-  "appearance": { "face": "f_14", "outfit": "suit_shoulder", "prop": "", "fx": [] },
+  "appearance": { "face": "f_14", "outfit": "suit_shoulder", "prop": "", "steps": "shoes", "fx": [] },
   "look": ["양복 상의를 어깨에 걸쳤다. 혀가 꼬였다.", "계산대에 팔꿈치를 대고 기댄다."],
   "items": [
     { "id": "soju", "name": "소주", "qty": 2, "restricted": true },

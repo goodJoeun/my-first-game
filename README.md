@@ -80,6 +80,7 @@ Assets/
 │  ├─ events/            손님(NPC 대사 변형)·전화·브리핑·정산 데이터
 │  ├─ npcs/              NPC 정의 (단골·미성년자·함정·일반·닮은 것)
 │  ├─ endings/           엔딩 9개
+│  ├─ (Characters/)      손님 모델 프리팹 (선택, 아래 '실제 사람 모델로 바꾸기')
 │  └─ rules/             수칙
 ├─ Scenes/Main.unity
 Docs/RULES.md            7일 회차 규칙 (합의한 규칙 전체)
@@ -109,11 +110,32 @@ Docs/RULES.md            7일 회차 규칙 (합의한 규칙 전체)
   - `truth`: `human` / `mimic` / `none`. 정산 리플레이의 정답 판정에 쓰입니다.
   - `clues[].visibility`: 1(숨은 단서, 3초 응시 후 표시) ~ 3(아주 분명)
   - `outcomes.{sell,refuse,alarm,answer,ignore}`: 급여·위험도 증감, 플래그, 다음 날 후속 이벤트
-  - `appearance.fx`: 3D 연출 플래그 (`no_shadow`, `no_door_chime`, `no_cctv`, `light_sway`, `phone_ring`)
+  - `appearance.fx`: 3D 연출 플래그 (`no_shadow`, `no_door_chime`, `no_cctv`, `no_footprints`, `no_footsteps`, `clock_stop`, `light_sway`, `phone_ring`)
+  - `appearance.steps`: 발소리 (`plain` 운동화, `shoes` 구두, `heels` 하이힐, `boots` 작업화·장화, `slippers` 슬리퍼)
 - **날짜** (`Resources/Data/days/dayN.json`): 시간대별 슬롯을 정합니다. `fixed`는 특정 이벤트를 고정하고, `pool: "customer"` / `pool: "phone"`은 회차 배치에서 손님·전화를 꺼냅니다. 그 밖의 `pool`과 `tags`는 조건에 맞는 이벤트 중 하나를 무작위로 고릅니다. `difficulty`의 `mimics`/`mimics_max`, `traps`/`traps_max`는 범위, `clue_visibility`는 그 날 단서 표시의 상한입니다.
 - **수칙** (`Resources/Data/rules/*.json`): `day` 이후부터 수칙 노트에 표시되고, `hidden: true`인 수칙은 노트에 나오지 않습니다.
 
 데이터를 추가한 뒤에는 **Tools > Check Data**로 스키마와 손님 수를 확인하세요. 회차 배치 2,000개를 만들어 규칙 위반과 엔딩 도달 가능성도 같이 검사합니다.
+
+## 실제 사람 모델로 바꾸기
+
+손님은 기본 도형으로 만들어지지만, 모델 프리팹을 넣으면 코드 수정 없이 그 모델로 바뀝니다.
+
+1. 사람 모델을 준비합니다. 스캔 인물 에셋(Renderpeople 등)이나 MakeHuman으로 만든 모델에 Mixamo로 뼈대와 `Idle`·`Walk` 동작을 붙이면 됩니다. 상업적 사용 조건을 확인하세요.
+2. Unity로 가져와 Rig를 **Humanoid**로 설정합니다. 발이 원점, 앞이 +z, 키 약 1.7m가 기준입니다. 단위가 잘못된 모델(100배 등)은 실행할 때 1.7m로 맞춥니다.
+3. Animator Controller에 **float 파라미터 `Speed`**를 만들고 `Speed > 0.1`이면 `Walk`, 아니면 `Idle`로 전환합니다. 게임이 걸을 때 이동 속도(m/s, 비상벨에 도망칠 때는 3.2), 서 있을 때 0을 넣습니다. 위치는 게임이 직접 옮기므로 루트 모션은 쓰지 않습니다.
+4. 프리팹을 `Assets/Resources/Characters/`에 넣습니다. 이름으로 누구의 모델인지 정합니다.
+   - **이벤트 ID** (`D2_N31_yoon_blood.prefab`): 그 대사 변형에만 씁니다.
+   - **NPC ID** (`park.prefab`): 그 NPC의 모든 변형에 씁니다. 이벤트 ID 모델이 없을 때 씁니다.
+   - **`clerk.prefab`**: CCTV에 비치는 점원(나)입니다.
+
+| NPC ID | 넣는 방법 |
+| --- | --- |
+| `park`, `yoon`, `choi` | NPC ID 하나로 넣습니다. 위장 단골도 이 모델을 써야 진짜와 똑같이 보입니다. **위장 이벤트 ID로 따로 만들지 마세요.** |
+| `student`, `highschooler`, `drunk`, `halloween`, `rider`, `hiker`, `collegian`, `parcel`, `gosi`, `grandma`, `smoker` | 변형마다 같은 사람이면 NPC ID, 옷차림이 많이 다르면 이벤트 ID로 넣습니다. |
+| `shadow`, `idcard`, `salt`, `echo`, `cctv`, `silent` (괴물) | 변형마다 다른 사람이므로 **이벤트 ID**로 넣습니다. |
+
+그림자 없음, CCTV에 안 비침, 발자국, 발소리 같은 연출은 모델에도 그대로 적용됩니다. 모델이 없는 손님은 기본 도형으로 나옵니다.
 
 ## 에디터 도구
 
@@ -132,7 +154,7 @@ Docs/RULES.md            7일 회차 규칙 (합의한 규칙 전체)
 
 - [x] 1일차 데이터 (이벤트 12개, 수칙 3개)
 - [x] 하루 흐름: 브리핑 → 근무 → 정산 → 저장
-- [x] 기본 도형 3D 매장과 연출 (그림자, 차임, CCTV, 형광등, 발자국, 발소리, 벽시계)
+- [x] 기본 도형 3D 매장과 연출 (그림자, 차임, CCTV와 CCTV 속 점원, 형광등, 발자국, 신발별 발소리, 벽시계)
 - [x] 위험도와 배드 엔딩
 - [x] 2~7일차 콘텐츠 (NPC 20명, 손님 대사 변형 78개, 전화 11개, 수칙 R02~R09)
 - [x] 무작위 회차 배치와 위장 단골, 윤 간호사 호감도

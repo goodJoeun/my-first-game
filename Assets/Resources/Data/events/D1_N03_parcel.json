@@ -7,7 +7,7 @@
   "placeholder": true,
   "tags": ["parcel"],
   "condition": { "day": 1 },
-  "appearance": { "face": "f_22", "outfit": "padded_vest", "prop": "parcel_box", "fx": [] },
+  "appearance": { "face": "f_22", "outfit": "padded_vest", "prop": "parcel_box", "steps": "plain", "fx": [] },
   "look": ["작은 택배 상자를 든 청년.", "상자에 테이프가 어설프게 붙어 있다."],
   "items": [ { "id": "parcel", "name": "택배 접수(소형)", "qty": 1 } ],
   "payment": "card",

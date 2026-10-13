@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "hiker",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "flashlight", "fx": [] },
+  "appearance": { "face": "f_20", "outfit": "hiking_jacket", "prop": "flashlight", "steps": "boots", "fx": [] },
   "look": ["등산 점퍼에 안경을 쓴 중년 남성.", "새벽 산행 준비인지 손전등을 들고 있다."],
   "items": [ { "id": "water", "name": "생수", "qty": 2 }, { "id": "chocobar", "name": "초코바", "qty": 2 } ],
   "payment": "card",

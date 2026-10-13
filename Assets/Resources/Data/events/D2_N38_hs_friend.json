@@ -6,7 +6,7 @@
   "npc": "highschooler",
   "minor": true,
   "condition": { "day": 2 },
-  "appearance": { "face": "f_12", "outfit": "long_padding", "prop": "school_badge", "fx": [] },
+  "appearance": { "face": "f_12", "outfit": "long_padding", "prop": "school_badge", "steps": "plain", "fx": [] },
   "look": ["교복 위에 롱패딩. 친구 하나가 유리문 밖에서 휴대폰을 보며 기다린다.", "가방에 고등학교 배지가 달려 있다."],
   "items": [ { "id": "beer", "name": "캔맥주", "qty": 4, "restricted": true } ],
   "payment": "card",

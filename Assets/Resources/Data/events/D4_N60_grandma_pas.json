@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "grandma",
   "condition": { "day": 4 },
-  "appearance": { "face": "f_24", "outfit": "flower_pants", "prop": "cart", "fx": [] },
+  "appearance": { "face": "f_24", "outfit": "flower_pants", "prop": "cart", "steps": "slippers", "fx": [] },
   "look": ["꽃무늬 몸빼 바지를 입은 할머니.", "손수레에 폐지가 반쯤 실려 있다."],
   "items": [ { "id": "pas", "name": "파스", "qty": 1 }, { "id": "yogurt", "name": "요구르트", "qty": 2 } ],
   "payment": "현금 (오천 원권 한 장)",

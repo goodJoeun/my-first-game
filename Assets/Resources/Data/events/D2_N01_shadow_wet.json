@@ -5,7 +5,7 @@
   "label": "손님",
   "npc": "shadow",
   "condition": { "day": 2 },
-  "appearance": { "face": "f_07", "outfit": "long_coat", "prop": "umbrella_wet", "fx": ["no_shadow"] },
+  "appearance": { "face": "f_07", "outfit": "long_coat", "prop": "umbrella_wet", "steps": "heels", "fx": ["no_shadow"] },
   "look": ["긴 코트의 여성. 머리카락 끝에서 물이 똑똑 떨어진다.", "밖은 비가 오지 않는다."],
   "items": [ { "id": "water", "name": "생수", "qty": 2 } ],
   "payment": "card",
