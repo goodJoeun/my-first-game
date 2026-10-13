@@ -6,7 +6,7 @@ using UnityEngine;
 // 프로토타입이라 UI 는 IMGUI(OnGUI)로 그린다. 아트가 들어오면 이 부분만 교체하면 된다.
 public class GameController : MonoBehaviour
 {
-    enum Phase { Title, Briefing, Event, Reaction, Settlement, DayEnd, BadEnding, Ending }
+    enum Phase { Title, Briefing, Event, Reaction, Patrol, Settlement, DayEnd, BadEnding, Ending }
 
     const int RiskLimit = 10;
     const float VirtualHeight = 720f;
@@ -39,6 +39,14 @@ public class GameController : MonoBehaviour
     int customerIndex;   // 오늘 배치(plan)에서 다음 손님 순번
     int dayPay;
     readonly List<Record> records = new List<Record>();
+
+    // 순찰 (그 날 한 번)
+    readonly Dictionary<string, AnomalyData> patrolActive = new Dictionary<string, AnomalyData>();   // kind → 데이터
+    readonly List<AnomalyData> patrolFound = new List<AnomalyData>();
+    readonly List<AnomalyData> patrolMissed = new List<AnomalyData>();
+    int patrolFalse;
+    bool patrolDone;
+    string patrolMessage;
     readonly HashSet<string> usedIds = new HashSet<string>();
 
     EventData briefing, settle, current;
@@ -100,6 +108,11 @@ public class GameController : MonoBehaviour
         SaveFile.Save(state);
         dayPay = 0;
         records.Clear();
+        patrolActive.Clear();
+        patrolFound.Clear();
+        patrolMissed.Clear();
+        patrolFalse = 0;
+        patrolDone = false;
         usedIds.Clear();
         slotIndex = -1;
         customerIndex = 0;
@@ -121,6 +134,13 @@ public class GameController : MonoBehaviour
             slotIndex++;
             if (day.slots == null || slotIndex >= day.slots.Length) { EnterSettlement(); return; }
             var slot = day.slots[slotIndex];
+            if (slot.pool == "patrol")
+            {
+                // 3D 매장이 없으면 걸어 다닐 수 없으니 건너뛴다.
+                if (world == null) continue;
+                BeginPatrol(slot.time);
+                return;
+            }
             var ev = ResolveSlot(slot);
             if (ev == null)
             {
@@ -224,6 +244,75 @@ public class GameController : MonoBehaviour
         phase = Phase.Reaction;
     }
 
+    // ---------------------------------------------------------------- 순찰
+
+    void BeginPatrol(string time)
+    {
+        currentTime = time;
+        patrolActive.Clear();
+        var p = state.PlanFor(state.day);
+        var ids = p != null && p.anomalies != null && p.anomalies.Count > 0 ? p.anomalies : FallbackAnomalies();
+        foreach (var id in ids)
+        {
+            AnomalyData a;
+            if (repo.Anomalies.TryGetValue(id, out a) && !patrolActive.ContainsKey(a.kind)) patrolActive[a.kind] = a;
+        }
+        patrolMessage = "계산대를 떠나 매장을 한 바퀴 돈다. 평소와 다른 것이 있으면 바라보고 신고하자.";
+        world.SetClock(time);
+        world.BeginPatrol(new List<string>(patrolActive.Keys));
+        phase = Phase.Patrol;
+    }
+
+    // 예전 저장 파일처럼 배치에 이상현상이 없으면 그 날 나올 수 있는 것 중 하나를 고른다.
+    List<string> FallbackAnomalies()
+    {
+        var list = new List<string>();
+        foreach (var a in repo.Anomalies.Values) if (a.day <= state.day) list.Add(a.id);
+        var pick = new List<string>();
+        if (list.Count > 0) pick.Add(list[Random.Range(0, list.Count)]);
+        return pick;
+    }
+
+    void ReportAnomaly()
+    {
+        string kind = world.Report();
+        AnomalyData a;
+        if (kind == null) patrolMessage = "너무 멀다. 가까이 가서 확인하자.";
+        else if (kind == "" || !patrolActive.TryGetValue(kind, out a))
+        {
+            patrolFalse++;
+            dayPay += RunRules.FalseReportPay;
+            patrolMessage = "…아무 이상도 없다. 괜히 신고했다. (" + Won(RunRules.FalseReportPay, true) + ")";
+        }
+        else
+        {
+            patrolActive.Remove(kind);
+            patrolFound.Add(a);
+            patrolMessage = "신고했다: " + a.label + ". 다시 보니 원래대로 돌아와 있다.";
+        }
+    }
+
+    void EndPatrol()
+    {
+        var missed = world.EndPatrol();
+        foreach (var kind in missed)
+        {
+            AnomalyData a;
+            if (patrolActive.TryGetValue(kind, out a)) patrolMissed.Add(a);
+        }
+        patrolActive.Clear();
+        patrolDone = true;
+        // 놓친 이상현상은 위험도로 돌아온다 (엔딩 조건은 바꾸지 않는다).
+        state.risk = Mathf.Clamp(state.risk + patrolMissed.Count * RunRules.MissedAnomalyRisk, 0, RiskLimit);
+        if (state.risk >= RiskLimit)
+        {
+            world.Blackout();
+            phase = Phase.BadEnding;
+            return;
+        }
+        AdvanceSlot();
+    }
+
     void AfterReaction()
     {
         if (state.risk >= RiskLimit)
@@ -287,6 +376,15 @@ public class GameController : MonoBehaviour
                 sb.AppendLine("<b>단골 근황</b>").AppendLine(settle.regular_news).AppendLine();
         }
 
+        if (patrolDone)
+        {
+            sb.AppendLine("<b>순찰</b>");
+            sb.AppendLine("찾은 이상현상 " + patrolFound.Count + "개, 놓친 이상현상 " + patrolMissed.Count + "개, 오인 신고 " + patrolFalse + "번");
+            foreach (var a in patrolMissed) sb.AppendLine("  놓침: \"" + a.text + "\"  (위험도 +" + RunRules.MissedAnomalyRisk + ")");
+            if (patrolFalse > 0) sb.AppendLine("  오인 신고  " + Won(RunRules.FalseReportPay * patrolFalse, true));
+            sb.AppendLine();
+        }
+
         sb.AppendLine("위험도  " + state.risk + " / " + RiskLimit);
         return sb.ToString();
     }
@@ -318,6 +416,12 @@ public class GameController : MonoBehaviour
 
     void Update()
     {
+        if (phase == Phase.Patrol && world != null)
+        {
+            world.SetPatrolInput(!notesOpen);
+            if (!notesOpen && Input.GetKeyDown(KeyCode.E)) ReportAnomaly();
+            return;
+        }
         if (phase != Phase.Event || current == null) return;
 
         // 손님이 계산대 앞에 도착한 뒤부터 대사와 타이머를 시작한다.
@@ -429,6 +533,7 @@ public class GameController : MonoBehaviour
                 case Phase.Briefing: DrawHud(W); DrawBriefing(W, H); break;
                 case Phase.Event: DrawHud(W); DrawEvent(W, H); break;
                 case Phase.Reaction: DrawHud(W); DrawReaction(W, H); break;
+                case Phase.Patrol: DrawHud(W); DrawPatrol(W, H); break;
                 case Phase.Settlement: DrawHud(W); DrawSettlement(W, H); break;
                 case Phase.DayEnd: DrawDayEnd(W, H); break;
                 case Phase.BadEnding: DrawBadEnding(W, H); break;
@@ -664,6 +769,19 @@ public class GameController : MonoBehaviour
                 if (Mathf.Min(c.visibility, cap) >= 2 || stareShown) sb.AppendLine(c.text);
             }
         GUI.Label(new Rect(px + 14, py + 8, pw - 28, ph - 16), sb.ToString(), obs);
+    }
+
+    void DrawPatrol(float W, float H)
+    {
+        // 조준점: 이 자리를 신고한다
+        Fill(new Rect(W / 2 - 1, H / 2 - 9, 2, 18), new Color(1, 1, 1, 0.8f));
+        Fill(new Rect(W / 2 - 9, H / 2 - 1, 18, 2), new Color(1, 1, 1, 0.8f));
+
+        Fill(new Rect(40, 486, W - 80, 100), Panel);
+        GUI.Label(new Rect(56, 492, W - 112, 30), "<b>새벽 순찰</b>   W/A/S/D: 걷기   마우스 오른쪽 드래그: 둘러보기   E: 바라보는 곳 신고", small);
+        GUI.Label(new Rect(56, 522, W - 112, 60), patrolMessage, label);
+        if (GUI.Button(new Rect(40, 600, 260, 50), "이상 신고 (E)", button)) ReportAnomaly();
+        if (GUI.Button(new Rect(W - 340, 600, 300, 50), "계산대로 돌아가기", button)) EndPatrol();
     }
 
     void DrawReaction(float W, float H)

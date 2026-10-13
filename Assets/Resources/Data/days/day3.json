@@ -2,12 +2,21 @@
   "day": 3,
   "briefing": "D3_00_briefing",
   "new_rules": ["R04", "R05"],
-  "difficulty": { "customers": 6, "mimics": 1, "mimics_max": 2, "traps": 1, "clue_visibility": 2 },
+  "difficulty": {
+    "customers": 6,
+    "mimics": 1,
+    "mimics_max": 2,
+    "traps": 1,
+    "clue_visibility": 2,
+    "anomalies": 1,
+    "anomalies_max": 2
+  },
   "slots": [
     { "time": "00:30", "pool": "customer" },
     { "time": "01:10", "pool": "customer" },
     { "time": "01:50", "pool": "phone" },
     { "time": "02:30", "pool": "customer" },
+    { "time": "02:55", "pool": "patrol" },
     { "time": "03:20", "pool": "customer" },
     { "time": "04:10", "pool": "customer" },
     { "time": "05:00", "pool": "customer" }

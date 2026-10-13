@@ -35,6 +35,15 @@ public static class RunRules
 
     public static readonly string[] Regulars = { "park", "yoon", "choi" };
 
+    // 순찰 이상현상 종류 (StoreWorld.Patrol 에 연출이 있는 것)
+    public static readonly string[] AnomalyKinds =
+    {
+        "light_off", "fridge_open", "counter_object", "standing_figure", "products_reversed", "wet_footprints",
+        "phone_off_hook", "clock_backward", "cctv_figure", "handprints", "empty_shelf", "ceiling_stain",
+    };
+    public const int MissedAnomalyRisk = 1;      // 놓친 이상현상 하나당 위험도
+    public const int FalseReportPay = -2000;     // 멀쩡한 곳을 신고하면
+
     public static bool IsRegular(string npc) { return System.Array.IndexOf(Regulars, npc) >= 0; }
 
     public static bool IsCustomer(EventData e) { return e != null && (e.truth == "human" || e.truth == "mimic"); }

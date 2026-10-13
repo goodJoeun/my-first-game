@@ -23,7 +23,7 @@ public static class DataCheck
             foreach (var s in day.slots)
             {
                 var id = s.@fixed;
-                if (string.IsNullOrEmpty(id)) { if (s.pool != "phone") customers++; continue; }
+                if (string.IsNullOrEmpty(id)) { if (s.pool == "customer") customers++; continue; }
                 var e = repo.Get(id);
                 if (e != null && (e.truth == "human" || e.truth == "mimic")) customers++;
             }
@@ -77,7 +77,22 @@ public static class DataCheck
                 bad += Fail(e.id + ": 윤 간호사 변형에 친절 행동이 없음");
         }
 
-        // 신분증: 카드 화면으로 직접 확인하므로, 카드 내용이 판별 규칙과 맞아야 한다.
+        // 순찰 이상현상: 연출이 있는 종류여야 하고, 순찰 날마다 필요한 수만큼 서로 다른 종류가 있어야 한다.
+        foreach (var a in repo.Anomalies.Values)
+            if (System.Array.IndexOf(RunRules.AnomalyKinds, a.kind) < 0) bad += Fail(a.id + ": 연출이 없는 이상현상 종류 '" + a.kind + "'");
+        foreach (var day in repo.Days.Values)
+        {
+            bool patrol = false;
+            foreach (var s in day.slots) if (s.pool == "patrol") patrol = true;
+            if (!patrol) continue;
+            var kinds = new HashSet<string>();
+            foreach (var a in repo.Anomalies.Values) if (a.day <= day.day) kinds.Add(a.kind);
+            int need = System.Math.Max(day.difficulty.anomalies, day.difficulty.anomalies_max);
+            if (kinds.Count < need) bad += Fail(day.day + "일차 순찰: 이상현상 종류 " + kinds.Count + " < " + need);
+            Debug.Log("DATACHECK day" + day.day + " patrol anomalies=" + day.difficulty.anomalies + "~" + need + " (pool " + kinds.Count + ")");
+        }
+
+        // 신분증: 카드 내용이 판별 규칙과 맞아야 한다.
         var regularCards = new Dictionary<string, string>();
         foreach (var e in repo.Events.Values)
         {

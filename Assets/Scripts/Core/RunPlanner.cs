@@ -12,6 +12,7 @@ public class RunPlanner
         public IDictionary<int, DayData> days;
         public IDictionary<string, NpcData> npcs;
         public IList<RuleData> rules;
+        public IDictionary<string, AnomalyData> anomalies;   // 순찰 이상현상 (없으면 순찰 없음)
     }
 
     // 하루치 실제 배치 (고정 + 풀)
@@ -24,6 +25,8 @@ public class RunPlanner
         public List<EventData> picked = new List<EventData>();   // 풀 슬롯에 넣은 손님
         public List<EventData> pickedPhones = new List<EventData>();
         public List<EventData> ordered = new List<EventData>();   // 슬롯 순서 (Expand 만 채운다)
+        public bool patrol;                                       // 순찰 슬롯이 있는 날
+        public List<string> anomalies = new List<string>();      // 순찰 때 나올 이상현상 ID
     }
 
     const int Attempts = 400;
@@ -110,10 +113,11 @@ public class RunPlanner
         var plan = new List<DayPlan>();
         foreach (var ds in best)
         {
-            if (ds.picked.Count == 0 && ds.pickedPhones.Count == 0) continue;
+            if (ds.picked.Count == 0 && ds.pickedPhones.Count == 0 && ds.anomalies.Count == 0) continue;
             var p = new DayPlan { day = ds.day };
             foreach (var e in ds.picked) p.customers.Add(e.id);
             if (ds.pickedPhones.Count > 0) p.phone = ds.pickedPhones[0].id;
+            p.anomalies.AddRange(ds.anomalies);
             plan.Add(p);
         }
         return plan;
@@ -180,6 +184,7 @@ public class RunPlanner
                     }
                 }
                 else if (s.pool == "customer" || s.pool == "phone") pool = true;
+                else if (s.pool == "patrol") { pool = true; ds.patrol = true; }
             }
             if (pool) poolDays.Add(ds);
         }
@@ -340,6 +345,24 @@ public class RunPlanner
             ds.pickedPhones.Add(pick);
             ds.phones.Add(pick);
         }
+
+        // 7) 순찰: 그 날 나올 수 있는 이상현상 중 난이도 수만큼 (하루에 같은 종류는 한 번)
+        foreach (var ds in poolDays)
+        {
+            if (!ds.patrol || src.anomalies == null) continue;
+            var df = ds.data.difficulty;
+            int n = Range(df.anomalies, System.Math.Max(df.anomalies, df.anomalies_max));
+            var ids = new List<string>();
+            foreach (var a in src.anomalies.Values) if (a.day <= ds.day) ids.Add(a.id);
+            ids.Sort(System.StringComparer.Ordinal);
+            Shuffle(ids);
+            var kinds = new HashSet<string>();
+            foreach (var id in ids)
+            {
+                if (ds.anomalies.Count >= n) break;
+                if (kinds.Add(src.anomalies[id].kind)) ds.anomalies.Add(id);
+            }
+        }
         return sched;
     }
 
@@ -477,6 +500,8 @@ public class RunPlanner
             var ds = new DaySchedule { day = d, data = src.days[d] };
             DayPlan p = null;
             foreach (var x in plan) if (x.day == d) p = x;
+            if (p != null && p.anomalies != null) ds.anomalies.AddRange(p.anomalies);
+            if (ds.data.slots != null) foreach (var s in ds.data.slots) if (s.pool == "patrol") ds.patrol = true;
             int ci = 0;
             if (ds.data.slots != null)
                 foreach (var s in ds.data.slots)
@@ -543,6 +568,20 @@ public class RunPlanner
             }
 
             var df = ds.data.difficulty;
+            if (ds.patrol && src.anomalies != null)
+            {
+                int aMax = System.Math.Max(df.anomalies, df.anomalies_max);
+                if (ds.anomalies.Count < df.anomalies || ds.anomalies.Count > aMax)
+                    hard.Add(d + "일차 순찰 이상현상 " + ds.anomalies.Count + " (" + df.anomalies + "~" + aMax + "이어야 함)");
+                var kinds = new HashSet<string>();
+                foreach (var id in ds.anomalies)
+                {
+                    AnomalyData a;
+                    if (!src.anomalies.TryGetValue(id, out a)) { hard.Add(d + "일차 순찰: 없는 이상현상 " + id); continue; }
+                    if (a.day > d) hard.Add(id + " 는 " + d + "일차 순찰에 나올 수 없음");
+                    if (!kinds.Add(a.kind)) hard.Add(d + "일차 순찰에 " + a.kind + " 가 두 번 나옴");
+                }
+            }
             int mMax = System.Math.Max(df.mimics, df.mimics_max), tMax = System.Math.Max(df.traps, df.traps_max);
             if (mon < df.mimics || mon > mMax) soft.Add(d + "일차 닮은 것 " + mon + " (표: " + df.mimics + "~" + mMax + ")");
             if (trap < df.traps || trap > tMax) soft.Add(d + "일차 함정 " + trap + " (표: " + df.traps + "~" + tMax + ")");

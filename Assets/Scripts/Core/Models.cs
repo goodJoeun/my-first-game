@@ -197,6 +197,19 @@ public class Difficulty
     public int traps;           // 함정 수 (하한)
     public int traps_max;       // 0 이면 traps 와 같다
     public int clue_visibility; // 1(미묘함) ~ 3(아주 분명). 단서 표시의 상한으로 쓴다
+    public int anomalies;       // 순찰 때 이상현상 수 (하한)
+    public int anomalies_max;   // 0 이면 anomalies 와 같다
+}
+
+// 순찰 때 찾아야 하는 이상현상. 연출은 StoreWorld.Patrol 의 kind 별 코드가 맡는다.
+[Serializable]
+public class AnomalyData
+{
+    public string id;
+    public string kind;         // RunRules.AnomalyKinds 중 하나
+    public int day;             // 이 날부터 나온다
+    public string label;        // 신고했을 때 보이는 이름
+    public string text;         // 놓쳤을 때 정산 리플레이 문구
 }
 
 [Serializable]
@@ -246,6 +259,7 @@ public class DayPlan
     public int day;
     public List<string> customers = new List<string>();
     public string phone;
+    public List<string> anomalies = new List<string>();   // 순찰 때 나올 이상현상 ID
 }
 
 [Serializable]

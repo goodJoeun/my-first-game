@@ -19,7 +19,7 @@ using UnityEngine.Rendering;
 //   phone_ring     계산대 전화가 울림
 // 발자국: 들어올 때는 모든 손님이 찍는다 (no_footprints 괴물만 예외 — 그 괴물의 단서).
 //         나갈 때는 사람 손님만 찍는다 (선택한 뒤라 판별 단서가 아니다). 다음 손님이 오면 지운다.
-public class StoreWorld : MonoBehaviour
+public partial class StoreWorld : MonoBehaviour
 {
     const int HiddenFromCctvLayer = 31;
     const int OnlyCctvLayer = 30;   // 점원(플레이어): CCTV 에만 비치고 내 시점에는 안 보인다
@@ -91,6 +91,7 @@ public class StoreWorld : MonoBehaviour
         foreach (var kind in new[] { "plain", "shoes", "heels", "boots", "slippers" })
             stepClips[kind] = new[] { Step(kind, 1), Step(kind, 2) };
         BuildClock();
+        SetupWalkable();   // 순찰 (StoreWorld.Patrol.cs)
 
         if (windowGlass != null)
         {
@@ -112,6 +113,7 @@ public class StoreWorld : MonoBehaviour
 
     public void ResetDay()
     {
+        if (patrolling) EndPatrol();
         StopAllCoroutines();
         ClearCustomer();
         foreach (var o in dayObjects) Destroy(o);
@@ -405,7 +407,8 @@ public class StoreWorld : MonoBehaviour
         SetLights(0f);
         yield return new WaitForSeconds(0.5f);
         if (customer == c) ClearCustomer();
-        // 괴물은 발자국 하나 남기지 않는다.
+        // 불이 꺼진 사이 들어올 때 찍힌 발자국까지 사라진다: 다시 켜지면 바닥이 말라 있다.
+        ClearFootprints();
         yield return new WaitForSeconds(0.25f);
         SetLights(1f);
     }
@@ -506,6 +509,12 @@ public class StoreWorld : MonoBehaviour
         for (int i = 0; i < lights.Length; i++) lights[i].intensity = baseIntensity[i] * k;
         foreach (var r in lightTubes)
             if (r != null) r.material.SetColor("_EmissionColor", Color.white * (k > 0.5f ? 1.4f : 0.05f));
+        // 이상현상: 매장 안쪽 형광등이 꺼져 있다 (lights[1] = StoreLight, lightTubes[1] = Tube_Store)
+        if (storeLightOff && lights.Length > 1 && lightTubes.Length > 1)
+        {
+            lights[1].intensity = 0f;
+            if (lightTubes[1] != null) lightTubes[1].material.SetColor("_EmissionColor", Color.white * 0.02f);
+        }
     }
 
     void RingPhone(bool on)
@@ -517,6 +526,7 @@ public class StoreWorld : MonoBehaviour
     void Update()
     {
         UpdateClock();
+        UpdatePatrol();
         // CCTV 속 점원은 내가 보는 방향으로 몸을 돌린다.
         var main = Camera.main;
         if (clerk != null && main != null) clerk.rotation = Quaternion.Euler(0, main.transform.eulerAngles.y, 0);
@@ -571,6 +581,7 @@ public class StoreWorld : MonoBehaviour
         }
         float minutes = CurrentClockMinutes();
         float seconds = Mathf.Floor((Time.time - clockSince) % 60f);  // 초침은 한 칸씩 똑딱 움직인다
+        if (clockReverse) seconds = -seconds;                           // 이상현상: 거꾸로 도는 초침
         // 바라보는 사람 기준 시계 방향 = z 축 음의 회전
         secondHand.localRotation = Quaternion.Euler(0, 0, -seconds * 6f);
         minuteHand.localRotation = Quaternion.Euler(0, 0, -(minutes % 60f) * 6f);
