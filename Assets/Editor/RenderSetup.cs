@@ -38,6 +38,7 @@ public static class RenderSetup
         renderer.renderingMode = RenderingMode.ForwardPlus;
         if (renderer.postProcessData == null) renderer.postProcessData = AssetDatabase.LoadAssetAtPath<PostProcessData>(DefaultPostProcessData);
         EnsureSsao(renderer);
+        EnsureDecals(renderer);
         EditorUtility.SetDirty(renderer);
 
         string assetPath = Dir + "/URP_Asset.asset";
@@ -79,6 +80,28 @@ public static class RenderSetup
         return asset;
     }
 
+    // 데칼(바닥 때·자국)을 그리는 기능. 설정은 기본값(자동 방식)으로 둔다.
+    static void EnsureDecals(UniversalRendererData renderer)
+    {
+        if (renderer.rendererFeatures.Exists(f => f is DecalRendererFeature)) return;
+        AddFeature(renderer, ScriptableObject.CreateInstance<DecalRendererFeature>(), "Decal");
+    }
+
+    static void AddFeature(UniversalRendererData renderer, ScriptableRendererFeature feature, string name)
+    {
+        feature.name = name;
+        AssetDatabase.AddObjectToAsset(feature, renderer);
+        renderer.rendererFeatures.Add(feature);
+        string guid;
+        long localId;
+        AssetDatabase.TryGetGUIDAndLocalFileIdentifier(feature, out guid, out localId);
+        var rso = new SerializedObject(renderer);
+        var map = rso.FindProperty("m_RendererFeatureMap");
+        map.InsertArrayElementAtIndex(map.arraySize);
+        map.GetArrayElementAtIndex(map.arraySize - 1).longValue = localId;
+        rso.ApplyModifiedPropertiesWithoutUndo();
+    }
+
     // 화면 공간 AO: 상품 사이, 진열대 아래, 손님 발밑처럼 라이트맵에 굽지 않는 곳의 접촉 그늘.
     // URP 의 SSAO 기능 클래스가 internal 이라 이름으로 찾아 만든다.
     static void EnsureSsao(UniversalRendererData renderer)
@@ -89,22 +112,15 @@ public static class RenderSetup
         if (feature == null)
         {
             feature = (ScriptableRendererFeature)ScriptableObject.CreateInstance(type);
-            feature.name = "ScreenSpaceAmbientOcclusion";
-            AssetDatabase.AddObjectToAsset(feature, renderer);
-            renderer.rendererFeatures.Add(feature);
-            string guid;
-            long localId;
-            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(feature, out guid, out localId);
-            var rso = new SerializedObject(renderer);
-            var map = rso.FindProperty("m_RendererFeatureMap");
-            map.InsertArrayElementAtIndex(map.arraySize);
-            map.GetArrayElementAtIndex(map.arraySize - 1).longValue = localId;
-            rso.ApplyModifiedPropertiesWithoutUndo();
+            AddFeature(renderer, feature, "ScreenSpaceAmbientOcclusion");
         }
         var fso = new SerializedObject(feature);
-        SetFloat(fso, "m_Settings.Intensity", 1.2f);
-        SetFloat(fso, "m_Settings.Radius", 0.25f);
-        SetFloat(fso, "m_Settings.DirectLightingStrength", 0.6f);
+        // 반경을 크게 잡으면 표본이 모자라 진열대 면이 얼룩덜룩해진다. 접촉 그늘 정도로만 쓴다.
+        SetFloat(fso, "m_Settings.Intensity", 1.0f);
+        SetFloat(fso, "m_Settings.Radius", 0.12f);
+        SetFloat(fso, "m_Settings.DirectLightingStrength", 0.5f);
+        var samples = fso.FindProperty("m_Settings.Samples");
+        if (samples != null) samples.enumValueIndex = 0;   // High (12 표본)
         fso.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(feature);
     }

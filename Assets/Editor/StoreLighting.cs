@@ -58,6 +58,7 @@ public static class StoreLighting
 
     // 굽는 상자는 크기를 메시에 넣고 라이트맵 UV 를 새로 편다.
     // (기본 큐브를 늘리면 넓은 바닥 면과 1cm 모서리가 라이트맵에서 같은 넓이를 차지해 바닥이 뭉개진다.)
+    // 텍스처 UV 는 면마다 미터 단위로 다시 매겨서, 상자 크기와 관계없이 타일 크기가 같게 보인다 (StoreSurfaces).
     static void MarkStatic(Transform store)
     {
         if (!AssetDatabase.IsValidFolder("Assets/Art/Meshes")) AssetDatabase.CreateFolder("Assets/Art", "Meshes");
@@ -82,7 +83,15 @@ public static class StoreLighting
                     var v = mesh.vertices;
                     for (int i = 0; i < v.Length; i++) v[i] = Vector3.Scale(v[i], s);
                     mesh.vertices = v;
+                    var n = mesh.normals;
+                    var uv = new Vector2[v.Length];
+                    for (int i = 0; i < v.Length; i++)
+                        uv[i] = Mathf.Abs(n[i].y) > 0.5f ? new Vector2(v[i].x, v[i].z)
+                              : Mathf.Abs(n[i].x) > 0.5f ? new Vector2(v[i].z, v[i].y)
+                              : new Vector2(v[i].x, v[i].y);
+                    mesh.uv = uv;
                     mesh.RecalculateBounds();
+                    mesh.RecalculateTangents();
                     Unwrapping.GenerateSecondaryUVSet(mesh);
                     if (container == null) { AssetDatabase.CreateAsset(mesh, MeshPath); container = mesh; }
                     else AssetDatabase.AddObjectToAsset(mesh, container);

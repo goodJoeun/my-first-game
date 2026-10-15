@@ -38,9 +38,15 @@ public static class SceneBuilder
 
         // --- 바닥 / 벽 / 천장 (StoreLayout: 가로 12m, 깊이 12m)
         float W = StoreLayout.HalfWidth * 2f, mid = StoreLayout.MidZ, depth = StoreLayout.Depth, front = StoreLayout.FrontZ;
-        Box(store, "Floor", new Vector3(0, -0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Floor", new Color(0.64f, 0.63f, 0.6f), 0.62f));
-        Box(store, "Ceiling", new Vector3(0, StoreLayout.Height + 0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Ceiling", new Color(0.88f, 0.88f, 0.86f)));
-        var wall = Mat("Wall", new Color(0.86f, 0.87f, 0.83f));
+        // 사진 질감: 40cm 테라조 타일 바닥, 60cm 텍스 타일 천장, 흰 페인트 벽 (StoreSurfaces, 출처 Textures/CREDITS.md)
+        var floorMat = Mat("Floor", new Color(0.86f, 0.85f, 0.82f), 0.62f);
+        StoreSurfaces.Apply(floorMat, "Floor_Terrazzo", 3.2f, 0.3f, 0.95f);
+        Box(store, "Floor", new Vector3(0, -0.05f, mid), new Vector3(W, 0.1f, depth), floorMat);
+        var ceilingMat = Mat("Ceiling", new Color(0.9f, 0.9f, 0.88f));
+        StoreSurfaces.Apply(ceilingMat, "Ceiling_Tile", 3.6f, 0.8f, 0.5f);
+        Box(store, "Ceiling", new Vector3(0, StoreLayout.Height + 0.05f, mid), new Vector3(W, 0.1f, depth), ceilingMat);
+        var wall = Mat("Wall", new Color(0.9f, 0.9f, 0.87f));
+        StoreSurfaces.Apply(wall, "Wall_Plaster", 2f, 0.35f, 0.5f);
         Box(store, "Wall_Back", new Vector3(0, 1.5f, StoreLayout.BackZ - 0.05f), new Vector3(W, 3, 0.1f), wall);
         Box(store, "Wall_Left", new Vector3(-StoreLayout.HalfWidth - 0.05f, 1.5f, mid), new Vector3(0.1f, 3, depth), wall);
         Box(store, "Wall_Right", new Vector3(StoreLayout.HalfWidth + 0.05f, 1.5f, mid), new Vector3(0.1f, 3, depth), wall);
@@ -231,6 +237,9 @@ public static class SceneBuilder
             tubeList.Add(Fixture(store, "Store_" + i, lp, fixtureMat, tubeMat));
         }
         lightList.Add(NewLight(store, "BackLight", LightType.Point, new Vector3(0, 2.6f, -1.3f), new Color(1f, 0.95f, 0.85f), 0.5f, 3.5f, LightShadows.None));
+
+        // --- 생활감: 바닥 때, 신발 자국, 벽·진열대 밑 때, 커피 얼룩
+        StoreSurfaces.AddDecals(store);
 
         // --- 위치 표식
         var points = new GameObject("Points").transform;
