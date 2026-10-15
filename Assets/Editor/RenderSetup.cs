@@ -150,6 +150,9 @@ public static class RenderSetup
         var data = cam.GetUniversalAdditionalCameraData();
         data.renderPostProcessing = true;
         data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+        // 손전등이 유리·창문에 정반사되면 하이라이트가 HDR 한계를 넘어 무한대/NaN 이 되고,
+        // 블룸이 그 한 점을 화면 전체로 번져 색 보정 표의 엉뚱한 색(민트색)으로 칠한다. NaN·무한대를 검게 막는다.
+        data.stopNaN = true;
 
         string path = Dir + "/NightShift_Volume.asset";
         AssetDatabase.DeleteAsset(path);
@@ -162,6 +165,7 @@ public static class RenderSetup
         bloom.intensity.Override(0.35f);
         bloom.threshold.Override(1.0f);
         bloom.scatter.Override(0.65f);
+        bloom.clamp.Override(40f);   // 블룸이 받는 밝기 상한 (정반사 하이라이트가 화면을 뒤덮지 않게)
         var color = profile.Add<ColorAdjustments>(true);
         color.postExposure.Override(-0.2f);
         color.contrast.Override(8f);

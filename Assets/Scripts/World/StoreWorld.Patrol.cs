@@ -10,6 +10,7 @@ using UnityEngine;
 public partial class StoreWorld
 {
     const float WalkSpeed = 1.8f;
+    const float RunSpeed = 3.6f;   // 왼쪽 Shift 를 누르고 있으면
     const float ReportRange = 7f;
     const float AimRadius = 0.12f;
 
@@ -79,6 +80,7 @@ public partial class StoreWorld
     public void BeginPatrol(IList<string> kinds, bool outside = false)
     {
         ClearCustomer();
+        ClearLeavers();
         ClearFootprints();
         var main = Camera.main;
         if (main == null) return;
@@ -219,11 +221,12 @@ public partial class StoreWorld
         t.rotation = Quaternion.Euler(patrolPitch, patrolYaw, 0);
 
         var move = Vector3.zero;
+        bool run = patrolInput && Input.GetKey(KeyCode.LeftShift);
         if (patrolInput)
         {
             var input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
             if (input.sqrMagnitude > 1f) input.Normalize();
-            move = Quaternion.Euler(0, patrolYaw, 0) * input * WalkSpeed;
+            move = Quaternion.Euler(0, patrolYaw, 0) * input * (run ? RunSpeed : WalkSpeed);
         }
         fallSpeed = walker.isGrounded ? -1f : fallSpeed - 9.8f * Time.deltaTime;
         var before = t.position;
@@ -231,7 +234,7 @@ public partial class StoreWorld
         var d = t.position - before;
         d.y = 0;
         walked += d.magnitude;
-        if (walked >= StepLength)
+        if (walked >= (run ? StepLength * 1.7f : StepLength))   // 뛸 때는 보폭이 넓다
         {
             walked = 0;
             playerStep ^= 1;

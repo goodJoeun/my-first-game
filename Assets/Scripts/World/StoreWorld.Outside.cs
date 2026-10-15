@@ -25,6 +25,11 @@ public partial class StoreWorld
     Color savedFogColor;
 
     const float OutsideFogDensity = 0.065f;
+    const float FlashlightOn = 26f;
+    // 손전등을 끌 때 Light.enabled 를 끄지 않고 세기만 거의 0 으로 낮춘다.
+    // 조명을 켜고 끄면 URP Forward+ 의 조명 목록 순서가 한 칸씩 밀려, 그 프레임에 손전등이 비추던 화면 전체가
+    // 다른 조명(뒷문 보안등 같은 민트색)의 색으로 칠해지는 일이 있었다. 목록이 바뀌지 않게 늘 켜 둔다.
+    const float FlashlightOff = 0.001f;
 
     // Awake 에서 부른다 (SetupWalkable 다음).
     void SetupOutside()
@@ -55,13 +60,12 @@ public partial class StoreWorld
             flashlight = go.AddComponent<Light>();
             flashlight.type = LightType.Spot;
             flashlight.color = new Color(1f, 0.95f, 0.85f);
-            flashlight.intensity = 26f;
+            flashlight.intensity = FlashlightOff;
             flashlight.range = 20f;
             flashlight.spotAngle = 55f;
             flashlight.innerSpotAngle = 22f;
             flashlight.shadows = LightShadows.Soft;
             flashlight.shadowStrength = 0.9f;
-            flashlight.enabled = false;
         }
         var unlit = Shader.Find("Universal Render Pipeline/Unlit");
         glowMaterial = new Material(unlit != null ? unlit : Shader.Find("Unlit/Color"));
@@ -93,7 +97,9 @@ public partial class StoreWorld
         RenderSettings.fogDensity = OutsideFogDensity;
         RenderSettings.fogColor = new Color(0.012f, 0.014f, 0.02f);
 
-        if (flashlight != null) flashlight.enabled = true;
+        // 창밖에 서서 지켜보던 손님(거절당한 괴물)은 바깥 순찰 동안 숨긴다 — 바깥엔 원래 아무도 없다 (R11)
+        foreach (var o in dayObjects) if (o != null) o.SetActive(false);
+        SetFlashlight(true);
         if (ambience != null && windClip != null) { ambience.clip = windClip; ambience.Play(); }
         nextAlleyFlicker = Time.time + Random.Range(2f, 6f);
         nextBlink = Time.time + Random.Range(2f, 4f);
@@ -108,7 +114,8 @@ public partial class StoreWorld
         RenderSettings.fogEndDistance = savedFogEnd;
         RenderSettings.fogDensity = savedFogDensity;
         RenderSettings.fogColor = savedFogColor;
-        if (flashlight != null) flashlight.enabled = false;
+        SetFlashlight(false);
+        foreach (var o in dayObjects) if (o != null) o.SetActive(true);
         if (ambience != null) ambience.Stop();
         if (alleyLight != null) alleyLight.intensity = alleyBase;
         blinkers.Clear();
@@ -116,7 +123,7 @@ public partial class StoreWorld
 
     void UpdateOutside()
     {
-        if (patrolInput && flashlight != null && Input.GetKeyDown(KeyCode.F)) flashlight.enabled = !flashlight.enabled;
+        if (patrolInput && flashlight != null && Input.GetKeyDown(KeyCode.F)) SetFlashlight(!FlashlightLit);
 
         // 골목 보안등은 늘 가끔 깜빡인다 (이상현상 아님)
         if (alleyLight != null)
@@ -136,6 +143,13 @@ public partial class StoreWorld
             bool open = Time.time >= blinkUntil;
             foreach (var r in blinkers) if (r != null) r.enabled = open;
         }
+    }
+
+    bool FlashlightLit { get { return flashlight != null && flashlight.intensity > FlashlightOff * 2f; } }
+
+    void SetFlashlight(bool on)
+    {
+        if (flashlight != null) flashlight.intensity = on ? FlashlightOn : FlashlightOff;
     }
 
     // 바깥 이상현상. kind 가 바깥 종류가 아니면 false.

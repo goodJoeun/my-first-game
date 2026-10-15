@@ -955,7 +955,7 @@ public class GameController : MonoBehaviour
         }
 
         Fill(new Rect(40, 486, W - 80, 100), Panel);
-        GUI.Label(new Rect(56, 492, W - 112, 30), (patrolOutside ? "<b>바깥 순찰</b>" : "<b>새벽 순찰</b>") + "   W/A/S/D: 걷기   마우스 오른쪽 드래그: 둘러보기   E: 바라보는 곳 신고" + (patrolOutside ? "   F: 손전등" : ""), small);
+        GUI.Label(new Rect(56, 492, W - 112, 30), (patrolOutside ? "<b>바깥 순찰</b>" : "<b>새벽 순찰</b>") + "   W/A/S/D: 걷기   Shift: 빨리 걷기   마우스 오른쪽 드래그: 둘러보기   E: 바라보는 곳 신고" + (patrolOutside ? "   F: 손전등" : ""), small);
         GUI.Label(new Rect(56, 522, W - 112, 60), patrolMessage, label);
         if (GUI.Button(new Rect(40, 600, 260, 50), "이상 신고 (E)", button)) ReportAnomaly();
         if (GUI.Button(new Rect(W - 340, 600, 300, 50), patrolOutside ? "매장으로 돌아가기" : "계산대로 돌아가기", button)) EndPatrol();

@@ -54,6 +54,9 @@ public partial class StoreWorld : MonoBehaviour
     GameObject customer;
     readonly List<GameObject> spawned = new List<GameObject>();
     readonly List<GameObject> dayObjects = new List<GameObject>();
+    readonly List<GameObject> leavers = new List<GameObject>();   // 계산을 마치고 매장 밖 길로 걸어 나가는 손님
+    readonly Dictionary<Transform, float> paces = new Dictionary<Transform, float>();   // 손님마다 걷는 속도 (m/s)
+    readonly Dictionary<Transform, Vector3> walkOffsets = new Dictionary<Transform, Vector3>();   // 다른 손님을 피해 길에서 비켜선 만큼 (구간이 바뀌어도 이어진다)
     readonly List<GameObject> footprints = new List<GameObject>();
     float[] baseIntensity;
     Quaternion counterLightRot;
@@ -121,10 +124,13 @@ public partial class StoreWorld : MonoBehaviour
         if (patrolling) EndPatrol();
         StopAllCoroutines();
         ClearCustomer();
+        ClearLeavers();
         foreach (var o in dayObjects) Destroy(o);
         dayObjects.Clear();
         ClearFootprints();
         walkerSteps.Clear();
+        paces.Clear();
+        walkOffsets.Clear();
         modelWalkers.Clear();
         clockStopped = false;
         flicker = sway = blackout = false;
@@ -170,6 +176,7 @@ public partial class StoreWorld : MonoBehaviour
         }
 
         customer = BuildCustomer(e);
+        paces[customer.transform] = PaceOf(e);
         walkerSteps[customer.transform] = HasFx(e, "no_footsteps") ? "none"
             : (e.appearance != null && !string.IsNullOrEmpty(e.appearance.steps) && stepClips.ContainsKey(e.appearance.steps) ? e.appearance.steps : "plain");
         if (HasFx(e, "clock_stop")) { SetClock(null); clockStopped = true; } // 지금 시각에서 멈춘다
@@ -187,12 +194,12 @@ public partial class StoreWorld : MonoBehaviour
         if (customer == null) return;
 
         bool mimic = e.truth == "mimic";
-        if (!mimic) StartCoroutine(LeaveFootprints(customer.transform));
+        var prints = mimic ? null : StartCoroutine(LeaveFootprints(customer.transform));
         if (choice == "alarm")
         {
             PlayOnce(alarm);
             if (mimic) StartCoroutine(Vanish());
-            else StartCoroutine(Walk(customer.transform, doorOutside.position, 3.2f, true));
+            else StartCoroutine(Leave(Mathf.Max(2.8f, Pace(customer.transform) * 1.6f), prints));   // 비상벨에 놀라 뛰어 나간다
         }
         else if (choice == "refuse" && mimic)
         {
@@ -200,7 +207,7 @@ public partial class StoreWorld : MonoBehaviour
         }
         else
         {
-            StartCoroutine(Walk(customer.transform, doorOutside.position, Random.Range(1.4f, 2.0f), true));
+            StartCoroutine(Leave(Pace(customer.transform) * Random.Range(0.95f, 1.05f), prints));
         }
     }
 
@@ -363,13 +370,33 @@ public partial class StoreWorld : MonoBehaviour
 
     // 들어오는 길: 사람마다 머뭇거림, 걷는 속도, 둘러보는 곳이 다르다.
     // 사람과 괴물이 똑같이 고르므로 들어오는 모습은 판별 단서가 아니다.
+    // 매장 밖 길(왼쪽·오른쪽 인도 끝, 길 건너편 횡단보도)에서 걸어와 문 앞에서 잠깐 멈췄다가 들어온다.
     IEnumerator Enter(EventData e)
     {
         var c = customer;
-        yield return new WaitForSeconds(Random.Range(0.2f, 2.0f));   // 문 앞에서 잠깐
+        var approach = ApproachRoute();
+        c.transform.position = approach[0];
+        float pace = Pace(c.transform);
+        float walkOutside = pace * Random.Range(1.0f, 1.1f);   // 바깥에서는 조금 더 서두른다
+        var door = approach[approach.Count - 1];
+        for (int i = 1; i < approach.Count - 1; i++)
+        {
+            yield return Walk(c.transform, approach[i], walkOutside, false);
+            if (c == null || c != customer) yield break;
+        }
+        // 문 바로 앞이 아니라 문 옆(걸어온 쪽)에서 잠깐 멈춘다. 나가는 사람이 있으면 먼저 지나가게 기다린다.
+        float side = c.transform.position.x - door.x;
+        side = Mathf.Abs(side) > 0.2f ? Mathf.Sign(side) : (Random.value < 0.5f ? -1f : 1f);
+        yield return Walk(c.transform, door + new Vector3(side * 0.95f, 0, 0.45f), walkOutside, false);
+        if (c == null || c != customer) yield break;
+        Face(c.transform, counterSpot.position);
+        yield return new WaitForSeconds(Random.Range(0.2f, 1.0f));   // 문 앞에서 잠깐
+        for (float waited = 0; waited < 8f && LeaverNear(door, 2.6f); waited += Time.deltaTime) yield return null;
+        if (c == null || c != customer) yield break;
+        yield return Walk(c.transform, door, walkOutside, false);
         if (c == null || c != customer) yield break;
         if (!HasFx(e, "no_door_chime")) PlayOnce(chime);
-        float speed = Random.Range(1.4f, 2.1f);
+        float speed = pace * Random.Range(0.93f, 1.03f);
         var prints = HasFx(e, "no_footprints") ? null : StartCoroutine(LeaveFootprints(c.transform));
         foreach (var step in EntryRoute())
         {
@@ -389,19 +416,31 @@ public partial class StoreWorld : MonoBehaviour
         CustomerArrived = true;
     }
 
+    // 다른 손님을 피해 가며 걷는다 (Avoid). 빨리 걷는 사람은 보폭도 넓다.
     IEnumerator Walk(Transform t, Vector3 target, float speed, bool destroyAtEnd)
     {
         Face(t, target);
         SetSpeed(t, speed);
         var start = t.position;
+        Vector3 offset;
+        walkOffsets.TryGetValue(t, out offset);
+        start -= offset;   // 길 위의 점 (지금 비켜서 있는 만큼을 뺀다)
         float dist = Vector3.Distance(start, target), d = 0;
+        var dir = target - start;
+        dir.y = 0;
+        dir = dir.sqrMagnitude > 0.000001f ? dir.normalized : t.forward;
+        var right = Vector3.Cross(Vector3.up, dir);
+        float stride = Mathf.Clamp(0.3f + speed * 0.15f, 0.4f, 0.8f);
         int stepIndex = 0;
         while (d < dist)
         {
             if (t == null) yield break;
-            d = Mathf.Min(dist, d + speed * Time.deltaTime);
+            float want, slow;
+            Avoid(t, t.position, dir, right, out want, out slow);
+            offset = Vector3.MoveTowards(offset, right * want, 1.6f * Time.deltaTime);
+            d = Mathf.Min(dist, d + speed * slow * Time.deltaTime);
             // 보폭마다 신발에 맞는 발소리 (no_footsteps 손님은 소리가 없다)
-            int s = (int)(d / StepLength);
+            int s = (int)(d / stride);
             if (s != stepIndex)
             {
                 stepIndex = s;
@@ -409,16 +448,145 @@ public partial class StoreWorld : MonoBehaviour
                 if (!walkerSteps.TryGetValue(t, out kind)) kind = "plain";
                 if (kind != "none") AudioSource.PlayClipAtPoint(stepClips[kind][s % 2], t.position, StepVolume(kind));
             }
-            var p = Vector3.Lerp(start, target, d / dist);
+            var p = Vector3.Lerp(start, target, d / dist) + offset;
             // 기본 도형은 위아래로 살짝 흔들어 걷는 느낌을 낸다 (모델은 애니메이션이 한다)
             p.y = start.y + (modelWalkers.Contains(t) ? 0f : Mathf.Abs(Mathf.Sin(d * 5f)) * 0.04f);
             t.position = p;
             yield return null;
         }
         if (t == null) yield break;
-        t.position = target;
+        t.position = target + offset;
+        walkOffsets[t] = offset;
         SetSpeed(t, 0f);
         if (destroyAtEnd && t.gameObject == customer) ClearCustomer();
+    }
+
+    // 걸음 속도 (m/s): 손님마다 다르고 같은 사람(NPC)은 늘 같다. 빠른 사람 20%, 보통 60%, 느린 사람 20%.
+    // 나이 많은 사람과 슬리퍼는 느리고 젊은 사람은 조금 빠르다. 사람과 괴물(위장 단골 포함)이 같은 규칙이라 판별 단서가 아니다.
+    static float PaceOf(EventData e)
+    {
+        var rng = new System.Random(((string.IsNullOrEmpty(e.npc) ? e.id : e.npc) + "/pace").GetHashCode());
+        double roll = rng.NextDouble();
+        float k = (float)rng.NextDouble();
+        float pace = roll < 0.2 ? Mathf.Lerp(2.3f, 2.9f, k) : roll < 0.8 ? Mathf.Lerp(1.4f, 1.9f, k) : Mathf.Lerp(1.0f, 1.3f, k);
+        var ap = e.appearance;
+        if (ap != null)
+        {
+            if (ap.age >= 60) pace *= 0.8f;
+            else if (ap.age > 0 && ap.age < 25) pace *= 1.08f;
+            if (ap.steps == "slippers") pace *= 0.85f;
+            else if (ap.steps == "heels") pace *= 0.95f;
+        }
+        return Mathf.Clamp(pace, 0.9f, 3.0f);
+    }
+
+    float Pace(Transform t)
+    {
+        float p;
+        return t != null && paces.TryGetValue(t, out p) ? p : 1.6f;
+    }
+
+    // 지금 걷거나 서 있는 손님들 (계산대 손님, 나가는 손님, 창밖에서 지켜보는 것)
+    IEnumerable<Transform> Crowd()
+    {
+        if (customer != null) yield return customer.transform;
+        foreach (var o in leavers) if (o != null) yield return o.transform;
+        foreach (var o in dayObjects) if (o != null && o.activeInHierarchy) yield return o.transform;
+    }
+
+    // 겹치지 않게: 앞 2m 안에서 길을 막는 사람이 있으면 그 반대쪽으로 비켜서고(가운데면 오른쪽 — 마주 오면 둘 다 자기 오른쪽으로 지나간다),
+    // 바로 앞이면 걸음을 늦춘다. 들어오는 손님은 나가는 손님과 마주치면 멈춰서 먼저 지나가게 한다 (내리고 타기).
+    // want 는 길에서 옆으로 비킬 거리(오른쪽 +), slow 는 속도 배율.
+    void Avoid(Transform self, Vector3 here, Vector3 dir, Vector3 right, out float want, out float slow)
+    {
+        want = 0;
+        slow = 1f;
+        bool entering = customer != null && self == customer.transform;
+        foreach (var o in Crowd())
+        {
+            if (o == self) continue;
+            var to = o.position - here;
+            to.y = 0;
+            float ahead = Vector3.Dot(to, dir), lateral = Vector3.Dot(to, right);
+            if (ahead < -0.3f || ahead > 2.0f || Mathf.Abs(lateral) > 1.0f) continue;
+            float away = lateral > 0.15f ? -0.6f : 0.6f;
+            if (want == 0 || Mathf.Abs(lateral) < 0.6f) want = away;
+            if (entering && leavers.Contains(o.gameObject) && ahead > -0.2f && ahead < 1.4f && Mathf.Abs(lateral) < 0.8f) slow = 0f;
+            else if (ahead > 0f && ahead < 0.8f && Mathf.Abs(lateral) < 0.55f) slow = Mathf.Min(slow, 0.2f);
+        }
+    }
+
+    // 나가는 손님이 이 근처에 있는지 (들어오는 손님이 문 옆에서 기다릴 때)
+    bool LeaverNear(Vector3 p, float r)
+    {
+        foreach (var o in leavers)
+            if (o != null && Vector3.Distance(new Vector3(o.transform.position.x, 0, o.transform.position.z), new Vector3(p.x, 0, p.z)) < r) return true;
+        return false;
+    }
+
+    // 매장 밖에서 문 앞(doorOutside)까지 오는 길. 첫 점은 계산대에서 유리 너머로 보이지 않는 곳이다 (인도 양 끝 x ±9 밖, 길 건너편 어둠).
+    List<Vector3> ApproachRoute()
+    {
+        var route = new List<Vector3>();
+        var door = doorOutside.position;
+        float lane = Random.Range(11.4f, 12.9f);   // 인도 위 걷는 줄
+        float roll = Random.value;
+        if (roll < 0.4f)
+        {
+            route.Add(new Vector3(Random.Range(-10.5f, -9f), 0, lane));
+            route.Add(new Vector3(door.x - Random.Range(0.8f, 1.6f), 0, lane));
+        }
+        else if (roll < 0.8f)
+        {
+            route.Add(new Vector3(Random.Range(9f, 10.5f), 0, lane));
+            route.Add(new Vector3(door.x + Random.Range(0.8f, 1.6f), 0, lane));
+        }
+        else
+        {
+            // 길 건너편에서 횡단보도를 건너온다 (도로는 인도보다 낮다)
+            float x = Random.Range(-1.0f, 1.0f), ry = OutsideLayout.RoadY;
+            route.Add(new Vector3(x + Random.Range(-2.5f, 2.5f), 0, OutsideLayout.FarFacade - 0.8f));
+            route.Add(new Vector3(x, 0, OutsideLayout.RoadFar + 0.3f));
+            route.Add(new Vector3(x, ry, OutsideLayout.RoadFar - 0.2f));
+            route.Add(new Vector3(x, ry, OutsideLayout.SidewalkFar + 0.2f));
+            route.Add(new Vector3(x, 0, OutsideLayout.SidewalkFar - 0.3f));
+        }
+        route.Add(door);
+        return route;
+    }
+
+    // 문 앞에서 길로 사라지는 길 (ApproachRoute 를 거꾸로 고른다)
+    List<Vector3> ExitRoute()
+    {
+        var route = ApproachRoute();
+        route.RemoveAt(route.Count - 1);
+        route.Reverse();
+        return route;
+    }
+
+    // 계산을 마친 손님이 문을 나가 길을 따라 멀어진다. 다음 손님을 기다리게 하지 않도록 계산대 손님 자리는 바로 비운다.
+    IEnumerator Leave(float speed, Coroutine prints)
+    {
+        var c = customer;
+        customer = null;
+        if (c == null) yield break;
+        leavers.Add(c);
+        yield return Walk(c.transform, doorOutside.position, speed, false);
+        if (prints != null) StopCoroutine(prints);   // 젖은 발자국은 매장 안에만
+        foreach (var p in ExitRoute())
+        {
+            if (c == null) yield break;
+            yield return Walk(c.transform, p, speed, false);
+        }
+        leavers.Remove(c);
+        if (c != null) Destroy(c);
+    }
+
+    // 길을 걸어 나가던 손님을 지운다 (하루가 끝날 때, 순찰을 나갈 때 — 바깥에 사람이 보이면 이상현상과 헷갈린다)
+    void ClearLeavers()
+    {
+        foreach (var o in leavers) if (o != null) Destroy(o);
+        leavers.Clear();
     }
 
     struct RouteStep
@@ -529,12 +697,20 @@ public partial class StoreWorld : MonoBehaviour
         var c = customer;
         customer = null; // 더 이상 계산대 손님이 아님
         dayObjects.Add(c);
-        yield return Walk(c.transform, doorOutside.position, Random.Range(1.2f, 1.7f), false);
+        float pace = Pace(c.transform) * 0.85f;   // 천천히
+        yield return Walk(c.transform, doorOutside.position, pace, false);
         if (c == null) yield break;
-        // 창밖에 서는 자리도 매번 다르다 (왼쪽·오른쪽 유리창 앞)
-        float side = Random.value < 0.5f ? -1f : 1f;
-        var spot = new Vector3(side * Random.Range(1.6f, StoreLayout.HalfWidth - 0.8f), 0, windowSpot.position.z);
-        yield return Walk(c.transform, spot, Random.Range(1.2f, 1.7f), false);
+        // 창밖에 서는 자리도 매번 다르다 (왼쪽·오른쪽 유리창 앞). 먼저 서 있는 것과 1m 넘게 떨어진 자리.
+        var spot = Vector3.zero;
+        for (int tries = 0; tries < 12; tries++)
+        {
+            float side = Random.value < 0.5f ? -1f : 1f;
+            spot = new Vector3(side * Random.Range(1.6f, StoreLayout.HalfWidth - 0.8f), 0, windowSpot.position.z);
+            bool free = true;
+            foreach (var o in dayObjects) if (o != null && o != c && Vector3.Distance(o.transform.position, spot) < 1.0f) free = false;
+            if (free) break;
+        }
+        yield return Walk(c.transform, spot, pace, false);
         if (c == null) yield break;
         Face(c.transform, counterSpot.position);
     }
