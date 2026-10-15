@@ -37,6 +37,7 @@ public static class RenderSetup
         // 조명이 5개 넘게 한 물체를 비춰도 빠지지 않게 Forward+ 로 그린다.
         renderer.renderingMode = RenderingMode.ForwardPlus;
         if (renderer.postProcessData == null) renderer.postProcessData = AssetDatabase.LoadAssetAtPath<PostProcessData>(DefaultPostProcessData);
+        EnsureSsao(renderer);
         EditorUtility.SetDirty(renderer);
 
         string assetPath = Dir + "/URP_Asset.asset";
@@ -57,6 +58,9 @@ public static class RenderSetup
         SetBool(so, "m_MainLightShadowsSupported", true);
         SetBool(so, "m_SoftShadowsSupported", true);
         SetInt(so, "m_AdditionalLightsShadowmapResolution", 4096);
+        // 반질한 바닥·유리에 비치는 매장 모습: 반사 프로브를 방 크기에 맞춰 투영하고 경계에서 섞는다.
+        SetBool(so, "m_ReflectionProbeBoxProjection", true);
+        SetBool(so, "m_ReflectionProbeBlending", true);
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(asset);
 
@@ -75,6 +79,42 @@ public static class RenderSetup
         return asset;
     }
 
+    // 화면 공간 AO: 상품 사이, 진열대 아래, 손님 발밑처럼 라이트맵에 굽지 않는 곳의 접촉 그늘.
+    // URP 의 SSAO 기능 클래스가 internal 이라 이름으로 찾아 만든다.
+    static void EnsureSsao(UniversalRendererData renderer)
+    {
+        var type = typeof(UniversalRendererData).Assembly.GetType("UnityEngine.Rendering.Universal.ScreenSpaceAmbientOcclusion");
+        if (type == null) { Debug.LogWarning("RENDERSETUP SSAO 기능을 찾지 못함"); return; }
+        ScriptableRendererFeature feature = renderer.rendererFeatures.Find(f => f != null && f.GetType() == type);
+        if (feature == null)
+        {
+            feature = (ScriptableRendererFeature)ScriptableObject.CreateInstance(type);
+            feature.name = "ScreenSpaceAmbientOcclusion";
+            AssetDatabase.AddObjectToAsset(feature, renderer);
+            renderer.rendererFeatures.Add(feature);
+            string guid;
+            long localId;
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(feature, out guid, out localId);
+            var rso = new SerializedObject(renderer);
+            var map = rso.FindProperty("m_RendererFeatureMap");
+            map.InsertArrayElementAtIndex(map.arraySize);
+            map.GetArrayElementAtIndex(map.arraySize - 1).longValue = localId;
+            rso.ApplyModifiedPropertiesWithoutUndo();
+        }
+        var fso = new SerializedObject(feature);
+        SetFloat(fso, "m_Settings.Intensity", 1.2f);
+        SetFloat(fso, "m_Settings.Radius", 0.25f);
+        SetFloat(fso, "m_Settings.DirectLightingStrength", 0.6f);
+        fso.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(feature);
+    }
+
+    static void SetFloat(SerializedObject so, string name, float v)
+    {
+        var p = so.FindProperty(name);
+        if (p != null) p.floatValue = v; else Debug.LogWarning("RENDERSETUP 설정 없음: " + name);
+    }
+
     static void SetBool(SerializedObject so, string name, bool v)
     {
         var p = so.FindProperty(name);
@@ -88,7 +128,7 @@ public static class RenderSetup
     }
 
     // 계산대 카메라에 후처리를 켜고, 매장 전체에 쓰는 볼륨을 만든다.
-    // 형광등 아래 편의점: 차갑고 약간 초록빛, 밝은 형광등 번짐, 가장자리 어둡게, 필름 노이즈.
+    // 형광등 아래 편의점: 사진처럼 담백하게. 약간 차갑고 초록빛, 형광등 번짐은 은은하게, 노이즈는 옅게.
     public static void AddPostProcessing(Camera cam, Transform parent)
     {
         var data = cam.GetUniversalAdditionalCameraData();
@@ -101,27 +141,27 @@ public static class RenderSetup
         AssetDatabase.CreateAsset(profile, path);
 
         var tone = profile.Add<Tonemapping>(true);
-        tone.mode.Override(TonemappingMode.ACES);
+        tone.mode.Override(TonemappingMode.Neutral);
         var bloom = profile.Add<Bloom>(true);
-        bloom.intensity.Override(0.6f);
+        bloom.intensity.Override(0.35f);
         bloom.threshold.Override(1.0f);
         bloom.scatter.Override(0.65f);
         var color = profile.Add<ColorAdjustments>(true);
-        color.postExposure.Override(0.4f);
-        color.contrast.Override(12f);
-        color.saturation.Override(-15f);
+        color.postExposure.Override(-0.2f);
+        color.contrast.Override(8f);
+        color.saturation.Override(-8f);
         color.colorFilter.Override(Color.white);
         color.hueShift.Override(0f);
         var wb = profile.Add<WhiteBalance>(true);
-        wb.temperature.Override(-10f);
-        wb.tint.Override(6f);
+        wb.temperature.Override(-6f);
+        wb.tint.Override(4f);
         var vignette = profile.Add<Vignette>(true);
-        vignette.intensity.Override(0.3f);
+        vignette.intensity.Override(0.2f);
         vignette.smoothness.Override(0.45f);
         vignette.color.Override(Color.black);
         var grain = profile.Add<FilmGrain>(true);
         grain.type.Override(FilmGrainLookup.Medium1);
-        grain.intensity.Override(0.3f);
+        grain.intensity.Override(0.12f);
         grain.response.Override(0.8f);
         foreach (var c in profile.components) AssetDatabase.AddObjectToAsset(c, profile);
         EditorUtility.SetDirty(profile);

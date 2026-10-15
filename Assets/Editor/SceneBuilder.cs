@@ -38,8 +38,8 @@ public static class SceneBuilder
 
         // --- 바닥 / 벽 / 천장 (StoreLayout: 가로 12m, 깊이 12m)
         float W = StoreLayout.HalfWidth * 2f, mid = StoreLayout.MidZ, depth = StoreLayout.Depth, front = StoreLayout.FrontZ;
-        Box(store, "Floor", new Vector3(0, -0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Floor", new Color(0.78f, 0.79f, 0.76f), 0.35f));
-        Box(store, "Ceiling", new Vector3(0, StoreLayout.Height + 0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Ceiling", new Color(0.85f, 0.85f, 0.83f)));
+        Box(store, "Floor", new Vector3(0, -0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Floor", new Color(0.64f, 0.63f, 0.6f), 0.62f));
+        Box(store, "Ceiling", new Vector3(0, StoreLayout.Height + 0.05f, mid), new Vector3(W, 0.1f, depth), Mat("Ceiling", new Color(0.88f, 0.88f, 0.86f)));
         var wall = Mat("Wall", new Color(0.86f, 0.87f, 0.83f));
         Box(store, "Wall_Back", new Vector3(0, 1.5f, StoreLayout.BackZ - 0.05f), new Vector3(W, 3, 0.1f), wall);
         Box(store, "Wall_Left", new Vector3(-StoreLayout.HalfWidth - 0.05f, 1.5f, mid), new Vector3(0.1f, 3, depth), wall);
@@ -73,7 +73,7 @@ public static class SceneBuilder
         var counter = new GameObject("Counter").transform;
         counter.SetParent(store);
         Box(counter, "Counter_Body", new Vector3(0, 0.45f, 0.15f), new Vector3(3.2f, 0.9f, 0.7f), Mat("Counter", new Color(0.28f, 0.3f, 0.34f)));
-        Box(counter, "Counter_Top", new Vector3(0, 0.93f, 0.15f), new Vector3(3.3f, 0.06f, 0.78f), Mat("Counter_Top", new Color(0.62f, 0.62f, 0.6f), 0.5f));
+        Box(counter, "Counter_Top", new Vector3(0, 0.93f, 0.15f), new Vector3(3.3f, 0.06f, 0.78f), Mat("Counter_Top", new Color(0.5f, 0.5f, 0.49f), 0.5f));
         Box(counter, "Register", new Vector3(0.9f, 1.08f, 0.0f), new Vector3(0.4f, 0.25f, 0.35f), Mat("Register", new Color(0.15f, 0.15f, 0.17f)));
         var phone = Box(counter, "Phone", new Vector3(1.35f, 1.0f, -0.05f), new Vector3(0.22f, 0.08f, 0.18f), Mat("Phone", new Color(0.75f, 0.73f, 0.68f)));
         var itemsAnchor = new GameObject("ItemsAnchor").transform;
@@ -100,7 +100,7 @@ public static class SceneBuilder
 
         // --- 진열대: 왼쪽 벽 진열대(한 면) + 가운데 곤돌라 두 줄(양면). 층마다 상품 모양이 다르다
         //     (상품 이름 Product_P 는 +x 면, Product_N 은 -x 면 — 순찰 이상현상이 면 단위로 쓴다)
-        var shelfMat = Mat("Shelf", new Color(0.58f, 0.6f, 0.64f), 0.3f);
+        var shelfMat = Mat("Shelf", new Color(0.82f, 0.83f, 0.84f), 0.45f);
         var priceMat = Mat("Price_Strip", new Color(0.95f, 0.85f, 0.25f), 0.3f);
         var rng = new System.Random(7);
         for (int i = 0; i < StoreLayout.ShelfNames.Length; i++)
@@ -210,22 +210,27 @@ public static class SceneBuilder
             Box(fridge, "Fridge_Mullion", new Vector3(ff - 0.02f, 1.1f, z), new Vector3(0.03f, 1.8f, 0.05f), fridgeMat);
         NewLight(store, "FridgeLight", LightType.Point, new Vector3(ff - 0.5f, 1.3f, fc.z), new Color(0.7f, 0.85f, 1f), 0.6f, 4f, LightShadows.None);
 
-        // --- 형광등: 계산대 앞 등은 그림자를 드리운다 (판별 단서). 매장 등 0 번이 '꺼진 형광등' 이상현상에 쓰인다.
+        // --- 형광등: 천장 매입등(흰 갓 + 빛나는 확산판). 계산대 앞 등은 그림자를 드리운다 (판별 단서).
+        //     직접광은 실시간(깜빡임·정전 연출), 간접광은 라이트맵에 굽는다 (StoreLighting).
         var tubeMat = Mat("Tube", Color.white, 0.2f, Color.white * 1.4f);
-        var counterLight = NewLight(store, "CounterLight", LightType.Spot, new Vector3(1.0f, 2.9f, 0.5f), new Color(0.93f, 0.97f, 1f), 2.6f, 7f, LightShadows.Soft);
+        var fixtureMat = Mat("Fixture", new Color(0.92f, 0.92f, 0.9f), 0.5f);
+        var counterLight = NewLight(store, "CounterLight", LightType.Spot, new Vector3(1.0f, 2.9f, 0.5f), new Color(0.93f, 0.97f, 1f), 6f, 7f, LightShadows.Soft);
         counterLight.transform.rotation = Quaternion.Euler(90, 0, 0);
         counterLight.spotAngle = 140f;
         counterLight.shadowStrength = 0.95f;
+        counterLight.bounceIntensity = 0.3f;   // 튀는 빛이 손님 그림자를 메우지 않게 (그림자가 판별 단서)
         var lightList = new List<Light> { counterLight };
-        var tubeList = new List<Renderer> { Box(store, "Tube_Counter", new Vector3(1.0f, 2.97f, 0.5f), new Vector3(1.2f, 0.05f, 0.12f), tubeMat).GetComponent<Renderer>() };
+        var tubeList = new List<Renderer> { Fixture(store, "Counter", new Vector3(1.0f, 0, 0.5f), fixtureMat, tubeMat) };
         for (int i = 0; i < StoreLayout.StoreLights.Length; i++)
         {
             var lp = StoreLayout.StoreLights[i];
-            lightList.Add(NewLight(store, "StoreLight_" + i, LightType.Point, lp, new Color(0.93f, 0.97f, 1f), 0.45f, 6f, LightShadows.None));
-            tubeList.Add(Box(store, "Tube_Store_" + i, new Vector3(lp.x, 2.97f, lp.z), new Vector3(1.2f, 0.05f, 0.12f), tubeMat).GetComponent<Renderer>());
+            // 매장 등은 실시간 그림자를 끈다 (그림자 맵이 많으면 계산대 등 그림자 해상도가 떨어진다). 진열대 그늘은 구운 AO 와 SSAO 가 맡는다.
+            var l = NewLight(store, "StoreLight_" + i, LightType.Point, lp, new Color(0.93f, 0.97f, 1f), 0.26f, 5.5f, LightShadows.None);
+            l.bounceIntensity = 0.6f;   // 흰 매장에서 튀는 빛이 너무 많으면 계산대 등 그림자가 묻힌다
+            lightList.Add(l);
+            tubeList.Add(Fixture(store, "Store_" + i, lp, fixtureMat, tubeMat));
         }
         lightList.Add(NewLight(store, "BackLight", LightType.Point, new Vector3(0, 2.6f, -1.3f), new Color(1f, 0.95f, 0.85f), 0.5f, 3.5f, LightShadows.None));
-        foreach (var t in tubeList) t.shadowCastingMode = ShadowCastingMode.Off;
 
         // --- 위치 표식
         var points = new GameObject("Points").transform;
@@ -266,8 +271,8 @@ public static class SceneBuilder
         world.windowSpot = windowSpot;
         world.itemsAnchor = itemsAnchor;
         world.counterLight = counterLight;
-        world.lights = lightList.ToArray();        // [0] 계산대 등, [1..5] 매장 등, 마지막 뒤쪽 등
-        world.lightTubes = tubeList.ToArray();     // [0] 계산대 등, [1..5] 매장 등
+        world.lights = lightList.ToArray();        // [0] 계산대 등, [1..] 매장 등 (StoreLayout.StoreLights), 마지막 뒤쪽 등
+        world.lightTubes = tubeList.ToArray();     // [0] 계산대 등, [1..] 매장 등 확산판
         world.windowGlass = glassL.GetComponent<Renderer>();
         world.phone = phone.transform;
         world.cctvCamera = cctv;
@@ -282,6 +287,8 @@ public static class SceneBuilder
         var controller = new GameObject("GameController").AddComponent<GameController>();
         controller.world = world;
 
+        EditorSceneManager.SaveScene(scene, ScenePath);
+        StoreLighting.Bake(store);
         EditorSceneManager.SaveScene(scene, ScenePath);
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
         EditorSettings.defaultBehaviorMode = EditorBehaviorMode.Mode3D;
@@ -302,6 +309,16 @@ public static class SceneBuilder
         go.transform.localScale = scale;
         go.GetComponent<Renderer>().sharedMaterial = mat;
         return go;
+    }
+
+    // 천장 매입등: 갓(굽는 정적 물체)과 확산판(Tube_, 연출로 밝기가 바뀌어 굽지 않음). 확산판 렌더러를 돌려준다.
+    static Renderer Fixture(Transform parent, string name, Vector3 at, Material housing, Material diffuser)
+    {
+        Box(parent, "Fixture_" + name, new Vector3(at.x, StoreLayout.Height - 0.03f, at.z), new Vector3(1.3f, 0.06f, 0.34f), housing)
+            .GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        var tube = Box(parent, "Tube_" + name, new Vector3(at.x, StoreLayout.Height - 0.065f, at.z), new Vector3(1.2f, 0.012f, 0.26f), diffuser).GetComponent<Renderer>();
+        tube.shadowCastingMode = ShadowCastingMode.Off;
+        return tube;
     }
 
     static GameObject Prim(Transform parent, string name, PrimitiveType type, Vector3 pos, Vector3 scale, Material mat)
@@ -360,6 +377,7 @@ public static class SceneBuilder
         l.intensity = intensity * (RenderSetup.Active ? (type == LightType.Spot ? UrpSpotScale : UrpPointScale) : 1f);
         l.range = range;
         l.shadows = shadows;
+        l.lightmapBakeType = LightmapBakeType.Mixed;   // 직접광은 실시간, 튀는 빛만 굽는다
         l.shadowBias = 0.02f;
         l.shadowNormalBias = 0.3f;
         return l;

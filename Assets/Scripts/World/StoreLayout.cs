@@ -45,11 +45,12 @@ public static class StoreLayout
     // 왼쪽 벽 안쪽 창고 문 (z 0.4 ~ 1.4)
     public static readonly Vector3 StorageDoor = new Vector3(-5.96f, 1.05f, 0.9f);
 
-    // 매장 형광등. 0 번(가장 안쪽 왼쪽)이 '꺼진 형광등' 이상현상에 쓰인다.
+    // 매장 형광등: 통로 세 줄 위에 줄지어 달린 매입등. '꺼진 형광등' 이상현상은 이 중 하나를 끈다.
     public static readonly Vector3[] StoreLights =
     {
-        new Vector3(LeftAisleX, 2.8f, 7.4f), new Vector3(RightAisleX, 2.8f, 7.4f),
-        new Vector3(LeftAisleX, 2.8f, 3.6f), new Vector3(RightAisleX, 2.8f, 3.6f),
-        new Vector3(0, 2.8f, 5.4f),
+        new Vector3(LeftAisleX, 2.8f, 8.6f), new Vector3(0, 2.8f, 8.6f), new Vector3(RightAisleX, 2.8f, 8.6f),
+        new Vector3(LeftAisleX, 2.8f, 6.5f), new Vector3(0, 2.8f, 6.5f), new Vector3(RightAisleX, 2.8f, 6.5f),
+        new Vector3(LeftAisleX, 2.8f, 4.4f), new Vector3(0, 2.8f, 4.4f), new Vector3(RightAisleX, 2.8f, 4.4f),
+        new Vector3(LeftAisleX, 2.8f, 2.3f), new Vector3(RightAisleX, 2.8f, 2.3f),
     };
 }

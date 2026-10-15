@@ -83,6 +83,7 @@ public partial class StoreWorld : MonoBehaviour
         baseIntensity = new float[lights.Length];
         for (int i = 0; i < lights.Length; i++) baseIntensity[i] = lights[i].intensity;
         counterLightRot = counterLight.transform.localRotation;
+        CacheBakedLight();
 
         audioSource = gameObject.AddComponent<AudioSource>();
         chime = Tone("chime", new[] { 880f, 660f }, 0.35f, false);
@@ -578,6 +579,7 @@ public partial class StoreWorld : MonoBehaviour
     void SetLights(float k)
     {
         for (int i = 0; i < lights.Length; i++) lights[i].intensity = baseIntensity[i] * k;
+        SetBakedLight(k > 0.5f);
         foreach (var r in lightTubes)
             if (r != null) r.material.SetColor("_EmissionColor", Color.white * (k > 0.5f ? 1.4f : 0.05f));
         // 이상현상: 매장 형광등 하나가 꺼져 있다 (offLight 번 조명과 형광등 막대)
@@ -586,6 +588,39 @@ public partial class StoreWorld : MonoBehaviour
             lights[offLight].intensity = 0f;
             if (lightTubes[offLight] != null) lightTubes[offLight].material.SetColor("_EmissionColor", Color.white * 0.02f);
         }
+    }
+
+    // 형광등의 간접광(라이트맵·라이트 프로브)과 반사는 구워져 있어서 실시간 조명을 꺼도 남는다.
+    // 정전·깜빡임 때는 검은 라이트맵, 거의 꺼진 프로브, 반사 0 으로 바꿔 매장이 실제로 어두워지게 한다.
+    LightmapData[] litMaps, darkMaps;
+    SphericalHarmonicsL2[] litProbes, darkProbes;
+    ReflectionProbe[] reflectionProbes;
+    bool bakedLightOn = true;
+
+    void CacheBakedLight()
+    {
+        litMaps = LightmapSettings.lightmaps;
+        darkMaps = new LightmapData[litMaps.Length];
+        for (int i = 0; i < litMaps.Length; i++)
+            darkMaps[i] = new LightmapData { lightmapColor = Texture2D.blackTexture, lightmapDir = litMaps[i].lightmapDir, shadowMask = litMaps[i].shadowMask };
+        var probes = LightmapSettings.lightProbes;
+        if (probes != null)
+        {
+            litProbes = probes.bakedProbes;
+            darkProbes = new SphericalHarmonicsL2[litProbes.Length];
+            for (int i = 0; i < litProbes.Length; i++) darkProbes[i] = litProbes[i] * 0.05f;
+        }
+        reflectionProbes = FindObjectsByType<ReflectionProbe>(FindObjectsSortMode.None);
+    }
+
+    void SetBakedLight(bool on)
+    {
+        if (on == bakedLightOn || litMaps == null) return;
+        bakedLightOn = on;
+        LightmapSettings.lightmaps = on ? litMaps : darkMaps;
+        var probes = LightmapSettings.lightProbes;
+        if (probes != null && litProbes != null && probes.count == litProbes.Length) probes.bakedProbes = on ? litProbes : darkProbes;
+        foreach (var rp in reflectionProbes) if (rp != null) rp.intensity = on ? 1f : 0.05f;
     }
 
     void RingPhone(bool on)
