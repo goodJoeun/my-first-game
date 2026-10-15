@@ -84,19 +84,28 @@ public static class DataCheck
             if (!famColors.Add(c.family + "/" + c.color)) bad += Fail("담배 " + c.family + " 에 " + c.color + " 갑이 둘 이상");
         Debug.Log("DATACHECK cigarettes=" + repo.Cigarettes.Count);
 
-        // 순찰 이상현상: 연출이 있는 종류여야 하고, 순찰 날마다 필요한 수만큼 서로 다른 종류가 있어야 한다.
+        // 순찰 이상현상: 연출이 있는 종류여야 하고(매장은 AnomalyKinds, 바깥은 OutsideKinds),
+        // 순찰 날마다 필요한 수만큼 서로 다른 종류가 있어야 한다.
         foreach (var a in repo.Anomalies.Values)
-            if (System.Array.IndexOf(RunRules.AnomalyKinds, a.kind) < 0) bad += Fail(a.id + ": 연출이 없는 이상현상 종류 '" + a.kind + "'");
+        {
+            var kindsFor = RunRules.IsOutside(a) ? RunRules.OutsideKinds : RunRules.AnomalyKinds;
+            if (System.Array.IndexOf(kindsFor, a.kind) < 0) bad += Fail(a.id + ": 연출이 없는 " + (RunRules.IsOutside(a) ? "바깥 " : "") + "이상현상 종류 '" + a.kind + "'");
+        }
         foreach (var day in repo.Days.Values)
         {
-            bool patrol = false;
-            foreach (var s in day.slots) if (s.pool == "patrol") patrol = true;
-            if (!patrol) continue;
-            var kinds = new HashSet<string>();
-            foreach (var a in repo.Anomalies.Values) if (a.day <= day.day) kinds.Add(a.kind);
-            int need = System.Math.Max(day.difficulty.anomalies, day.difficulty.anomalies_max);
-            if (kinds.Count < need) bad += Fail(day.day + "일차 순찰: 이상현상 종류 " + kinds.Count + " < " + need);
-            Debug.Log("DATACHECK day" + day.day + " patrol anomalies=" + day.difficulty.anomalies + "~" + need + " (pool " + kinds.Count + ")");
+            foreach (bool outdoor in new[] { false, true })
+            {
+                bool slot = false;
+                foreach (var s in day.slots) if (s.pool == (outdoor ? "outside" : "patrol")) slot = true;
+                if (!slot) continue;
+                var kinds = new HashSet<string>();
+                foreach (var a in repo.Anomalies.Values) if (a.day <= day.day && RunRules.IsOutside(a) == outdoor) kinds.Add(a.kind);
+                int min = outdoor ? day.difficulty.outside : day.difficulty.anomalies;
+                int need = System.Math.Max(min, outdoor ? day.difficulty.outside_max : day.difficulty.anomalies_max);
+                if (min < 1) bad += Fail(day.day + "일차 " + (outdoor ? "바깥 순찰" : "순찰") + " 슬롯이 있는데 이상현상 수가 0");
+                if (kinds.Count < need) bad += Fail(day.day + "일차 " + (outdoor ? "바깥 순찰" : "순찰") + ": 이상현상 종류 " + kinds.Count + " < " + need);
+                Debug.Log("DATACHECK day" + day.day + (outdoor ? " outside" : " patrol") + " anomalies=" + min + "~" + need + " (pool " + kinds.Count + ")");
+            }
         }
 
         // 신분증: 카드 내용이 판별 규칙과 맞아야 한다.

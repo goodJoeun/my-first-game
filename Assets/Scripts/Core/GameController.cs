@@ -62,6 +62,7 @@ public class GameController : MonoBehaviour
     readonly List<string> patrolMissedWhere = new List<string>();   // 놓친 이상현상의 실제 위치 (매번 다르다)
     int patrolFalse;
     bool patrolDone;
+    bool patrolOutside;   // 지금 순찰이 바깥 순찰인지
     string patrolMessage;
     readonly HashSet<string> usedIds = new HashSet<string>();
 
@@ -166,11 +167,12 @@ public class GameController : MonoBehaviour
             var slot = day.slots[slotIndex];
             // 회차 배치에 하루 순서가 있으면 그 순서로 채운다 (시간대는 슬롯 시간 그대로).
             string seq = SequenceAt(slotIndex);
-            if (seq == RunRules.PatrolToken || (seq == null && slot.pool == "patrol"))
+            bool outdoor = seq == RunRules.OutsideToken || (seq == null && slot.pool == "outside");
+            if (outdoor || seq == RunRules.PatrolToken || (seq == null && slot.pool == "patrol"))
             {
                 // 3D 매장이 없으면 걸어 다닐 수 없으니 건너뛴다.
                 if (world == null) continue;
-                BeginPatrol(slot.time);
+                BeginPatrol(slot.time, outdoor);
                 return;
             }
             var ev = seq != null ? repo.Get(seq) : ResolveSlot(slot);
@@ -302,28 +304,39 @@ public class GameController : MonoBehaviour
 
     // ---------------------------------------------------------------- 순찰
 
-    void BeginPatrol(string time)
+    // outdoor: 매장 밖(인도·도로·골목·뒷마당)을 손전등을 들고 도는 바깥 순찰
+    void BeginPatrol(string time, bool outdoor)
     {
         currentTime = time;
+        patrolOutside = outdoor;
         patrolActive.Clear();
         var p = state.PlanFor(state.day);
-        var ids = p != null && p.anomalies != null && p.anomalies.Count > 0 ? p.anomalies : FallbackAnomalies();
+        var ids = new List<string>();
+        if (p != null && p.anomalies != null)
+            foreach (var id in p.anomalies)
+            {
+                AnomalyData a;
+                if (repo.Anomalies.TryGetValue(id, out a) && RunRules.IsOutside(a) == outdoor) ids.Add(id);
+            }
+        if (ids.Count == 0) ids = FallbackAnomalies(outdoor);
         foreach (var id in ids)
         {
             AnomalyData a;
             if (repo.Anomalies.TryGetValue(id, out a) && !patrolActive.ContainsKey(a.kind)) patrolActive[a.kind] = a;
         }
-        patrolMessage = "계산대를 떠나 매장을 한 바퀴 돈다. 평소와 다른 것이 있으면 바라보고 신고하자.";
+        patrolMessage = outdoor
+            ? "손전등을 들고 매장 밖을 한 바퀴 돈다. 앞 인도와 도로, 오른쪽 골목, 뒷마당까지. 평소와 다른 것이 있으면 바라보고 신고하자. (F: 손전등)"
+            : "계산대를 떠나 매장을 한 바퀴 돈다. 평소와 다른 것이 있으면 바라보고 신고하자.";
         world.SetClock(time);
-        world.BeginPatrol(new List<string>(patrolActive.Keys));
+        world.BeginPatrol(new List<string>(patrolActive.Keys), outdoor);
         phase = Phase.Patrol;
     }
 
     // 예전 저장 파일처럼 배치에 이상현상이 없으면 그 날 나올 수 있는 것 중 하나를 고른다.
-    List<string> FallbackAnomalies()
+    List<string> FallbackAnomalies(bool outdoor)
     {
         var list = new List<string>();
-        foreach (var a in repo.Anomalies.Values) if (a.day <= state.day) list.Add(a.id);
+        foreach (var a in repo.Anomalies.Values) if (a.day <= state.day && RunRules.IsOutside(a) == outdoor) list.Add(a.id);
         var pick = new List<string>();
         if (list.Count > 0) pick.Add(list[Random.Range(0, list.Count)]);
         return pick;
@@ -942,10 +955,10 @@ public class GameController : MonoBehaviour
         }
 
         Fill(new Rect(40, 486, W - 80, 100), Panel);
-        GUI.Label(new Rect(56, 492, W - 112, 30), "<b>새벽 순찰</b>   W/A/S/D: 걷기   마우스 오른쪽 드래그: 둘러보기   E: 바라보는 곳 신고", small);
+        GUI.Label(new Rect(56, 492, W - 112, 30), (patrolOutside ? "<b>바깥 순찰</b>" : "<b>새벽 순찰</b>") + "   W/A/S/D: 걷기   마우스 오른쪽 드래그: 둘러보기   E: 바라보는 곳 신고" + (patrolOutside ? "   F: 손전등" : ""), small);
         GUI.Label(new Rect(56, 522, W - 112, 60), patrolMessage, label);
         if (GUI.Button(new Rect(40, 600, 260, 50), "이상 신고 (E)", button)) ReportAnomaly();
-        if (GUI.Button(new Rect(W - 340, 600, 300, 50), "계산대로 돌아가기", button)) EndPatrol();
+        if (GUI.Button(new Rect(W - 340, 600, 300, 50), patrolOutside ? "매장으로 돌아가기" : "계산대로 돌아가기", button)) EndPatrol();
     }
 
     void DrawReaction(float W, float H)

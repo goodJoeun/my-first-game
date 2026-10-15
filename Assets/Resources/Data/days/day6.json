@@ -10,7 +10,9 @@
     "traps_max": 3,
     "clue_visibility": 1,
     "anomalies": 2,
-    "anomalies_max": 3
+    "anomalies_max": 3,
+    "outside": 2,
+    "outside_max": 3
   },
   "slots": [
     { "time": "00:30", "pool": "customer" },
@@ -18,6 +20,7 @@
     { "time": "02:10", "pool": "customer" },
     { "time": "02:50", "pool": "phone" },
     { "time": "03:30", "pool": "customer" },
+    { "time": "03:55", "pool": "outside" },
     { "time": "04:20", "pool": "customer" },
     { "time": "04:45", "pool": "patrol" },
     { "time": "05:10", "pool": "customer" }

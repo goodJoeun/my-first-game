@@ -7,6 +7,8 @@ using UnityEngine.Rendering;
 // 손님 모델: Resources/Characters/{이벤트 ID 또는 NPC ID}.prefab 이 있으면 그 모델을 쓰고, 없으면 기본 도형으로 만든다.
 //   점원(CCTV 속 나)은 Characters/clerk. Animator 에 float 파라미터 Speed(m/s, 0 = 서 있기)가 있으면 걸을 때 넣어 준다.
 // 발소리 종류는 appearance.steps: plain(운동화) / shoes(뚜벅뚜벅) / heels(또각또각) / boots(저벅저벅) / slippers(질질).
+// 소리: Resources/Sounds/{이름} 오디오 파일이 있으면 그것을, 없으면 합성음을 쓴다.
+//   chime(입장 차임) / ring(전화벨) / alarm(정전 경보) / step_{발소리 종류}_1, step_{발소리 종류}_2 (보폭마다 번갈아)
 // 판별 로직은 GameController 에 있고, 여기는 보이는 것만 담당한다.
 // 이벤트 JSON 의 appearance.fx 로 연출을 켠다:
 //   no_shadow      그림자를 드리우지 않음 (제1조)
@@ -63,6 +65,7 @@ public partial class StoreWorld : MonoBehaviour
     readonly HashSet<Transform> modelWalkers = new HashSet<Transform>();   // 실제 모델(애니메이션)로 만든 손님
     static readonly Dictionary<string, GameObject> prefabCache = new Dictionary<string, GameObject>();
     const string CharacterDir = "Characters/";
+    const string SoundDir = "Sounds/";
     Transform clerk;
     float nextRing;
 
@@ -86,13 +89,14 @@ public partial class StoreWorld : MonoBehaviour
         CacheBakedLight();
 
         audioSource = gameObject.AddComponent<AudioSource>();
-        chime = Tone("chime", new[] { 880f, 660f }, 0.35f, false);
-        ring = Tone("ring", new[] { 440f, 480f, 440f, 480f }, 0.12f, false);
-        alarm = Tone("alarm", new[] { 950f, 700f, 950f, 700f, 950f, 700f }, 0.15f, true);
+        chime = Sound("chime") ?? Tone("chime", new[] { 880f, 660f }, 0.35f, false);
+        ring = Sound("ring") ?? Tone("ring", new[] { 440f, 480f, 440f, 480f }, 0.12f, false);
+        alarm = Sound("alarm") ?? Tone("alarm", new[] { 950f, 700f, 950f, 700f, 950f, 700f }, 0.15f, true);
         foreach (var kind in new[] { "plain", "shoes", "heels", "boots", "slippers" })
-            stepClips[kind] = new[] { Step(kind, 1), Step(kind, 2) };
+            stepClips[kind] = new[] { Sound("step_" + kind + "_1") ?? Step(kind, 1), Sound("step_" + kind + "_2") ?? Step(kind, 2) };
         BuildClock();
         SetupWalkable();   // 순찰 (StoreWorld.Patrol.cs)
+        SetupOutside();    // 바깥 순찰 (StoreWorld.Outside.cs)
 
         if (windowGlass != null)
         {
@@ -734,7 +738,9 @@ public partial class StoreWorld : MonoBehaviour
         return pivot;
     }
 
-    // 사운드 에셋이 없어서 짧은 음을 직접 합성한다.
+    static AudioClip Sound(string name) { return Resources.Load<AudioClip>(SoundDir + name); }
+
+    // 사운드 파일이 없을 때 쓰는 합성음
     static AudioClip Tone(string name, float[] notes, float noteLen, bool square)
     {
         const int rate = 44100;

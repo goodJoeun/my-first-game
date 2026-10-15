@@ -42,7 +42,16 @@ public static class RunRules
         "phone_off_hook", "clock_backward", "cctv_figure", "handprints", "empty_shelf", "ceiling_stain",
         "storage_door_open",
     };
+    // 바깥 순찰 이상현상 종류 (StoreWorld.Outside 에 연출이 있는 것). 매장 밖 인도·도로·골목·뒷마당을 손전등을 들고 돈다.
+    public static readonly string[] OutsideKinds =
+    {
+        "out_figure", "out_payphone_ring", "out_red_streetlight", "out_manhole_open", "out_road_footprints",
+        "out_shutter_open", "out_lying_figure", "out_window_face", "out_eyes",
+    };
     public const string PatrolToken = "@patrol";   // DayPlan.sequence 에서 순찰 자리
+    public const string OutsideToken = "@outside"; // DayPlan.sequence 에서 바깥 순찰 자리
+
+    public static bool IsOutside(AnomalyData a) { return a != null && a.area == "outside"; }
     public const int MissedAnomalyRisk = 1;      // 놓친 이상현상 하나당 위험도
     public const int FalseReportPay = -2000;     // 멀쩡한 곳을 신고하면
 

@@ -75,7 +75,8 @@ public partial class StoreWorld
 
     // ------------------------------------------------------------ 순찰 시작·끝
 
-    public void BeginPatrol(IList<string> kinds)
+    // outside: 매장 밖 바깥 순찰 (출입문 밖에서 시작, 손전등, 짙은 안개 — StoreWorld.Outside)
+    public void BeginPatrol(IList<string> kinds, bool outside = false)
     {
         ClearCustomer();
         ClearFootprints();
@@ -102,6 +103,7 @@ public partial class StoreWorld
         aimLabel = null;
         where.Clear();
         usedFaces.Clear();
+        if (outside) EnterOutside(main.transform);
         foreach (var k in kinds) Activate(k);
         patrolling = patrolInput = true;
     }
@@ -113,6 +115,7 @@ public partial class StoreWorld
         foreach (var k in missed) Deactivate(k);
         patrolling = false;
         aimLabel = null;
+        if (outsideMode) ExitOutside();
         if (walker != null) walker.enabled = false;
         var main = Camera.main;
         if (main != null)
@@ -147,7 +150,8 @@ public partial class StoreWorld
         var result = new Aimed();
         var main = Camera.main;
         if (main == null) return result;
-        var hits = Physics.SphereCastAll(new Ray(main.transform.position, main.transform.forward), AimRadius, ReportRange, ~0, QueryTriggerInteraction.Collide);
+        // Ignore Raycast 층(바깥의 보이지 않는 벽)은 겨누지 않는다
+        var hits = Physics.SphereCastAll(new Ray(main.transform.position, main.transform.forward), AimRadius, ReportRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
         float solid = float.MaxValue;
         Collider solidCol = null;
         foreach (var h in hits)
@@ -197,7 +201,8 @@ public partial class StoreWorld
             if (n == "Wall_Clock") return "벽시계";
             if (n.StartsWith("CCTV")) return "CCTV 카메라";
             if (n.StartsWith("Wall")) return "벽";
-            if (n == "Street") return "바깥";
+            string outside = OutsideLabel(n);
+            if (outside != null) return outside;
         }
         return "물건";
     }
@@ -232,6 +237,7 @@ public partial class StoreWorld
             playerStep ^= 1;
             AudioSource.PlayClipAtPoint(stepClips["shoes"][playerStep], new Vector3(t.position.x, 0.1f, t.position.z), 0.4f);
         }
+        if (outsideMode) UpdateOutside();
         // CCTV 속 점원도 나를 따라 걷는다.
         if (clerk != null) clerk.position = new Vector3(t.position.x, 0, t.position.z);
         aimLabel = Aim().label;
@@ -447,7 +453,7 @@ public partial class StoreWorld
                 break;
 
             default:
-                Debug.LogWarning("알 수 없는 이상현상: " + kind);
+                if (!ActivateOutside(kind, a, root)) Debug.LogWarning("알 수 없는 이상현상: " + kind);
                 break;
         }
     }

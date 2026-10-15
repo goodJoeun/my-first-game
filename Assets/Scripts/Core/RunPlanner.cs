@@ -26,8 +26,9 @@ public class RunPlanner
         public List<EventData> pickedPhones = new List<EventData>();
         public List<EventData> ordered = new List<EventData>();   // 슬롯 순서 (Expand 만 채운다)
         public bool patrol;                                       // 순찰 슬롯이 있는 날
-        public List<string> anomalies = new List<string>();      // 순찰 때 나올 이상현상 ID
-        public List<string> sequence = new List<string>();       // 슬롯을 채울 순서 (이벤트 ID, 순찰은 PatrolToken)
+        public bool outside;                                      // 바깥 순찰 슬롯이 있는 날
+        public List<string> anomalies = new List<string>();      // 순찰 때 나올 이상현상 ID (매장 + 바깥)
+        public List<string> sequence = new List<string>();       // 슬롯을 채울 순서 (이벤트 ID, 순찰은 PatrolToken / OutsideToken)
     }
 
     const int Attempts = 400;
@@ -187,6 +188,7 @@ public class RunPlanner
                 }
                 else if (s.pool == "customer" || s.pool == "phone") pool = true;
                 else if (s.pool == "patrol") { pool = true; ds.patrol = true; }
+                else if (s.pool == "outside") { pool = true; ds.outside = true; }
             }
             if (pool) poolDays.Add(ds);
         }
@@ -348,22 +350,13 @@ public class RunPlanner
             ds.phones.Add(pick);
         }
 
-        // 7) 순찰: 그 날 나올 수 있는 이상현상 중 난이도 수만큼 (하루에 같은 종류는 한 번)
+        // 7) 순찰: 그 날 나올 수 있는 이상현상 중 난이도 수만큼 (하루에 같은 종류는 한 번). 매장 순찰과 바깥 순찰을 따로 고른다.
         foreach (var ds in poolDays)
         {
-            if (!ds.patrol || src.anomalies == null) continue;
+            if (src.anomalies == null) continue;
             var df = ds.data.difficulty;
-            int n = Range(df.anomalies, System.Math.Max(df.anomalies, df.anomalies_max));
-            var ids = new List<string>();
-            foreach (var a in src.anomalies.Values) if (a.day <= ds.day) ids.Add(a.id);
-            ids.Sort(System.StringComparer.Ordinal);
-            Shuffle(ids);
-            var kinds = new HashSet<string>();
-            foreach (var id in ids)
-            {
-                if (ds.anomalies.Count >= n) break;
-                if (kinds.Add(src.anomalies[id].kind)) ds.anomalies.Add(id);
-            }
+            if (ds.patrol) PickAnomalies(ds, false, Range(df.anomalies, System.Math.Max(df.anomalies, df.anomalies_max)));
+            if (ds.outside) PickAnomalies(ds, true, Range(df.outside, System.Math.Max(df.outside, df.outside_max)));
         }
 
         // 8) 하루 순서: 손님·전화·순찰이 매번 다른 순서로 온다 (시간대는 날짜 JSON 그대로).
@@ -380,6 +373,7 @@ public class RunPlanner
                 else if (s.pool == "customer") { pooled = true; if (ci < ds.picked.Count) items.Add(ds.picked[ci++].id); }
                 else if (s.pool == "phone") { pooled = true; if (pi < ds.pickedPhones.Count) items.Add(ds.pickedPhones[pi++].id); }
                 else if (s.pool == "patrol") { pooled = true; items.Add(RunRules.PatrolToken); }
+                else if (s.pool == "outside") { pooled = true; items.Add(RunRules.OutsideToken); }
             }
             if (items.Count != ds.data.slots.Length) continue;   // 못 채운 슬롯이 있으면 날짜 JSON 순서로
             if (pooled)
@@ -522,6 +516,22 @@ public class RunPlanner
 
     // ------------------------------------------------------------ 검사
 
+    // 매장(outside=false) 또는 바깥(outside=true) 이상현상을 n 개 고른다.
+    void PickAnomalies(DaySchedule ds, bool outside, int n)
+    {
+        var ids = new List<string>();
+        foreach (var a in src.anomalies.Values) if (a.day <= ds.day && RunRules.IsOutside(a) == outside) ids.Add(a.id);
+        ids.Sort(System.StringComparer.Ordinal);
+        Shuffle(ids);
+        var kinds = new HashSet<string>();
+        int picked = 0;
+        foreach (var id in ids)
+        {
+            if (picked >= n) break;
+            if (kinds.Add(src.anomalies[id].kind)) { ds.anomalies.Add(id); picked++; }
+        }
+    }
+
     // 배치를 날짜별 실제 손님 목록으로 펼친다.
     public static List<DaySchedule> Expand(Source src, List<DayPlan> plan)
     {
@@ -534,7 +544,12 @@ public class RunPlanner
             DayPlan p = null;
             foreach (var x in plan) if (x.day == d) p = x;
             if (p != null && p.anomalies != null) ds.anomalies.AddRange(p.anomalies);
-            if (ds.data.slots != null) foreach (var s in ds.data.slots) if (s.pool == "patrol") ds.patrol = true;
+            if (ds.data.slots != null)
+                foreach (var s in ds.data.slots)
+                {
+                    if (s.pool == "patrol") ds.patrol = true;
+                    if (s.pool == "outside") ds.outside = true;
+                }
             if (p != null && p.sequence != null && ds.data.slots != null && p.sequence.Count == ds.data.slots.Length)
             {
                 // 배치에 하루 순서가 있으면 그 순서대로
@@ -542,7 +557,7 @@ public class RunPlanner
                 foreach (var id in p.sequence)
                 {
                     EventData e;
-                    if (id == RunRules.PatrolToken || !src.events.TryGetValue(id, out e)) continue;
+                    if (id == RunRules.PatrolToken || id == RunRules.OutsideToken || !src.events.TryGetValue(id, out e)) continue;
                     ds.ordered.Add(e);
                     if (RunRules.IsCustomer(e)) ds.customers.Add(e); else ds.phones.Add(e);
                 }
@@ -624,13 +639,12 @@ public class RunPlanner
                 if (!pooled && (ds.sequence[0] != ds.data.slots[0].@fixed || ds.sequence[ds.sequence.Count - 1] != ds.data.slots[ds.data.slots.Length - 1].@fixed))
                     hard.Add(d + "일차(고정) 첫 손님이나 마지막 손님이 바뀜");
                 if (ds.patrol && !ds.sequence.Contains(RunRules.PatrolToken)) hard.Add(d + "일차 순서에 순찰이 없음");
+                if (ds.outside && !ds.sequence.Contains(RunRules.OutsideToken)) hard.Add(d + "일차 순서에 바깥 순찰이 없음");
             }
             var df = ds.data.difficulty;
-            if (ds.patrol && src.anomalies != null)
+            if ((ds.patrol || ds.outside) && src.anomalies != null)
             {
-                int aMax = System.Math.Max(df.anomalies, df.anomalies_max);
-                if (ds.anomalies.Count < df.anomalies || ds.anomalies.Count > aMax)
-                    hard.Add(d + "일차 순찰 이상현상 " + ds.anomalies.Count + " (" + df.anomalies + "~" + aMax + "이어야 함)");
+                int store = 0, outdoor = 0;
                 var kinds = new HashSet<string>();
                 foreach (var id in ds.anomalies)
                 {
@@ -638,7 +652,12 @@ public class RunPlanner
                     if (!src.anomalies.TryGetValue(id, out a)) { hard.Add(d + "일차 순찰: 없는 이상현상 " + id); continue; }
                     if (a.day > d) hard.Add(id + " 는 " + d + "일차 순찰에 나올 수 없음");
                     if (!kinds.Add(a.kind)) hard.Add(d + "일차 순찰에 " + a.kind + " 가 두 번 나옴");
+                    if (RunRules.IsOutside(a)) outdoor++; else store++;
                 }
+                int aMin = ds.patrol ? df.anomalies : 0, aMax = ds.patrol ? System.Math.Max(df.anomalies, df.anomalies_max) : 0;
+                if (store < aMin || store > aMax) hard.Add(d + "일차 순찰 이상현상 " + store + " (" + aMin + "~" + aMax + "이어야 함)");
+                int oMin = ds.outside ? df.outside : 0, oMax = ds.outside ? System.Math.Max(df.outside, df.outside_max) : 0;
+                if (outdoor < oMin || outdoor > oMax) hard.Add(d + "일차 바깥 순찰 이상현상 " + outdoor + " (" + oMin + "~" + oMax + "이어야 함)");
             }
             int mMax = System.Math.Max(df.mimics, df.mimics_max), tMax = System.Math.Max(df.traps, df.traps_max);
             if (mon < df.mimics || mon > mMax) soft.Add(d + "일차 닮은 것 " + mon + " (표: " + df.mimics + "~" + mMax + ")");

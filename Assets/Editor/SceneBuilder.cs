@@ -23,6 +23,7 @@ public static class SceneBuilder
     public static void Build()
     {
         mats.Clear();
+        StoreProps.ClearCache();
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         RenderSettings.ambientMode = AmbientMode.Flat;
@@ -55,13 +56,14 @@ public static class SceneBuilder
         Box(store, "Front_Bottom", new Vector3(0, 0.15f, front + 0.05f), new Vector3(W, 0.3f, 0.12f), frame);
         Box(store, "Door_Frame_L", new Vector3(-0.75f, 1.4f, front + 0.05f), new Vector3(0.08f, 2.3f, 0.14f), frame);
         Box(store, "Door_Frame_R", new Vector3(0.75f, 1.4f, front + 0.05f), new Vector3(0.08f, 2.3f, 0.14f), frame);
-        var glassMat = Mat("Glass_Night", new Color(0.02f, 0.03f, 0.06f), 0.95f);
+        // 투명한 앞 유리: 안에서는 어두운 길과 창밖에 선 손님이, 밖에서는 환한 매장이 보인다 (아침에는 StoreWorld 가 하늘색으로 채운다)
+        var glassMat = GlassMat("Glass_Night", new Color(0.05f, 0.07f, 0.09f, 0.2f));
         float glassW = StoreLayout.HalfWidth - 0.75f, glassX = 0.75f + glassW / 2f;
         var glassL = Box(store, "Glass_Left", new Vector3(-glassX, 1.45f, front + 0.05f), new Vector3(glassW, 2.3f, 0.04f), glassMat);
-        Box(store, "Glass_Right", new Vector3(glassX, 1.45f, front + 0.05f), new Vector3(glassW, 2.3f, 0.04f), glassMat);
-        // 바깥 길바닥 (창밖에 선 손님이 보이도록)
-        Box(store, "Street", new Vector3(0, -0.06f, front + 3f), new Vector3(20, 0.1f, 6), Mat("Street", new Color(0.12f, 0.12f, 0.13f)));
-        NewLight(store, "StreetLight", LightType.Point, new Vector3(3f, 3.5f, front + 2.5f), new Color(1f, 0.75f, 0.45f), 1.2f, 7f, LightShadows.None);
+        var glassR = Box(store, "Glass_Right", new Vector3(glassX, 1.45f, front + 0.05f), new Vector3(glassW, 2.3f, 0.04f), glassMat);
+        glassL.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        glassR.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        // 바깥(인도·도로·골목·뒷마당)은 소품을 놓은 뒤 OutsideBuilder 가 짓는다.
 
         // --- 창고 문 (왼쪽 벽 안쪽 구석)
         var storage = new GameObject("Storage").transform;
@@ -240,6 +242,10 @@ public static class SceneBuilder
 
         // --- 생활감: 바닥 때, 신발 자국, 벽·진열대 밑 때, 커피 얼룩
         StoreSurfaces.AddDecals(store);
+        // --- 실사 소품: 소화기, 미끄럼 주의 표지판, 우유·골판지 상자, 점원 의자 (StoreProps)
+        StoreProps.Add(store);
+        // --- 매장 바깥: 바깥 순찰 무대 (OutsideBuilder, 좌표는 OutsideLayout)
+        OutsideBuilder.Build(store);
 
         // --- 위치 표식
         var points = new GameObject("Points").transform;
@@ -270,7 +276,7 @@ public static class SceneBuilder
         cctv.fieldOfView = 75f;
         cctv.clearFlags = CameraClearFlags.SolidColor;
         cctv.backgroundColor = Color.black;
-        Box(store, "CCTV_Housing", cctvGo.transform.position + new Vector3(0.05f, 0.05f, 0.05f), new Vector3(0.15f, 0.12f, 0.25f), Mat("Monitor_Body", Color.black));
+        StoreProps.AddCctv(store, cctvGo.transform);
 
         // --- 연출 컴포넌트
         var worldGo = new GameObject("StoreWorld");
@@ -308,7 +314,7 @@ public static class SceneBuilder
 
     // ------------------------------------------------------------ 도우미
 
-    static GameObject Box(Transform parent, string name, Vector3 pos, Vector3 scale, Material mat)
+    internal static GameObject Box(Transform parent, string name, Vector3 pos, Vector3 scale, Material mat)
     {
         var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.name = name;
@@ -330,7 +336,7 @@ public static class SceneBuilder
         return tube;
     }
 
-    static GameObject Prim(Transform parent, string name, PrimitiveType type, Vector3 pos, Vector3 scale, Material mat)
+    internal static GameObject Prim(Transform parent, string name, PrimitiveType type, Vector3 pos, Vector3 scale, Material mat)
     {
         var go = GameObject.CreatePrimitive(type);
         go.name = name;
@@ -374,7 +380,7 @@ public static class SceneBuilder
         return t;
     }
 
-    static Light NewLight(Transform parent, string name, LightType type, Vector3 pos, Color color, float intensity, float range, LightShadows shadows)
+    internal static Light NewLight(Transform parent, string name, LightType type, Vector3 pos, Color color, float intensity, float range, LightShadows shadows)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent);
@@ -392,7 +398,7 @@ public static class SceneBuilder
         return l;
     }
 
-    static Material Mat(string name, Color color, float smoothness = 0.1f, Color? emission = null)
+    internal static Material Mat(string name, Color color, float smoothness = 0.1f, Color? emission = null)
     {
         Material m;
         if (mats.TryGetValue(name, out m)) return m;

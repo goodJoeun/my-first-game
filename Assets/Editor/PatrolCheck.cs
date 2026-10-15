@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// 순찰 검사 (배치 모드 전용): 플레이 모드에서 이상현상을 모두 켜고 여러 자리에서 화면을 찍은 뒤(Logs/patrol_*.png),
+// 순찰 검사 (배치 모드 전용): 플레이 모드에서 이상현상을 모두 켜고 여러 자리에서 화면을 찍은 뒤(Logs/patrol_*.png, 바깥은 outside_*.png),
 // 이상현상마다 바라보고 신고해 판정이 맞는지, 멀쩡한 곳은 오인 신고가 되는지 로그(PATROLCHECK)로 남긴다.
 // Unity -batchmode -projectPath . -executeMethod PatrolCheck.Run -logFile -   (끝나면 에디터를 스스로 닫는다. -quit 없이 실행)
 [InitializeOnLoad]
@@ -45,11 +45,25 @@ public static class PatrolCheck
         var cam = Camera.main;
         float lx = StoreLayout.LeftAisleX, rx = StoreLayout.RightAisleX, fz = StoreLayout.FrontZ;
         int checkedCount = 0, failed = 0;
+        // 매장 순찰을 Rounds 번, 이어서 바깥 순찰을 Rounds 번
+        for (int pass = 0; pass < 2; pass++)
         for (int round = 0; round < Rounds; round++)
         {
-            world.BeginPatrol(RunRules.AnomalyKinds);
+            bool outdoor = pass == 1;
+            world.BeginPatrol(outdoor ? RunRules.OutsideKinds : RunRules.AnomalyKinds, outdoor);
             cam.GetComponent<CharacterController>().enabled = false;   // 카메라를 직접 옮긴다
-            if (round == 0)
+            if (round == 0 && outdoor)
+            {
+                float ry = OutsideLayout.RoadY;
+                Shot(cam, "outside_start", OutsideLayout.Start, OutsideLayout.Start + Quaternion.Euler(0, OutsideLayout.StartYaw, 0) * Vector3.forward * 5f);
+                Shot(cam, "outside_storefront", new Vector3(-1.5f, 1.62f + ry, 18.5f), new Vector3(0, 2.2f, 10f));
+                Shot(cam, "outside_road", new Vector3(-8.5f, 1.62f, 12.2f), new Vector3(10f, 0.5f, 18f));
+                Shot(cam, "outside_far", new Vector3(4f, 1.62f, 21.8f), new Vector3(-4f, 1.5f, 22.5f));
+                Shot(cam, "outside_alley", new Vector3(7.9f, 1.62f, 9.5f), new Vector3(7.9f, 1.0f, -4f));
+                Shot(cam, "outside_back", new Vector3(8.0f, 1.62f, -3.2f), new Vector3(-5f, 0.8f, -6.5f));
+                Shot(cam, "outside_back_far", new Vector3(-4.5f, 1.62f, -3.0f), new Vector3(8f, 0.8f, -7f));
+            }
+            if (round == 0 && !outdoor)
             {
                 Shot(cam, "patrol_counter", new Vector3(0, 1.62f, -0.9f), new Vector3(0, 1.05f, 2.4f));
                 Shot(cam, "patrol_center", new Vector3(0, 1.62f, 1.5f), new Vector3(0, 1.3f, fz));
@@ -64,7 +78,7 @@ public static class PatrolCheck
                 checkedCount++;
                 bool ok = false;
                 Vector3 from = Vector3.zero;
-                foreach (var vp in Viewpoints(t.Value))
+                foreach (var vp in Viewpoints(t.Value, outdoor))
                 {
                     cam.transform.position = vp;
                     cam.transform.LookAt(t.Value);
@@ -72,9 +86,14 @@ public static class PatrolCheck
                     if (world.DebugAimKind() == t.Key) { ok = true; from = vp; break; }
                 }
                 if (!ok) failed++;
-                Debug.Log("PATROLCHECK round " + round + " " + t.Key + " @" + t.Value.ToString("F1") + " (" + world.WhereOf(t.Key) + ") -> " + (ok ? "OK from " + from.ToString("F1") : "NOT REPORTABLE"));
+                Debug.Log("PATROLCHECK " + (outdoor ? "outside " : "") + "round " + round + " " + t.Key + " @" + t.Value.ToString("F1") + " (" + world.WhereOf(t.Key) + ") -> " + (ok ? "OK from " + from.ToString("F1") : "NOT REPORTABLE"));
             }
-            if (round == 0)
+            if (round == 0 && outdoor)
+            {
+                Report(world, cam, "(road, should be false unless footprints)", new Vector3(-8f, 1.62f, 12.5f), new Vector3(-8f, OutsideLayout.RoadY, 15f));
+                Report(world, cam, "(back door, should be false)", new Vector3(-3f, 1.62f, -4.5f), OutsideLayout.BackDoor);
+            }
+            if (round == 0 && !outdoor)
             {
                 // 실제 신고 한 번과 오인 신고 두 번
                 Report(world, cam, "(floor, should be false)", new Vector3(0, 1.62f, 1.5f), new Vector3(0, 0, 3.0f));
@@ -86,19 +105,25 @@ public static class PatrolCheck
     }
 
     // 판정 영역 둘레의 눈높이 자리들 (가까운 곳부터). 진열대·벽 안은 뺀다.
-    static System.Collections.Generic.IEnumerable<Vector3> Viewpoints(Vector3 c)
+    // outdoor: 바깥에서 걸어 다닐 수 있는 곳 (OutsideLayout.Walkable), 도로 위면 눈높이가 낮다
+    static System.Collections.Generic.IEnumerable<Vector3> Viewpoints(Vector3 c, bool outdoor)
     {
-        foreach (float d in new[] { 1.0f, 1.6f, 2.4f, 3.4f })
+        foreach (float d in new[] { 1.0f, 1.6f, 2.4f, 3.4f, 4.6f })
             for (int k = 0; k < 16; k++)
             {
                 float ang = k * Mathf.PI / 8f;
                 var vp = new Vector3(c.x + Mathf.Cos(ang) * d, 1.62f, c.z + Mathf.Sin(ang) * d);
-                if (Mathf.Abs(vp.x) > StoreLayout.HalfWidth - 0.3f || vp.z < StoreLayout.BackZ + 0.3f || vp.z > StoreLayout.FrontZ - 0.3f) continue;
+                if (outdoor)
+                {
+                    if (!OutsideLayout.Walkable(vp)) continue;
+                    if (vp.z > OutsideLayout.SidewalkFar && vp.z < OutsideLayout.RoadFar) vp.y += OutsideLayout.RoadY;
+                }
+                else if (Mathf.Abs(vp.x) > StoreLayout.HalfWidth - 0.3f || vp.z < StoreLayout.BackZ + 0.3f || vp.z > StoreLayout.FrontZ - 0.3f) continue;
                 if (Physics.CheckSphere(vp, 0.25f, ~0, QueryTriggerInteraction.Ignore)) continue;
                 if (Physics.CheckSphere(new Vector3(vp.x, 0.6f, vp.z), 0.25f, ~0, QueryTriggerInteraction.Ignore)) continue;   // 계산대·진열대 안
                 yield return vp;
             }
-        yield return new Vector3(0, 1.62f, -0.9f);   // 계산대 뒤 (CCTV 모니터 등)
+        if (!outdoor) yield return new Vector3(0, 1.62f, -0.9f);   // 계산대 뒤 (CCTV 모니터 등)
     }
 
     static void Report(StoreWorld world, Camera cam, string expect, Vector3 from, Vector3 at)

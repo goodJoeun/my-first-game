@@ -15,7 +15,8 @@ public static class StoreLighting
     static readonly string[] DynamicPrefixes =
     {
         "Product", "Fridge_Bottle", "Counter_Rack_Item", "Magazine_Item", "Storage_Door", "Storage_Handle",
-        "Phone", "Tube_", "Shelf_Price", "Monitor_Screen", "Glass_", "Fridge_Front", "CCTV_Housing",
+        "Phone", "Tube_", "Shelf_Price", "Monitor_Screen", "Glass_", "Fridge_Front",
+        "Lamp", "Road_Paint", "Window_Frame",
     };
 
     // 장면을 저장한 뒤 부른다: 정적 표시, 프로브 배치, 굽기.
@@ -65,11 +66,14 @@ public static class StoreLighting
         AssetDatabase.DeleteAsset(MeshPath);
         Object container = null;
         var cache = new Dictionary<string, Mesh>();
+        var props = store.Find("Props");   // 실사 소품은 프로브로 밝힌다 (StoreProps)
+        var outside = store.Find("Outside");
 
         foreach (var mf in store.GetComponentsInChildren<MeshFilter>())
         {
             var r = mf.GetComponent<MeshRenderer>();
             if (r == null || IsDynamic(mf.name) || mf.sharedMesh == null) continue;
+            if (props != null && mf.transform.IsChildOf(props)) continue;
 
             if (mf.sharedMesh.name == "Cube")
             {
@@ -103,8 +107,8 @@ public static class StoreLighting
 
             GameObjectUtility.SetStaticEditorFlags(mf.gameObject, StaticEditorFlags.ContributeGI | StaticEditorFlags.ReflectionProbeStatic);
             r.receiveGI = ReceiveGI.Lightmaps;
-            // 창밖 길바닥은 보이는 부분이 적어 해상도를 아낀다.
-            if (mf.name == "Street") r.scaleInLightmap = 0.25f;
+            // 바깥은 어둡고 넓어서 해상도를 아낀다 (건물 덩어리는 더).
+            if (outside != null && mf.transform.IsChildOf(outside)) r.scaleInLightmap = mf.name.StartsWith("Building") ? 0.12f : 0.3f;
         }
         AssetDatabase.SaveAssets();
     }
@@ -126,6 +130,14 @@ public static class StoreLighting
                 {
                     var p = new Vector3(x, y, z);
                     if (!InsideFurniture(p)) positions.Add(p);
+                }
+        // 바깥: 걸어 다니는 곳에 2m 간격 (바깥 순찰의 이상현상·손님이 주변 빛을 받게)
+        for (float x = OutsideLayout.LeftEnd + 0.5f; x < OutsideLayout.RightEnd; x += 2f)
+            for (float z = OutsideLayout.BackFence + 0.5f; z < OutsideLayout.FarFacade; z += 2f)
+                foreach (float y in new[] { 0.4f, 1.6f, 3.2f })
+                {
+                    var p = new Vector3(x, y, z);
+                    if (OutsideLayout.Walkable(p)) positions.Add(p);
                 }
         var go = new GameObject("LightProbes");
         go.transform.SetParent(store);

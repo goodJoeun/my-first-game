@@ -199,6 +199,8 @@ public class Difficulty
     public int clue_visibility; // 1(미묘함) ~ 3(아주 분명). 단서 표시의 상한으로 쓴다
     public int anomalies;       // 순찰 때 이상현상 수 (하한)
     public int anomalies_max;   // 0 이면 anomalies 와 같다
+    public int outside;         // 바깥 순찰 때 이상현상 수 (하한)
+    public int outside_max;     // 0 이면 outside 와 같다
 }
 
 // 순찰 때 찾아야 하는 이상현상. 연출은 StoreWorld.Patrol 의 kind 별 코드가 맡는다.
@@ -206,7 +208,8 @@ public class Difficulty
 public class AnomalyData
 {
     public string id;
-    public string kind;         // RunRules.AnomalyKinds 중 하나
+    public string kind;         // RunRules.AnomalyKinds (매장) 또는 OutsideKinds (바깥) 중 하나
+    public string area;         // "outside" 면 바깥 순찰, 비어 있으면 매장 순찰
     public int day;             // 이 날부터 나온다
     public string label;        // 신고했을 때 보이는 이름
     public string text;         // 놓쳤을 때 정산 리플레이 문구

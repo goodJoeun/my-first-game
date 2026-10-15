@@ -9,7 +9,9 @@
     "traps": 1,
     "clue_visibility": 2,
     "anomalies": 1,
-    "anomalies_max": 2
+    "anomalies_max": 2,
+    "outside": 1,
+    "outside_max": 2
   },
   "slots": [
     { "time": "00:30", "pool": "customer" },
@@ -19,6 +21,7 @@
     { "time": "02:55", "pool": "patrol" },
     { "time": "03:20", "pool": "customer" },
     { "time": "04:10", "pool": "customer" },
+    { "time": "04:35", "pool": "outside" },
     { "time": "05:00", "pool": "customer" }
   ],
   "settle": "D3_99_settle"
