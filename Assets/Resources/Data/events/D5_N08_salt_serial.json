@@ -21,6 +21,7 @@
     { "id": "cheese", "name": "치즈", "qty": 1 }
   ],
   "payment": "현금 (만 원권 다섯 장)",
+  "cash": "same_serial",
   "dialogue": {
     "enter": "와인이랑 치즈요.",
     "pay": "(지폐를 가지런히 내민다) 현금으로 할게요. 새 돈이에요.",

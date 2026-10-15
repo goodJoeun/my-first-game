@@ -108,6 +108,23 @@ public static class DataCheck
             }
         }
 
+        // 지폐: 계산대 '지폐 확인' 화면에 펼쳐지는 돈이 수칙 R04 와 맞아야 한다.
+        // R04 단서가 있는 괴물은 걸리는 돈(같은 일련번호·옛날 돈)을, 나머지 손님은 멀쩡한 돈을 내야 한다.
+        int billEvents = 0;
+        foreach (var e in repo.Events.Values)
+        {
+            if (!RunRules.IsCustomer(e)) continue;
+            var bills = Banknotes.For(e);
+            if (bills != null) billEvents++;
+            bool r04 = false;
+            if (e.clues != null) foreach (var c in e.clues) if (c.target == "payment" && c.rule == "R04") r04 = true;
+            bool breaks = Banknotes.Breaks(bills);
+            if (r04 && bills == null) bad += Fail(e.id + ": R04 지폐 단서가 있는데 결제 문구에서 지폐를 만들 수 없음 (" + e.payment + ")");
+            else if (r04 && RunRules.IsMonster(e) && !breaks) bad += Fail(e.id + ": R04 괴물인데 낸 지폐가 멀쩡함");
+            else if (breaks && !(r04 && RunRules.IsMonster(e))) bad += Fail(e.id + ": R04 에 걸리는 지폐를 내는데 R04 괴물이 아님");
+        }
+        Debug.Log("DATACHECK banknotes events=" + billEvents);
+
         // 신분증: 카드 내용이 판별 규칙과 맞아야 한다.
         var regularCards = new Dictionary<string, string>();
         foreach (var e in repo.Events.Values)

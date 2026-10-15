@@ -116,7 +116,7 @@ public static class RenderSetup
         }
         var fso = new SerializedObject(feature);
         // 반경을 크게 잡으면 표본이 모자라 진열대 면이 얼룩덜룩해진다. 접촉 그늘 정도로만 쓴다.
-        SetFloat(fso, "m_Settings.Intensity", 1.0f);
+        SetFloat(fso, "m_Settings.Intensity", 1.5f);
         SetFloat(fso, "m_Settings.Radius", 0.12f);
         SetFloat(fso, "m_Settings.DirectLightingStrength", 0.5f);
         var samples = fso.FindProperty("m_Settings.Samples");

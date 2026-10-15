@@ -77,6 +77,8 @@ public class GameController : MonoBehaviour
     int cigWant = -1, cigQty;             // 원하는 상표 번호와 갑 수 (-1 이면 담배 손님 아님)
     string cigRequest;
     bool cigFetched, rackOpen;
+    List<Banknote> bills;   // 손님이 낸 지폐 (없으면 null) — 지폐 확인 화면에서 일련번호를 직접 본다
+    bool billsOpen;
     int dayCigWrong;
 
     IdCard card;            // 지금 손님이 보여 줄 신분증 (없으면 null)
@@ -262,6 +264,8 @@ public class GameController : MonoBehaviour
                     cigRequest = CigaretteRequest(repo.Cigarettes[cigWant], cigQty);
                 }
         card = IdCards.For(ev);
+        bills = Banknotes.For(ev);
+        billsOpen = false;
         if (cardPhoto != null) Destroy(cardPhoto);
         cardPhoto = null;
         log.Clear();
@@ -279,6 +283,7 @@ public class GameController : MonoBehaviour
         if (choice == "sell" && cigWant >= 0 && !cigFetched) return;   // 담배를 건네야 계산할 수 있다
         cardOpen = false;
         rackOpen = false;
+        billsOpen = false;
 
         dayPay += o.pay;
         state.risk = Mathf.Clamp(state.risk + o.risk, 0, RiskLimit);
@@ -671,7 +676,14 @@ public class GameController : MonoBehaviour
     {
         bool customer = current.truth == "human" || current.truth == "mimic";
 
-        if (customer) DrawObservation(W);
+        // 손님 정보(관찰)는 손님이 들어와 계산대 앞에 선 뒤에 보여 준다.
+        if (customer && arrived) DrawObservation(W);
+        else if (customer)
+        {
+            float pw = 400, px = world == null ? 40 : W - pw - 40;
+            Fill(new Rect(px, 75, world == null ? W - 80 : pw, 44), Panel);
+            GUI.Label(new Rect(px + 14, 83, pw - 28, 30), "손님이 오고 있다…", obs);
+        }
         else if (!string.IsNullOrEmpty(current.narration))
         {
             Fill(new Rect(40, 75, W - 80, 70), Panel);
@@ -680,6 +692,7 @@ public class GameController : MonoBehaviour
 
         if (rackOpen) DrawRack();
         else if (cardOpen && card != null) DrawIdCard();
+        else if (billsOpen && bills != null) DrawBills();
         else if (world != null)
             GUI.Label(new Rect(44, 386, 600, 28), "마우스 오른쪽 드래그: 둘러보기   Space: 정면", small);
 
@@ -714,9 +727,21 @@ public class GameController : MonoBehaviour
                     string line = current.dialogue != null ? current.dialogue.ask_id : null;
                     log.Add(string.IsNullOrEmpty(line) ? "(신분증을 보여준다.)" : line);
                     cardOpen = card != null;
-                    rackOpen = false;
+                    rackOpen = billsOpen = false;
                 }
-                else { cardOpen = !cardOpen; if (cardOpen) rackOpen = false; }
+                else { cardOpen = !cardOpen; if (cardOpen) rackOpen = billsOpen = false; }
+            }
+            float bx = x + (cigWant >= 0 ? 420 : 210);
+            if (bills != null)
+            {
+                // 지폐는 손님이 돈을 내민 뒤에 받아서 펼쳐 볼 수 있다.
+                GUI.enabled = arrived && (paid || current.dialogue == null);
+                if (GUI.Button(new Rect(bx, y, 200, 50), billsOpen ? "지폐 닫기" : "지폐 확인", button))
+                {
+                    billsOpen = !billsOpen;
+                    if (billsOpen) cardOpen = rackOpen = false;
+                }
+                GUI.enabled = arrived;
             }
             if (cigWant >= 0)
             {
@@ -724,7 +749,7 @@ public class GameController : MonoBehaviour
                 if (GUI.Button(new Rect(x + 210, y, 200, 50), cigFetched ? "담배 건넴" : rackOpen ? "진열장 닫기" : "담배 꺼내기", button))
                 {
                     rackOpen = !rackOpen;
-                    if (rackOpen) cardOpen = false;
+                    if (rackOpen) cardOpen = billsOpen = false;
                 }
             }
             GUI.enabled = arrived;
@@ -888,6 +913,45 @@ public class GameController : MonoBehaviour
         if (GUI.Button(new Rect(r.xMax - 84, r.y + 14, 70, 32), "닫기", button)) cardOpen = false;
     }
 
+    // 지폐 확인: 받은 지폐를 겹쳐 펼친다. 장마다 왼쪽 위에 일련번호가 있어 서로 대조할 수 있다 (수칙 R04).
+    // 이상한지 아닌지는 알려 주지 않는다.
+    void DrawBills()
+    {
+        int n = bills.Count;
+        const float bw = 500, bh = 120, step = 46;
+        var area = new Rect(40, 75, bw, bh + step * (n - 1));
+        var ink = new GUIStyle(label) { fontSize = 17 };
+        ink.normal.textColor = new Color(0.1f, 0.1f, 0.12f);
+        FixedColor(ink);
+        var serialInk = new GUIStyle(ink) { fontSize = 20, fontStyle = FontStyle.Bold };
+        serialInk.normal.textColor = new Color(0.55f, 0.08f, 0.06f);
+        FixedColor(serialInk);
+        var big = new GUIStyle(ink) { fontSize = 30, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleRight };
+        for (int i = 0; i < n; i++)
+        {
+            var b = bills[i];
+            var r = new Rect(area.x, area.y + step * i, bw, bh);
+            Color baseColor = b.old ? new Color(0.72f, 0.62f, 0.5f)
+                : b.value == 50000 ? new Color(0.93f, 0.82f, 0.55f)
+                : b.value == 10000 ? new Color(0.7f, 0.82f, 0.66f)
+                : b.value == 5000 ? new Color(0.92f, 0.72f, 0.55f)
+                : new Color(0.66f, 0.76f, 0.9f);
+            if (b.crumpled) baseColor *= 0.9f;
+            Fill(new Rect(r.x - 2, r.y - 2, r.width + 4, r.height + 4), new Color(0.25f, 0.25f, 0.27f));
+            Fill(r, baseColor);
+            Fill(new Rect(r.x + 8, r.y + 8, r.width - 16, r.height - 16), new Color(1f, 1f, 1f, 0.12f));
+            Fill(new Rect(r.x + r.width * 0.56f, r.y + 14, 90, r.height - 28), new Color(1f, 1f, 1f, 0.22f));   // 초상 자리
+            if (b.crumpled)
+                for (int k = 0; k < 4; k++) Fill(new Rect(r.x + 60 + k * 110, r.y, 2, r.height), new Color(0, 0, 0, 0.12f));
+            GUI.Label(new Rect(r.x + 16, r.y + 8, 300, 30), b.serial, serialInk);
+            GUI.Label(new Rect(r.x + 16, r.y + 40, 300, 26), b.old ? "한국은행권" : "한국은행", ink);
+            GUI.Label(new Rect(r.x + r.width - 220, r.y + 36, 200, 44), Banknotes.ValueText(b.value), big);
+            if (i == n - 1) GUI.Label(new Rect(r.x + r.width - 220, r.y + r.height - 34, 200, 28), b.serial, new GUIStyle(serialInk) { alignment = TextAnchor.MiddleRight });
+        }
+        GUI.Label(new Rect(area.x, area.yMax + 6, bw, 26), "받은 지폐 " + n + "장", small);
+        if (GUI.Button(new Rect(area.xMax - 84, area.y + 8, 70, 32), "닫기", button)) billsOpen = false;
+    }
+
     // 전에 온 적 있는 단골에게만 물을 수 있다. 위장한 것도 같은 얼굴이라 똑같이 물을 수 있다.
     bool CanAskLast()
     {
@@ -932,6 +996,7 @@ public class GameController : MonoBehaviour
             {
                 if (string.IsNullOrEmpty(c.text)) continue;
                 if (c.kind == "id") continue;                            // 신분증은 카드 화면에서 직접 확인
+                if (c.target == "payment" && bills != null) continue;    // 지폐는 지폐 확인 화면에서 직접 확인
                 if (world != null && world.Renders(c.target)) continue; // 3D 로 직접 확인
                 if (Mathf.Min(c.visibility, cap) >= 2 || stareShown) sb.AppendLine(c.text);
             }

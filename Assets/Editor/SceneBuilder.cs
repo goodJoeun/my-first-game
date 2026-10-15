@@ -222,10 +222,10 @@ public static class SceneBuilder
         //     직접광은 실시간(깜빡임·정전 연출), 간접광은 라이트맵에 굽는다 (StoreLighting).
         var tubeMat = Mat("Tube", Color.white, 0.2f, Color.white * 1.4f);
         var fixtureMat = Mat("Fixture", new Color(0.92f, 0.92f, 0.9f), 0.5f);
-        var counterLight = NewLight(store, "CounterLight", LightType.Spot, new Vector3(1.0f, 2.9f, 0.5f), new Color(0.93f, 0.97f, 1f), 6f, 7f, LightShadows.Soft);
+        var counterLight = NewLight(store, "CounterLight", LightType.Spot, new Vector3(1.0f, 2.9f, 0.5f), new Color(0.93f, 0.97f, 1f), 7f, 7f, LightShadows.Soft);
         counterLight.transform.rotation = Quaternion.Euler(90, 0, 0);
         counterLight.spotAngle = 140f;
-        counterLight.shadowStrength = 0.95f;
+        counterLight.shadowStrength = 1f;
         counterLight.bounceIntensity = 0.3f;   // 튀는 빛이 손님 그림자를 메우지 않게 (그림자가 판별 단서)
         var lightList = new List<Light> { counterLight };
         var tubeList = new List<Renderer> { Fixture(store, "Counter", new Vector3(1.0f, 0, 0.5f), fixtureMat, tubeMat) };
@@ -233,8 +233,8 @@ public static class SceneBuilder
         {
             var lp = StoreLayout.StoreLights[i];
             // 매장 등은 실시간 그림자를 끈다 (그림자 맵이 많으면 계산대 등 그림자 해상도가 떨어진다). 진열대 그늘은 구운 AO 와 SSAO 가 맡는다.
-            var l = NewLight(store, "StoreLight_" + i, LightType.Point, lp, new Color(0.93f, 0.97f, 1f), 0.26f, 5.5f, LightShadows.None);
-            l.bounceIntensity = 0.6f;   // 흰 매장에서 튀는 빛이 너무 많으면 계산대 등 그림자가 묻힌다
+            var l = NewLight(store, "StoreLight_" + i, LightType.Point, lp, new Color(0.93f, 0.97f, 1f), 0.22f, 5.5f, LightShadows.None);
+            l.bounceIntensity = 0.3f;   // 흰 매장에서 튀는 빛이 너무 많으면 계산대 등 그림자가 묻힌다
             lightList.Add(l);
             tubeList.Add(Fixture(store, "Store_" + i, lp, fixtureMat, tubeMat));
         }

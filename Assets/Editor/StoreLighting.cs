@@ -38,7 +38,7 @@ public static class StoreLighting
             aoMaxDistance = 0.8f,
             aoExponentIndirect = 1f,
             maxBounces = 3,
-            indirectScale = 0.8f,
+            indirectScale = 0.45f,
             directSampleCount = 32,
             indirectSampleCount = 512,
             environmentSampleCount = 256,

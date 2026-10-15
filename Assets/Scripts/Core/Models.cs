@@ -158,6 +158,7 @@ public class EventData
     public string[] look;           // 외형 설명 (관찰 패널)
     public Item[] items;
     public string payment;
+    public string cash;             // "same_serial": 낸 지폐의 일련번호가 모두 같다 (Banknotes, 수칙 R04)
     public IdCard card;             // 신분증 (비우면 외형으로 만든다)
     public bool no_id;              // 신분증을 보여 주지 않는다 (집에 두고 옴 등)
     public Dialogue dialogue;
