@@ -697,19 +697,22 @@ public class GameController : MonoBehaviour
             GUI.Label(new Rect(44, 386, 600, 28), "마우스 오른쪽 드래그: 둘러보기   Space: 정면", small);
 
         // 대화창: 이 손님이 한 말을 모두 남기고 스크롤한다. 새 줄이 오면 맨 아래로 내린다.
-        var box = new Rect(40, 420, W - 80, 166);
-        Fill(box, Panel);
-        var sb = new StringBuilder();
-        if (customer || current.type == "event") sb.AppendLine("<b>" + current.label + "</b>");
-        if (!arrived) sb.AppendLine("…");
-        foreach (var line in log) sb.AppendLine(line);
-        string text = sb.ToString().TrimEnd();
-        float textW = box.width - 48;
-        var content = new Rect(0, 0, textW, label.CalcHeight(new GUIContent(text), textW));
-        if (log.Count != dialogLines) { dialogLines = log.Count; dialogScroll.y = content.height; }
-        dialogScroll = GUI.BeginScrollView(new Rect(box.x + 16, box.y + 6, box.width - 24, box.height - 12), dialogScroll, content);
-        GUI.Label(content, text, label);
-        GUI.EndScrollView();
+        // 손님 이름(박 대리 등)이 미리 드러나지 않게, 손님이 계산대 앞에 선 뒤에 뜬다.
+        if (arrived)
+        {
+            var box = new Rect(40, 420, W - 80, 166);
+            Fill(box, Panel);
+            var sb = new StringBuilder();
+            if (customer || current.type == "event") sb.AppendLine("<b>" + current.label + "</b>");
+            foreach (var line in log) sb.AppendLine(line);
+            string text = sb.ToString().TrimEnd();
+            float textW = box.width - 48;
+            var content = new Rect(0, 0, textW, label.CalcHeight(new GUIContent(text), textW));
+            if (log.Count != dialogLines) { dialogLines = log.Count; dialogScroll.y = content.height; }
+            dialogScroll = GUI.BeginScrollView(new Rect(box.x + 16, box.y + 6, box.width - 24, box.height - 12), dialogScroll, content);
+            GUI.Label(content, text, label);
+            GUI.EndScrollView();
+        }
 
         // 행동
         float x = 40, y = 600;
